@@ -19,7 +19,7 @@ const labs = new EntitySchema({
         desc_lab: {
             type: "varchar", 
             length: 100, 
-            nullable: false
+            nullable: true
         },
         status: {
             type: "enum",

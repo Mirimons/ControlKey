@@ -1,10 +1,10 @@
 import express from "express";
-import tipo_usuario from "../entities/tipo_usuario.js";
+import TipoUsuario from "../entities/tipo_usuario.js";
 import { AppDataSource } from "../database/data-source.js";
 import { Like, IsNull } from "typeorm";
 
 const route = express.Router();
-const tipo_usuarioRepository = AppDataSource.getRepository(tipo_usuario);
+const tipo_usuarioRepository = AppDataSource.getRepository(TipoUsuario);
 route.get("/", async (request, response) => {
     const tipos_usuario = await tipo_usuarioRepository.findBy({ deletedAt: IsNull() });
     return response.status(200).send({ "response": tipos_usuario });
@@ -20,7 +20,7 @@ route.post("/", async (request, response) => {
     const { desc_tipo } = request.body;
 
     if (desc_tipo.length < 1) {
-        return response.status(400).send({ "response": 'Campo "desc_tipo" deve ter pelo menos um caractere.' });
+        return response.status(400).send({ "response": "O campo 'desc_tipo' deve ter pelo menos um caractere." });
     }
 
     //Tratamentos de erro 

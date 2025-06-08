@@ -11,10 +11,9 @@ const usuario = new EntitySchema({
             unsigned: true,
             nullable: false
         },
-        cpf: {
-            type: "char", 
-            length: 11,
-            unique: true,
+        id_tipo: {
+            type: "int",
+            unsigned: true,
             nullable: false
         },
         nome: {
@@ -22,18 +21,19 @@ const usuario = new EntitySchema({
             length: 100,
             nullable: false
         },
-        telefone: {
-            type: "varchar",
-            length: 15,
+        cpf: {
+            type: "char", 
+            length: 11,
+            unique: true,
             nullable: false
         },
         data_nasc: {
             type: "date",
             nullable: false
         },
-        id_tipo: {
-            type: "int",
-            unsigned: true,
+        telefone: {
+            type: "varchar",
+            length: 15,
             nullable: false
         },
         createdAt: {
