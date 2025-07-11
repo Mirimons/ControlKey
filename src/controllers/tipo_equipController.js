@@ -1,18 +1,18 @@
 import express from "express";
-import TipoUsuario from "../entities/tipo_usuario.js";
+import TipoEquipamento from "../entities/tipo_equip.js";
 import { AppDataSource } from "../database/data-source.js";
 import { Like, IsNull } from "typeorm";
 
 const route = express.Router();
-const tipo_usuarioRepository = AppDataSource.getRepository(TipoUsuario);
+const tipo_equipRepository = AppDataSource.getRepository(TipoEquipamento);
 route.get("/", async (request, response) => {
-    const tipos_usuario = await tipo_usuarioRepository.findBy({ deletedAt: IsNull() });
-    return response.status(200).send({ "response": tipos_usuario });
+    const tipos_equip = await tipo_equipRepository.findBy({ deletedAt: IsNull() });
+    return response.status(200).send({ "response": tipos_equip });
 });
 
 route.get("/:nameFound", async (request, response) => {
     const { nameFound } = request.params;
-    const tipoFound = await tipo_usuarioRepository.findBy({ desc_tipo: Like(`%${nameFound}%`) });
+    const tipoFound = await tipo_equipRepository.findBy({ desc_tipo: Like(`%${nameFound}%`) });
     return response.status(200).send({ "response": tipoFound });
 });
 
@@ -25,10 +25,10 @@ route.post("/", async (request, response) => {
 
     //Tratamentos de erro 
     try {
-        const newTipo = tipo_usuarioRepository.create({ desc_tipo });
-        await tipo_usuarioRepository.save(newTipo);
+        const newTipo = tipo_equipRepository.create({ desc_tipo });
+        await tipo_equipRepository.save(newTipo);
 
-        return response.status(201).send({ "response": "Tipo de usuário cadastrado com sucesso!" });
+        return response.status(201).send({ "response": "Tipo de equipamento cadastrado com sucesso!" });
     } catch (erro) {
         return response.status(500).send({ "error": erro });
     }
@@ -48,9 +48,9 @@ route.put("/:id", async (request, response) => {
 
     //Tratamentos de erro 
     try {
-        await tipo_usuarioRepository.update({ id, desc_tipo });
+        await tipo_equipRepository.update({ id, desc_tipo });
 
-        return response.status(200).send({ "response": "Tipo de usuário atualizado com sucesso!" });
+        return response.status(200).send({ "response": "Tipo de equipamento atualizado com sucesso!" });
     } catch (erro) {
         return response.status(500).send({ "error": erro });
     }
@@ -63,9 +63,9 @@ route.delete("/:id", async (request, response) => {
         return response.status(400).send({ "response": "O 'id' precisa ser um valor numérico" });
     }
     //Soft delete
-    await tipo_usuarioRepository.update({ id }, { deletedAt: () => "CURRENT_TIMESTAMP" });
+    await tipo_equipRepository.update({ id }, { deletedAt: () => "CURRENT_TIMESTAMP" });
 
-    return response.status(200).send({"response": "Tipo de usuário excluído com sucesso!"});
+    return response.status(200).send({"response": "Tipo de equipamento excluído com sucesso!"});
 });
 
 export default route;

@@ -2,7 +2,7 @@
 
 function validateAndFormatDate(dateString) {
     //Verificar se o parâmetro existe:
-    if(dateString === undefined || dateString === null){
+    if(dateString === undefined && dateString === null){
         return {isValid: false, error: "Data não fornecida."};
     }
 
@@ -35,7 +35,7 @@ function validateAndFormatDate(dateString) {
 
     let day, month, year;
     if (isDDMMYYYY) {
-        [day, month, year] = dateString.String.split("/").map(Number);
+        [day, month, year] = dateString.split("/").map(Number);
     } else {
         [year, month, day] = dateString.split("-").map(Number);
     }
