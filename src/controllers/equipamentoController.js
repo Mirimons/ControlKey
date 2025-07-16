@@ -61,7 +61,7 @@ route.put("/:id", async (request, response) => {
     const { id } = request.params;
 
     if (isNaN(id)) {
-        return response.status(400).send({ "response": "O campo 'id_tipo' precisa ser um valor numérico." });
+        return response.status(400).send({ "response": "O campo 'id' precisa ser um valor numérico." });
     }
 
     if (!id_tipo && isNaN(Number(id_tipo))) {

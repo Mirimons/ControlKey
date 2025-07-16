@@ -1,4 +1,4 @@
-/////////////////  ARRUMAR DEPOIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  \\\\\\\\\\\\\\\\\\\
+/////////////////            ARRUMAR DEPOIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!       \\\\\\\\\\\\\\\\\\\
 
 
 import express from "express";
@@ -44,8 +44,6 @@ route.post("/", async (request, response) => {
 
     try {
         // const usuario = await usuarioRepository.
-
-
 
         const newUsuarioCad = usuarioRepository.create({
             id_usuario: Number(id),
