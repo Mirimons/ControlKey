@@ -32,7 +32,12 @@ route.post("/", async (request, response) => {
     }
 
     try {
-        const newLab = labsRepository.create({desc_lab, nome_lab, status, createdAt: new Date()});
+        const newLab = labsRepository.create({
+            desc_lab,
+            nome_lab, 
+            status,
+            createdAt: new Date()
+        });
         await labsRepository.save(newLab);
 
         return response.status(201).send({"response": "Laboratório cadastrado com sucesso!"});
@@ -60,7 +65,12 @@ route.put("/:id", async (request, response) => {
     }
 
     try {
-        await labsRepository.update({id, desc_lab, nome_lab, status});
+        await labsRepository.update({
+            id,
+            desc_lab,
+            nome_lab,
+            status
+        });
 
         return response.status(201).send({"response": "Laboratório atualizado com sucesso!"});
         } catch(erro){
