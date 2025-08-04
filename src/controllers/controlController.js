@@ -30,11 +30,8 @@ route.post("/", async (request, response) => {
     if (!id_usuario && isNaN(Number(id_usuario))) {
         return response.status(400).send({ "response": "O campo 'id_usuario' é obrigatório e precisa ser numérico." });
     }
-    if (!id_equip && isNaN(Number(id_equip))) {
-        return response.status(400).send({ "response": "O campo 'id_equip' é obrigatório e precisa ser numérico." });
-    }
-    if (!id_labs && isNaN(Number(id_labs))) {
-        return response.status(400).send({ "response": "O campo 'id_labs' é obrigatório e precisa ser numérico." });
+    if ((!id_equip && isNaN(Number(id_equip))) || (!id_labs && isNaN(Number(id_labs)))) {
+        return response.status(400).send({ "response": "É necessário preencher um dos campos (id_equip ou id_labs)." });
     }
     if (!data_inicio && IsNull(Date(data_inicio))){
         return response.status(400).send({"response": "O campo 'data_inicio' é obrigatório."})
@@ -62,18 +59,18 @@ route.post("/", async (request, response) => {
         });
     
         if (!usuario && isNaN(Number(usuario))) {
-            return response.status(404).send({ "response": "laboratório não encontrado." });
+            return response.status(404).send({ "response": "Usuário não encontrado." });
         }
         if (!equipamento && isNaN(Number(equipamento))){
-            return response.status(404).send({ "response": "usuario não encontrado." })
+            return response.status(404).send({ "response": "Equipamento não encontrado." })
         }
         if (!labs && isNaN(Number(labs))){
-            return response.status(404).send({ "response": "usuario não encontrado." })
+            return response.status(404).send({ "response": "Laboratório não encontrado." })
         }
     
         const newControl = controlRepository.create({
-            id_labs: Number(id_labs),
             id_usuario: Number(id_usuario),
+            id_labs: Number(id_labs),
             id_equip: Number(id_equip),
             data_inicio, 
             data_fim,
@@ -95,11 +92,8 @@ route.put("/:id", async (request, response) => {
     if (!id_usuario && isNaN(Number(id_usuario))) {
         return response.status(400).send({ "response": "O campo 'id_usuario' é obrigatório e precisa ser numérico." });
     }
-    if (!id_equip && isNaN(Number(id_equip))) {
+    if ((!id_equip && isNaN(Number(id_equip))) || (!id_labs && isNaN(Number(id_labs)))) {
         return response.status(400).send({ "response": "O campo 'id_equip' é obrigatório e precisa ser numérico." });
-    }
-    if (!id_labs && isNaN(Number(id_labs))) {
-        return response.status(400).send({ "response": "O campo 'id_labs' é obrigatório e precisa ser numérico." });
     }
     if (!data_inicio && IsNull(Date(data_inicio))){
         return response.status(400).send({"response": "O campo 'data_inicio' é obrigatório."})
@@ -134,7 +128,7 @@ route.delete("/:id", async (request, response) => {
         return response.status(400).send({ "response": "O 'id' precisa ser um valor numérico" });
     }
     //Soft delete
-    await agendamentoRepository.update({ id }, { deletedAt: () => "CURRENT_TIMESTAMP" });
+    await controlRepository.update({ id }, { deletedAt: () => "CURRENT_TIMESTAMP" });
 
     return response.status(200).send({"response": "Control excluído com sucesso!"});
 });
