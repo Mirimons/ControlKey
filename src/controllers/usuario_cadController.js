@@ -2,8 +2,8 @@
 
 
 import express from "express";
-import UsuarioCad from "../entities/usuario_cad";
-import Usuario from "../entities/usuario";
+import UsuarioCad from "../entities/usuario_cad.js";
+import Usuario from "../entities/usuario.js";
 import { AppDataSource } from "../database/data-source.js";
 import { Like, IsNull } from "typeorm";
 

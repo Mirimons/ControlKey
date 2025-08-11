@@ -4,7 +4,7 @@ import { AppDataSource } from "../database/data-source.js";
 import { IsNull } from "typeorm";
 import { generateToken } from "../utils/jwt.js";
 import { generateNewPassword } from "../utils/login.js";
-import { sendEmail } from "../helpers/nodemailer.js";
+import { sendEmail } from "../helpers/nodemail.js";
 
 const route = express.Router();
 const usuario_cadRepository = AppDataSource.getRepository(UsuarioCad);
