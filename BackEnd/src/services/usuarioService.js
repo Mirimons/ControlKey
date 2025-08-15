@@ -1,4 +1,3 @@
-
 import Usuario from "../entities/usuario.js";
 import TipoUsuario from "../entities/tipo_usuario.js";
 import { AppDataSource } from "../database/data-source.js";

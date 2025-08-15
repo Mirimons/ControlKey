@@ -1,71 +1,63 @@
 import express from "express";
-import TipoUsuario from "../entities/tipo_usuario.js";
-import { AppDataSource } from "../database/data-source.js";
-import { Like, IsNull } from "typeorm";
+import tipoUsuarioService from "../services/tipoUsuarioService";
+import tipoUsuarioService from "../services/tipoUsuarioService";
 
 const route = express.Router();
-const tipo_usuarioRepository = AppDataSource.getRepository(TipoUsuario);
+
 route.get("/", async (request, response) => {
-    const tipos_usuario = await tipo_usuarioRepository.findBy({ deletedAt: IsNull() });
-    return response.status(200).send({ "response": tipos_usuario });
+  try {
+    const tipos = await tipoUsuarioService.getTiposUsuario();
+    return response.status(200).json({ response: tipos });
+  } catch (error) {
+    return response.status(500).json({ error: error.mensage });
+  }
 });
 
 route.get("/:nameFound", async (request, response) => {
-    const { nameFound } = request.params;
-    const tipoFound = await tipo_usuarioRepository.findBy({ desc_tipo: Like(`%${nameFound}%`) });
-    return response.status(200).send({ "response": tipoFound });
+    try {
+        const tipos = await tipoUsuarioService.getByDescricao(request.params.nameFound);
+        return response.status(200).json({ response: tipos});
+    } catch (error) {
+        return response.status(500).json({ error: error.mensage});
+    }
 });
 
 route.post("/", async (request, response) => {
-    const { desc_tipo } = request.body;
-
-    if (desc_tipo.length < 1) {
-        return response.status(400).send({ "response": "O campo 'desc_tipo' deve ter pelo menos um caractere." });
-    }
-
-    //Tratamentos de erro 
     try {
-        const newTipo = tipo_usuarioRepository.create({ desc_tipo });
-        await tipo_usuarioRepository.save(newTipo);
-
-        return response.status(201).send({ "response": "Tipo de usuário cadastrado com sucesso!" });
-    } catch (erro) {
-        return response.status(500).send({ "error": erro });
-    }
+        const newTipo = await tipoUsuarioService.postTipoUsuario(request.body);
+        return response.status(201).json({ 
+            response: "Tipo de usuário cadastrado com sucesso!",
+            data: newTipo
+        });
+    } catch (error) {
+    return response.status(400).json({ error: error.message });
+  }
 });
 
 route.put("/:id", async (request, response) => {
-    const { desc_tipo } = request.body;
-    const { id } = request.params;
-
-    if (isNaN(id)) {
-        return response.status(400).send({ "response": "O 'id' precisa ser um valor numérico." });
-    }
-
-    if (desc_tipo.length < 1) {
-        return response.status(400).send({ "response": "O campo 'desc_tipo' deve ter pelo menos um caractere." });
-    }
-
-    //Tratamentos de erro 
-    try {
-        await tipo_usuarioRepository.update({ id, desc_tipo });
-
-        return response.status(200).send({ "response": "Tipo de usuário atualizado com sucesso!" });
-    } catch (erro) {
-        return response.status(500).send({ "error": erro });
-    }
+  try {
+    const updateTipo = await tipoUsuarioService.putTipoUsuario(
+      request.params.id, 
+      request.body
+    );
+    return response.status(200).json({ 
+      response: "Tipo de usuário atualizado com sucesso!",
+      data: updateTipo
+    });
+  } catch (error) {
+    return response.status(400).json({ error: error.message });
+  }
 });
 
 route.delete("/:id", async (request, response) => {
-    const { id } = request.params;
-
-    if (isNaN(id)) {
-        return response.status(400).send({ "response": "O 'id' precisa ser um valor numérico" });
-    }
-    //Soft delete
-    await tipo_usuarioRepository.update({ id }, { deletedAt: () => "CURRENT_TIMESTAMP" });
-
-    return response.status(200).send({"response": "Tipo de usuário excluído com sucesso!"});
+  try {
+    await tipoUsuarioService.deleteTipoUsuario(request.params.id);
+    return response.status(200).json({
+      response: "Tipo de usuário excluído com sucesso!"
+    });
+  } catch (error) {
+    return response.status(400).json({ error: error.message });
+  }
 });
 
 export default route;
