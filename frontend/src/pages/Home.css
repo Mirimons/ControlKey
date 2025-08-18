@@ -1,0 +1,43 @@
+.container {
+  padding: 20px;
+  font-family: sans-serif;
+}
+
+.cards-container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.card {
+  border-radius: 10px;
+  padding: 15px 20px;
+  color: black;
+  width: 200px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.card span {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+body {
+  background-color: #D4E5EA; /* ou qualquer cor que quiser */
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
