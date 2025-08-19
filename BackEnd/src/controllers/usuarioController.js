@@ -30,10 +30,10 @@ route.post("/", async (request, response) => {
       usuario: novoUsuario,
     });
   } catch (error) {
-    console.error("Erro ao cadastrar usuário:", error);
+    console.error("Erro ao cadastrar usuário: ", error);
     if (
-      error.message.includes("já cadastrado") ||
-      error.message.includes("não encontrado")
+      error.message.includes("Já cadastrado") ||
+      error.message.includes("Não encontrado")
     ) {
       return response.status(409).json({ response: error.message });
     }
@@ -47,7 +47,7 @@ route.put("/:id", async (request, response) => {
     const usuarioAtualizado = await usuarioService.putUsuario(id, request.body);
     return response.status(200).json({
       response: "Usuário atualizado com sucesso!",
-      usuario: usuarioAtualizado,
+      usuario: usuarioAtualizado
     });
   } catch (error) {
     console.error("Erro ao atualizar usuário:", error);
