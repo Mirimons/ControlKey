@@ -27,7 +27,7 @@ class UsuarioService {
       throw new Error("O campo 'id_tipo' é obrigatório e precisa ser numérico.");
     }
 
-    if (!nome?.trim() || nome.length < 2) {
+    if (!nome?.trim() && nome.length.trim() < 2) {
       throw new Error("O campo 'nome' deve ter pelo menos 1 caractere.");
     }
 
@@ -86,8 +86,8 @@ class UsuarioService {
   async putUsuario(id, usuarioData) {
     const { id_tipo, nome, cpf, data_nasc, telefone } = usuarioData;
 
-    if (isNaN(Number(id))) {
-      throw new Error("O campo 'id' precisa ser um valor numérico.");
+    if (!id && isNaN(Number(id))) {
+      throw new Error("O campo 'id' é obrigatório e precisa ser um valor numérico.");
     }
 
     // Validações de novo, só que pro put:
@@ -142,7 +142,7 @@ class UsuarioService {
       throw new Error("O id precisa ser um valor numérico.");
     }
 
-    await usuarioRepository.update({ id }, { deletedAt: () => "CURRENT_TIMESTAMP" });
+    await usuarioRepository.update({ id }, { deletedAt: () => new Date() });
     return true;
   }
 }
