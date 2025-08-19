@@ -1,92 +1,104 @@
-import express from "express";
-import Labs from "../entities/labs.js";
-import { AppDataSource } from "../database/data-source.js";
-import { Like, IsNull } from "typeorm";
+import expresponses from "expresponses";
+import labsService from "../services/labsService.js";
 
-const route = express.Router();
-
-const labsRepository = AppDataSource.getRepository(Labs);
+const route = expresponses.Router();
 
 route.get("/", async (request, response) => {
-    const Labs = await labsRepository.findBy({ deletedAt: IsNull() });
-    return response.status(200).send({ "response": Labs });
+    try{
+        const labs = await labsService.getLabs();
+        return response.status(200).json(labs);
+    } catch (error) {
+        console.error("Erro ao listar os laboratórios: ", error);
+        return response.status(500).json({
+            error: "Erro interno ao listar os laboratórios."
+        });
+    }
 });
 
-route.get("/:nameFound", async (request, response) => {
-    const { nameFound } = request.params;
-    const labFound = await labsRepository.findBy({ nome: Like(`%${nameFound}%`) });
-    return response.status(200).send({ "response": labFound });
+route.get("/:nome", async (request, response) => {
+    try {
+        const labs = await labsService.getByNome(request.params.nome);
+        return response.status(200).json(labs);
+    } catch (error) {
+    console.error(`Erro ao buscar laboratório por nome (${request.params.nome}):`, error);
+    return response.status(500).json({ 
+      error: "Erro interno na busca por nome" 
+    });
+  }
 });
 
 route.post("/", async (request, response) => {
-    const { desc_lab, nome_lab, status } = request.body;
-
-    if (desc_lab.length < 1) {
-        return response.status(400).send({ "response": "O campo 'desc_lab' deve ter pelo menos um caractere." });
+  try {
+    const newLab = await labsService.postLabs(request.body);
+    return response.status(201).json({
+      message: "Laboratório criado com sucesso",
+      data: newLab
+    });
+  } catch (error) {
+    console.error("Erro ao criar laboratório:", error);
+    
+    // Tratamento para nomes duplicados
+    if (error.message.includes("Já existe um laboratório com este nome")) {
+      return response.status(409).json({ error: error.message });
     }
-    if(nome_lab.length < 1) {
-        return response.status(400).send({ "response": "O campo 'nome_lab' deve ter pelo menos um caractere."});
+    
+    // Validações de entrada
+    if (error.message.includes("obrigatório") || 
+        error.message.includes("deve ser")) {
+      return response.status(400).json({ error: error.message });
     }
-    if (status.toLowercase() != 'livre' && status.toLowercase() != 'ocupado'){
-        return response.status(400).send({ "response": 'O status deve ser "livre" ou "ocupado". '})
-    }
-
-    try {
-        const newLab = labsRepository.create({
-            desc_lab,
-            nome_lab, 
-            status,
-            createdAt: new Date()
-        });
-        await labsRepository.save(newLab);
-
-        return response.status(201).send({"response": "Laboratório cadastrado com sucesso!"});
-        } catch(erro){
-            return response.status(500).send({"error": erro});
-        };
-    }
-);
+    
+    return response.status(500).json({ error: "Erro interno ao criar laboratório" });
+  }
+});
 
 route.put("/:id", async (request, response) => {
-    const { desc_lab, nome_lab, status } = request.body;
-    const { id } = request.params;
-
-    if (isNaN(id)) {
-    return response.status(400).send({ "response": "O campo 'id' precisa ser um valor numérico." });
+  try {
+    const updatedLab = await labsService.putLabs(request.params.id, request.body);
+    return response.status(200).json({
+      message: "Laboratório atualizado com sucesso",
+      data: updatedLab
+    });
+  } catch (error) {
+    console.error(`Erro ao atualizar laboratório (ID: ${request.params.id}):`, error);
+    
+    if (error.message.includes("não encontrado")) {
+      return response.status(404).json({ error: error.message });
     }
-    if (desc_lab.length < 1) {
-        return response.status(400).send({ "response": "O campo 'desc_lab' deve ter pelo menos um caractere." });
+    
+    if (error.message.includes("Já existe um laboratório com este nome")) {
+      return response.status(409).json({ error: error.message });
     }
-    if(nome_lab.length < 1) {
-        return response.status(400).send({ "response": "O campo 'nome_lab' deve ter pelo menos um caractere."});
+    
+    if (error.message.includes("obrigatório") || 
+        error.message.includes("deve ser")) {
+      return response.status(400).json({ error: error.message });
     }
-    if (status.toLowercase() != 'livre' && status.toLowercase() != 'ocupado'){
-        return response.status(400).send({ "response": 'O status deve ser "livre" ou "ocupado". '})
-    }
-
-    try {
-        await labsRepository.update({
-            id,
-            desc_lab,
-            nome_lab,
-            status
-        });
-
-        return response.status(201).send({"response": "Laboratório atualizado com sucesso!"});
-        } catch(erro){
-            return response.status(500).send({"error": erro});
-        };
+    
+    return response.status(500).json({ error: "Erro interno ao atualizar laboratório" });
+  }
 });
+
 route.delete("/:id", async (request, response) => {
-    const { id } = request.params;
-
-    if (isNaN(id)) {
-        return response.status(400).send({ "response": "O 'id' precisa ser um valor numérico" });
+  try {
+    await labsService.deleteLabs(request.params.id);
+    return response.status(200).json({ 
+      message: "Laboratório excluído com sucesso" 
+    });
+  } catch (error) {
+    console.error(`Erro ao excluir laboratório (ID: ${request.params.id}):`, error);
+    
+    if (error.message.includes("não encontrado")) {
+      return response.status(404).json({ error: error.message });
     }
-    //Soft delete
-    await labsRepository.update({ id }, { deletedAt: () => "CURRENT_TIMESTAMP" });
-
-    return response.status(200).send({"response": "Laboratório excluído com sucesso!"});
+    
+    if (error.message.includes("obrigatório") || 
+        error.message.includes("numérico")) {
+      return response.status(400).json({ error: error.message });
+    }
+    
+    return response.status(500).json({ error: "Erro interno ao excluir laboratório" });
+  }
 });
 
 export default route;
