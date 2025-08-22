@@ -1,5 +1,5 @@
 import express from "express";
-import agendamentoService from "../services/agendamentoService.js";
+import agendamentoService from "../services/agendamentoServices.js";
 
 const route = express.Router();
 

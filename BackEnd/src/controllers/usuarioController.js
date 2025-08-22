@@ -8,20 +8,39 @@ route.get("/", async (request, response) => {
     const usuarios = await usuarioService.getUsuarios();
     return response.status(200).json({ response: usuarios });
   } catch (error) {
+    console.error("Erro ao listar usuários: ", error);
     return response.status(500).json({ response: error.message });
   }
 });
 
-route.get("/:nameFound", async (request, response) => {
+route.get("/search/:nome", async (request, response) => {
   try {
-    const { nameFound } = request.params;
-    const usuarioFound = await usuarioService.getByNome(nameFound);
-    return response.status(200).json({ response: usuarioFound });
+    const { nome } = request.params;
+    const usuarios = await usuarioService.getByNome(nome);
+    return response.status(200).json({ response: usuarios });
+  } catch (error) {
+    console.error("Erro ao buscar usuários por nome: ", error);
+    return response.status(500).json({ response: error.message });
+  }
+});
+
+route.get("/:id", async (request, response) => {
+  try {
+    const { id } = request.params;
+    const usuario = await usuarioService.getUsuarioById(id);
+
+    if(!usuario) {
+      return response.status(404).json({response: "Usuário não encontrado."});
+    }
+
+    return response.status(200).json({ response: usuario });
   } catch (error) {
     return response.status(500).json({ response: error.message });
   }
 });
 
+
+//PAREI AQUI PRA ARRUMAR ISSO AQUI Ó
 route.post("/", async (request, response) => {
   try {
     const novoUsuario = await usuarioService.postUsuario(request.body);

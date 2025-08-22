@@ -1,7 +1,7 @@
 import express from "express";
 import EquipService from "../services/equipamentoService.js";
-import tipoEquipService from "../services/tipoEquipService";
 import equipamentoService from "../services/equipamentoService.js";
+
 const route = express.Router();
 
 route.get("/", async (request, response) => {

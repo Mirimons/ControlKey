@@ -56,4 +56,4 @@ class TipoEquipService {
     }
 }
 
-export default new TipoEquipService()
+export default new TipoEquipService();

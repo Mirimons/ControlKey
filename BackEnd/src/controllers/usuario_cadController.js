@@ -1,5 +1,8 @@
+//// TESTAR USUARIO CONTROLLER UNIFICADO ANTES DE APAGAR AQUI TAMBÉM!!!!!!
+
+/*
 import express from "express";
-import usuarioCadService from "../services/usuarioCadService";
+import usuarioCadService from "../services/usuarioCadService.js";
 
 const route = express.Router();
 
@@ -65,3 +68,4 @@ route.delete('/:id', async (request, response) => {
 });
 
 export default route;
+*/

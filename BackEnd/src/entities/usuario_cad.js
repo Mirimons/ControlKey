@@ -23,8 +23,13 @@ const usuario_cad = new EntitySchema({
         },
         senha: {
             type: "varchar",
-            length: 50,
+            length: 255,
             nullable: true
+        },
+        passwordResetAt: {
+            type: "timestamp",
+            nullable: true,
+            default: null
         },
         createdAt: {
             type: "timestamp", 

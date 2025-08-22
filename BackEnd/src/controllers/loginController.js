@@ -1,58 +1,54 @@
 import express from "express";
-import UsuarioCad from "../entities/usuario_cad.js";
-import { AppDataSource } from "../database/data-source.js";
-import { IsNull } from "typeorm";
-import { generateToken } from "../utils/jwt.js";
-import { generateNewPassword } from "../utils/login.js";
-import { sendEmail } from "../helpers/nodemail.js";
+import loginService from "../services/loginService.js";
 
 const route = express.Router();
-const usuario_cadRepository = AppDataSource.getRepository(UsuarioCad);
 
 //Para que os dados do usuário, como o login e senha, não sejam expostos com o get,é usado o post
 route.post("/", async (request, response) => {
+  try {
     const { email, senha } = request.body;
+    const loginResult = await loginService.login(email, senha);
 
-    if (!email.includes("@")) {
-        return response.status(400).send({ "response": "O email informado é inválido." });
+    return response.status(200).json(loginResult);
+  } catch (error) {
+    console.error("Erro no login: ", error);
+
+    if (
+      error.message.includes("inválido") ||
+      error.message.includes("Credenciais")
+    ) {
+      return response.status(401).json({ error: error.message });
     }
 
-    if (senha.length < 6) {
-        return response.status(400).send({ "response": "A senha deve conter no mínimo 6 caracteres." });
+    if (
+      error.message.includes("obrigatório") ||
+      error.message.includes("mínimo")
+    ) {
+      return response.status(400).json({ error: error.message });
     }
 
-    const user = await usuario_cadRepository.findOneBy({
-        email, senha, deleteAt: IsNull()
-    });
-
-    if (!user) {
-        return response.status(401).send({ "response": "Usuário ou senha inválido" });
-    }
-
-    const token = generateToken({ user: user.nome, email: user.email });
-
-    return response.status(200).send({ "respponse": "Login efetuado com sucesso", token });
-
+    return response.status(500).json({ error: "Erro interno no servidor." });
+  }
 });
 
 route.put("/reset", async (request, response) => {
+  try {
     const { email } = request.body;
-
-    const user = await usuario_cadRepository.findOneBy({ email, deleteAt: IsNull() });
-
-    if (!user) {
-        return response.status(400).send({ "response": "Email inválido." });
+    const result = await loginService.resetPassword(email);
+    return response.status(200).json(result);
+  } catch (error) {
+    if(error.message.includes("Aguarde")) {
+      return response.status(429).json({error: error.message});
+    }
+    if (
+      error.message.includes("inválido") ||
+      error.message.includes("não encontrado")
+    ) {
+      return response.status(400).json({ error: error.message });
     }
 
-    const newPassword = generateNewPassword();
-
-    await usuario_cadRepository.update({ email }, { senha: newPassword });
-
-    //Enviar Email
-    sendEmail(newPassword, user.email);
-
-    return response.status(200).send({ "response": "Senha enviada para o email cadastrado. Verifique seu email." });
-
+    return response.status(500).json({ error: "Erro interno no servidor." });
+  }
 });
 
 export default route;

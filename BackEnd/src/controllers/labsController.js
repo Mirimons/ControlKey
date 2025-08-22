@@ -1,7 +1,7 @@
-import expresponses from "expresponses";
+import express from "express";
 import labsService from "../services/labsService.js";
 
-const route = expresponses.Router();
+const route = express.Router();
 
 route.get("/", async (request, response) => {
     try{
@@ -20,9 +20,9 @@ route.get("/:nome", async (request, response) => {
         const labs = await labsService.getByNome(request.params.nome);
         return response.status(200).json(labs);
     } catch (error) {
-    console.error(`Erro ao buscar laboratório por nome (${request.params.nome}):`, error);
+    console.error(`Erro ao buscar laboratório por nome (${request.params.nome}): `, error);
     return response.status(500).json({ 
-      error: "Erro interno na busca por nome" 
+      error: "Erro interno na busca por nome." 
     });
   }
 });
@@ -35,10 +35,10 @@ route.post("/", async (request, response) => {
       data: newLab
     });
   } catch (error) {
-    console.error("Erro ao criar laboratório:", error);
+    console.error("Erro ao criar laboratório: ", error);
     
     // Tratamento para nomes duplicados
-    if (error.message.includes("Já existe um laboratório com este nome")) {
+    if (error.message.includes("Já existe um laboratório com este nome.")) {
       return response.status(409).json({ error: error.message });
     }
     
@@ -48,7 +48,7 @@ route.post("/", async (request, response) => {
       return response.status(400).json({ error: error.message });
     }
     
-    return response.status(500).json({ error: "Erro interno ao criar laboratório" });
+    return response.status(500).json({ error: "Erro interno ao criar laboratório." });
   }
 });
 
@@ -56,17 +56,17 @@ route.put("/:id", async (request, response) => {
   try {
     const updatedLab = await labsService.putLabs(request.params.id, request.body);
     return response.status(200).json({
-      message: "Laboratório atualizado com sucesso",
+      message: "Laboratório atualizado com sucesso!",
       data: updatedLab
     });
   } catch (error) {
-    console.error(`Erro ao atualizar laboratório (ID: ${request.params.id}):`, error);
+    console.error(`Erro ao atualizar laboratório (ID: ${request.params.id}): `, error);
     
     if (error.message.includes("não encontrado")) {
       return response.status(404).json({ error: error.message });
     }
     
-    if (error.message.includes("Já existe um laboratório com este nome")) {
+    if (error.message.includes("Já existe um laboratório com este nome.")) {
       return response.status(409).json({ error: error.message });
     }
     
@@ -75,7 +75,7 @@ route.put("/:id", async (request, response) => {
       return response.status(400).json({ error: error.message });
     }
     
-    return response.status(500).json({ error: "Erro interno ao atualizar laboratório" });
+    return response.status(500).json({ error: "Erro interno ao atualizar laboratório." });
   }
 });
 
@@ -83,10 +83,10 @@ route.delete("/:id", async (request, response) => {
   try {
     await labsService.deleteLabs(request.params.id);
     return response.status(200).json({ 
-      message: "Laboratório excluído com sucesso" 
+      message: "Laboratório excluído com sucesso!" 
     });
   } catch (error) {
-    console.error(`Erro ao excluir laboratório (ID: ${request.params.id}):`, error);
+    console.error(`Erro ao excluir laboratório (ID: ${request.params.id}): `, error);
     
     if (error.message.includes("não encontrado")) {
       return response.status(404).json({ error: error.message });
@@ -97,7 +97,7 @@ route.delete("/:id", async (request, response) => {
       return response.status(400).json({ error: error.message });
     }
     
-    return response.status(500).json({ error: "Erro interno ao excluir laboratório" });
+    return response.status(500).json({ error: "Erro interno ao excluir laboratório." });
   }
 });
 
