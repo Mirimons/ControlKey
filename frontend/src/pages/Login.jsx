@@ -1,88 +1,26 @@
-// import React, { useState } from 'react';
-// import './Login.css';
-// // import api from '../services/api';
-// // import logo from '../assets/LOGOCERTO.png';
+import "./Login.css";
 
-// function Login() {
-//     // const [username, setUsername] = useState('');
-//     // const [password, setPassword] = useState('');
+export default function Login() {
+  return (
+    <div className="login-container">
+      {/* Lado esquerdo */}
+      <div className="login-left">
+        <img src="/logo-etec.png" alt="Etec" />
+        <img src="/logo-cps.png" alt="CPS" />
+      </div>
 
-//     const handleLogin = async () => {
-//         try {
-//             // const res = await api.post('/login', {
-//             //     username,
-//             //     password
-//             // });
-//             // console.log('Resposta do backend:', res.data);
-//             // Aqui você pode redirecionar ou salvar token, etc.
-//         } catch (err) {
-//             console.error('Erro no login:', err);
-//         }
-//     };
-
-//     return (
-//         <div className="login-container">
-//             <header className="login-header">
-//                 {/* <img src={ } alt="Logo ETEC" className="logo-login" /> */}
-//             </header>
-
-//             <div className="login-box">
-//                 {/* <img src={logo} alt="Logo ControlKey" className="logo-central" /> */}
-//                 <h2>CONTROLKEY</h2>
-
-//                 <div className='input-group'>
-//                     <input
-//                         type='text'
-//                         placeholder='Username'
-//                         value={username}
-//                         onChange={e => setUsername(e.target.value)}
-//                     />
-//                 </div>
-//                 <div className='input-group'>
-//                     <input
-//                         type='password'
-//                         placeholder='Password'
-//                         value={password}
-//                         onChange={e => setPassword(e.target.value)}
-//                     />
-//                 </div>
-//                 <button className='btn-login' onClick={handleLogin}>Entrar</button>
-//                 <a href="/" className='esqueceu-senha'>Esqueceu a senha?</a>
-//             </div>
-//         </div>
-//     );
-// }
-
-// export default Login;
-
-import React from 'react';
-import './Login.css';
-
-function Login() {
-    const handleLogin = () => {
-        console.log('Login clicado');
-    };
-
-    return (
-        <div className="login-container">
-            <header className="login-header">
-                {/* Logo se quiser */}
-            </header>
-
-            <div className="login-box">
-                <h2>CONTROLKEY</h2>
-
-                <div className='input-group'>
-                    <input type='text' placeholder='Username' />
-                </div>
-                <div className='input-group'>
-                    <input type='password' placeholder='Password' />
-                </div>
-                <button className='btn-login' onClick={handleLogin}>Entrar</button>
-                <a href="/" className='esqueceu-senha'>Esqueceu a senha?</a>
-            </div>
+      {/* Lado direito */}
+      <div className="login-right">
+        <div className="login-box">
+          <img src="/logo-controlkey.png" alt="ControlKey" />
+          <h2>CONTROLKEY</h2>
+          <input type="text" placeholder="UserName" />
+          <input type="password" placeholder="Password" />
+          <button>Entrar</button>
+          <a href="#">Esqueceu a senha?</a>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 
-export default Login;
