@@ -1,15 +1,19 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const AppDataSource = new DataSource({
     type: "mysql",
-    host: "localhost",
-    username: "root",
-    port: 3306,
-    password: "",
-    database: "control_key",
+    host: process.env.DB_HOST || "localhost",
+    username: process.env.DB_USER || "root",
+    port: Number(process.env.DB_PORT) || 3306,
+    password: process.env.DB_PASSWORD ||"",
+    database: process.env.DB_NAME || "control_key",
     entities: ["src/entities/*.js"],
-    migrations: ["src/database/migrations/*.cjs"]
+    migrations: ["src/database/migrations/*.cjs"],
+    synchronize: process.env.NODE_ENV === 'development'
 });
 
 export {AppDataSource};

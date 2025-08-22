@@ -230,12 +230,12 @@ class UsuarioService {
       throw new Error("CPF já cadastrado.");
     }
 
-    const usuarioAtual = await usuarioRepository.findOne({
+    const currentUsuario = await usuarioRepository.findOne({
       where: { id, deletedAt: IsNull()},
       relations: ['usuario_cad']
     });
 
-    if (!usuarioAtual){
+    if (!currentUsuario){
       throw new Error("Usuário não encontrado.")
     }
 
@@ -252,10 +252,10 @@ class UsuarioService {
     );
 
     //Se tiver usuarioCad:
-    if(usuarioAtual.usuario_cad) {
-      const hashedPassword = senha ? await bcrypt.hash(senha, 10): usuarioAtual.usuario_cad.senha;
+    if(currentUsuario.usuario_cad) {
+      const hashedPassword = senha ? await bcrypt.hash(senha, 10): currentUsuario.usuario_cad.senha;
 
-      await usuarioCadRepository.update(usuarioAtual.usuario_cad.id_usuario, {
+      await usuarioCadRepository.update(currentUsuario.usuario_cad.id_usuario, {
         matricula: matricula.trim(),
         email_institucional: email_institucional.trim(),
         senha: hashedPassword

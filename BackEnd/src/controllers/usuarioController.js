@@ -1,5 +1,7 @@
 import express from "express";
 import usuarioService from "../services/usuarioService.js";
+import { getErrorMessage } from "../helpers/errorHandler.js";
+import { handleDatabaseError } from "../helpers/errorHandler.js";
 
 const route = express.Router();
 
@@ -9,7 +11,10 @@ route.get("/", async (request, response) => {
     return response.status(200).json({ response: usuarios });
   } catch (error) {
     console.error("Erro ao listar usuários: ", error);
-    return response.status(500).json({ response: error.message });
+    return response.status(500).json({
+      response: "Erro interno no servidor.",
+      error: getErrorMessage(error),
+    });
   }
 });
 
@@ -20,7 +25,10 @@ route.get("/search/:nome", async (request, response) => {
     return response.status(200).json({ response: usuarios });
   } catch (error) {
     console.error("Erro ao buscar usuários por nome: ", error);
-    return response.status(500).json({ response: error.message });
+    return response.status(500).json({
+      response: "Erro interno no servidor.",
+      error: getErrorMessage(error),
+    });
   }
 });
 
@@ -29,61 +37,157 @@ route.get("/:id", async (request, response) => {
     const { id } = request.params;
     const usuario = await usuarioService.getUsuarioById(id);
 
-    if(!usuario) {
-      return response.status(404).json({response: "Usuário não encontrado."});
+    if (!usuario) {
+      return response.status(404).json({ response: "Usuário não encontrado." });
     }
 
     return response.status(200).json({ response: usuario });
   } catch (error) {
-    return response.status(500).json({ response: error.message });
+    console.error("Erro ao buscar usuário: ", error);
+    return response.status(500).json({
+      response: "Erro interno no servidor.",
+      error: getErrorMessage(error),
+    });
   }
 });
 
-
-//PAREI AQUI PRA ARRUMAR ISSO AQUI Ó
 route.post("/", async (request, response) => {
   try {
-    const novoUsuario = await usuarioService.postUsuario(request.body);
+    const newUsuario = await usuarioService.postUsuario(request.body);
     return response.status(201).json({
       response: "Usuário cadastrado com sucesso!",
-      usuario: novoUsuario,
+      data: {
+        id: newUsuario.id,
+        nome: newUsuario.nome,
+        cpf: newUsuario.cpf,
+        data_nasc: newUsuario.data_nasc,
+        telefone: newUsuario.telefone,
+        tipo: {
+          id: newUsuario.tipo.id,
+          desc_tipo: newUsuario.tipo.desc_tipo,
+        },
+        ...(newUsuario.usuario_cad && {
+          cadastro: {
+            matricula: newUsuario.usuario_cad.matricula,
+            email_institucional: newUsuario.usuario_cad.email_institucional,
+            tem_senha: !!newUsuario.usuario_cad.senha,
+          },
+        }),
+      },
     });
   } catch (error) {
     console.error("Erro ao cadastrar usuário: ", error);
-    if (
-      error.message.includes("Já cadastrado") ||
-      error.message.includes("Não encontrado")
-    ) {
-      return response.status(409).json({ response: error.message });
+
+    if (error.code?.startsWith('ER_') || error.errno) {
+      return response.status(409).json({
+        response: handleDatabaseError(error),
+        error: "Erro de banco de dados"
+      });
     }
-    return response.status(400).json({ response: error.message });
+
+    if (error.message.includes("já cadastrado")) {
+      return response.status(409).json({
+        response: error.message,
+        error: "Conflito de dados.",
+      });
+    }
+    if (error.message.includes("não encontrado")) {
+      return response.status(404).json({
+        response: error.message,
+        error: "Usuário não encontrado.",
+      });
+    }
+    if (
+      error.message.includes("obrigatório") ||
+      error.message.includes("inválido") ||
+      error.message.includes("deve ter") ||
+      error.message.includes("precisa")
+    ) {
+      return response.status(400).json({
+        response: error.message,
+        error: "Dados inválidos.",
+      });
+    }
+
+    return response.status(500).json({
+      response: "Erro interno no servidor.",
+      error: getErrorMessage(error),
+    });
   }
 });
 
 route.put("/:id", async (request, response) => {
   try {
     const { id } = request.params;
-    const usuarioAtualizado = await usuarioService.putUsuario(id, request.body);
+    const updatedUsuario = await usuarioService.putUsuario(
+      Number(id),
+      request.body
+    );
     return response.status(200).json({
       response: "Usuário atualizado com sucesso!",
-      usuario: usuarioAtualizado
+      data: updatedUsuario,
     });
   } catch (error) {
     console.error("Erro ao atualizar usuário:", error);
-    return response.status(400).json({ response: error.message });
+
+    if (error.code?.startsWith('ER_') || error.errno) {
+      return response.status(409).json({
+        response: handleDatabaseError(error),
+        error: "Erro de banco de dados"
+      });
+    }
+
+    if (error.message.includes("já cadastrado")) {
+      return response.status(409).json({
+        response: error.message,
+        error: "Conflito de dados.",
+      });
+    }
+    if (error.message.includes("não encontrado")) {
+      return response.status(404).json({
+        response: error.message,
+        error: "Usuário não encontrado.",
+      });
+    }
+    if (
+      error.message.includes("obrigatório") ||
+      error.message.includes("inválido") ||
+      error.message.includes("deve ter") ||
+      error.message.includes("precisa")
+    ) {
+      return response.status(400).json({
+        response: error.message,
+        error: "Dados inválidos.",
+      });
+    }
+    return response.status(500).json({
+      response: "Erro interno no servidor.",
+      error: getErrorMessage(error),
+    });
   }
 });
 
 route.delete("/:id", async (request, response) => {
   try {
     const { id } = request.params;
-    await usuarioService.deleteUsuario(id);
-    return response
-      .status(200)
-      .json({ response: "Usuário excluído com sucesso!" });
+    await usuarioService.deleteUsuario(Number(id));
+
+    return response.status(200).json({
+      response: "Usuário excluído com sucesso!",
+    });
   } catch (error) {
     console.error("Erro ao excluir usuário:", error);
-    return response.status(400).json({ response: error.message });
+
+    if (error.message.includes("não encontrado")) {
+      return response
+        .status(404)
+        .json({ response: error.message, error: "Usuário não encontrado." });
+    }
+
+    return response.status(500).json({
+      response: "Erro interno no servidor.",
+      error: getErrorMessage(error),
+    });
   }
 });
 

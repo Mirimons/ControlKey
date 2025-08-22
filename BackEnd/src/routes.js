@@ -6,22 +6,20 @@ import tipo_equipController from "./controllers/tipo_equipController.js";
 import equipamentoController from "./controllers/equipamentoController.js";
 import labsController from "./controllers/labsController.js";
 import agendamentoController from "./controllers/agendamentoController.js";
-import usuario_cadController from "./controllers/usuario_cadController.js";
 import controlController from "./controllers/controlController.js";
 import loginControler from "./controllers/loginController.js";
-import { authenticate } from "./utils/jwt.js";
+import { authenticate, authorize } from './utils/index.js'
 
 const routes = express();
 
-routes.use("/usuario_cad", usuario_cadController);
-routes.use("/control", controlController);
-routes.use("/agendamento", agendamentoController);
-routes.use("/labs", labsController);
-routes.use("/tipo_usuario", tipo_usuarioController);
-routes.use("/usuario", usuarioController);
-routes.use("/tipo_equip", tipo_equipController);
-routes.use("/equipamento", equipamentoController);
-routes.use("/usuario_cad", usuario_cadController);
 routes.use("/login", loginControler);
+
+routes.use("/control", authenticate, controlController);
+routes.use("/agendamento",authenticate, agendamentoController);
+routes.use("/labs",authenticate, labsController);
+routes.use("/tipo_usuario", authenticate, tipo_usuarioController);
+routes.use("/usuario", authenticate, usuarioController);
+routes.use("/tipo_equip", authenticate, tipo_equipController);
+routes.use("/equipamento", authenticate, equipamentoController);
 
 export default routes;

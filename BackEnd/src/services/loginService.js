@@ -1,7 +1,7 @@
 import UsuarioCad from "../entities/usuario_cad.js";
 import { AppDataSource } from "../database/data-source.js";
 import { IsNull } from "typeorm";
-import { generateToken } from "../utils/jwt.js";
+import { generateToken } from "../utils/jwt/generateToken.js";
 import { sendEmail } from "../helpers/nodemail.js";
 import { generateNewPassword } from "../utils/login.js";
 import bcrypt from "bcrypt";
