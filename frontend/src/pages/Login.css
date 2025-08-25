@@ -1,58 +1,45 @@
-/* Container principal ocupando a tela toda */
+/* Container */
 .login-container {
-  display: flex;
-  height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* 50% / 50% */
+  min-height: 100vh;
   width: 100%;
 }
 
-/* Lado esquerdo azul escuro */
+/* Esquerda (fica como está) */
 .login-left {
-  width: 50%;
-  background-color: #08324c; /* azul escuro */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 450px;
+  background-color: #08324c;
+  display: grid;
+  place-items: center;
 }
 
-/* Logos no topo do lado esquerdo */
-.login-left img {
-  max-width: 120px;
-  margin: 15px 0;
-}
-
-/* Parte direita com fundo azul claro */
+/* Direita: centralização absoluta via grid */
 .login-right {
-  flex: 1;
   background-color: #e6f2f7;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: grid !important;
+  place-content: center !important;
+  /* centra horizontal e vertical */
+  padding: 24px;
 }
 
-/* Caixa branca do formulário */
+/* Caixa do formulário */
 .login-box {
+  width: min(90%, 420px);
+  /* adapta sem estourar */
   background: #fff;
-  padding: 40px;
+  padding: 32px 28px;
   border-radius: 12px;
-  width: 350px;
-  box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   text-align: center;
-  margin-left: 260px;
+  margin: 0;
+  /* sem empurrões */
 }
 
-/* Logo central */
+/* Logo do box */
 .login-box img {
   max-width: 150px;
-  margin-bottom: 15px;
-}
-
-/* Título */
-.login-box h2 {
-  font-size: 22px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  color: #1c2c3c;
+  margin-bottom: 16px;
 }
 
 /* Inputs */
@@ -77,7 +64,6 @@
   font-weight: bold;
   color: #08324c;
   transition: all 0.3s ease;
-  margin-left: 13px;
 }
 
 .login-box button:hover {
@@ -85,7 +71,7 @@
   color: #fff;
 }
 
-/* Link de esqueceu a senha */
+/* Link */
 .login-box a {
   display: block;
   margin-top: 12px;
@@ -97,5 +83,3 @@
 .login-box a:hover {
   text-decoration: underline;
 }
-
-

@@ -1,12 +1,12 @@
 import "./Login.css";
+import imgLogin from '../assets/imagem-cadeado.png';
 
 export default function Login() {
   return (
     <div className="login-container">
       {/* Lado esquerdo */}
       <div className="login-left">
-        <img src="/logo-etec.png" alt="Etec" />
-        <img src="/logo-cps.png" alt="CPS" />
+      <img src={imgLogin}></img>
       </div>
 
       {/* Lado direito */}
