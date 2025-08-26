@@ -1,8 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './User.css';
 import SideBar from "../components/sidebar";
 
 function User() {
+    const [modalAberto, setModalAberto] = useState(false);
+    const [tipoUsuario, setTipoUsuario] = useState("");
+
+    const abrirModal = () => setModalAberto(true);
+    const fecharModal = () => setModalAberto(false);
+
+    const handleSalvar = (e) => {
+        e.preventDefault(); // evita recarregar a página
+        console.log("Usuário salvo!");
+        fecharModal();
+    };
+
     return (
         <div className="usuarios-container">
             <header className="usuarios-header">
@@ -17,8 +29,8 @@ function User() {
                 </div>
                 <div>
                     <h3>Selecione o tipo de usuário:</h3>
-                    <select>
-                        <option value="" disabled selected hidden>Selecione o tipo de usuário</option>
+                    <select defaultValue="">
+                        <option value="" disabled hidden>Selecione o tipo de usuário</option>
                         <option value="Administrador">Administrador</option>
                         <option value="Comum">Comum</option>
                     </select>
@@ -26,8 +38,8 @@ function User() {
             </div>
 
             <div className="usuarios-acoes">
-                <button>Adicionar Usuário</button>
-                <button>Pesquisar</button>
+                <button type="button" onClick={abrirModal}>Adicionar Usuário</button>
+                <button type="button">Pesquisar</button>
             </div>
 
             <table className="usuarios-tabela">
@@ -52,6 +64,39 @@ function User() {
                     ))}
                 </tbody>
             </table>
+
+            {/* Modal */}
+            {modalAberto && (
+                <div className="modal-fundo">
+                    <div className="modal-conteudo">
+                        <form onSubmit={handleSalvar}>
+                            <h2>Adicionar Usuário</h2>
+
+                            <select
+                                value={tipoUsuario}
+                                onChange={(e) => setTipoUsuario(e.target.value)}
+                                required
+                            >
+                                <option value="" disabled hidden>Selecione o tipo de usuário</option>
+                                <option value="Administrador">Administrador</option>
+                                <option value="Comum">Comum</option>
+                            </select>
+
+                            <input type="text" placeholder="Nome completo" required />
+                            <input type="text" placeholder="CPF" required />
+                            <input type="email" placeholder="Email Institucional" required />
+                            <input type="tel" placeholder="Telefone (celular)" required />
+                            <input type="text" placeholder="Matrícula" required />
+                            <input type="date" placeholder="Data de Nascimento" required />
+
+                            <div className="modal-botoes">
+                                <button type="button" onClick={fecharModal}>Cancelar</button>
+                                <button type="submit">Salvar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

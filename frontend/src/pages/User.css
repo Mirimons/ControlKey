@@ -84,3 +84,61 @@ body {
   cursor: pointer;
   font-size: 18px;
 }
+
+/* Fundo escuro do modal */
+.modal-fundo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Caixa do modal */
+.modal-conteudo {
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Inputs e select */
+.modal-conteudo input,
+.modal-conteudo select {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Botoes do modal */
+.modal-botoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-botoes button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.modal-botoes button:first-child {
+  background-color: #ccc;
+}
+
+.modal-botoes button:last-child {
+  background-color: #4da6ff;
+  color: white;
+}
