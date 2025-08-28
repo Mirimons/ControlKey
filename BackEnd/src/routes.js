@@ -17,8 +17,8 @@ routes.use("/login", loginControler);
 routes.use("/control", authenticate, controlController);
 routes.use("/agendamento",authenticate, agendamentoController);
 routes.use("/labs",authenticate, labsController);
-routes.use("/tipo_usuario", authenticate, tipo_usuarioController);
-routes.use("/usuario", authenticate, usuarioController);
+routes.use("/tipo_usuario", tipo_usuarioController);
+routes.use("/usuario",  usuarioController);
 routes.use("/tipo_equip", authenticate, tipo_equipController);
 routes.use("/equipamento", authenticate, equipamentoController);
 

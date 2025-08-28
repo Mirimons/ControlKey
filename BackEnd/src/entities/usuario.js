@@ -60,10 +60,7 @@ const usuario = new EntitySchema({
         usuario_cad: {
             type: "one-to-one",
             target: "UsuarioCad",
-            joinColumn: {
-                name: "id",
-                referencedColumnName: "id_usuario"
-            },
+            cascade: true,
             nullable: true,
             inverseSide: "usuario"
         },

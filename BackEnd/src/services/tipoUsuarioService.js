@@ -17,15 +17,18 @@ class TipoUsuarioService {
   }
 
   async postTipoUsuario(tipoUsuarioData) {
+
+    const {desc_tipo} = tipoUsuarioData;
+    
     if (
-      !tipoUsuarioData.desc_tipo ||
-      tipoUsuarioData.desc_tipo.trim().length < 1
+      !desc_tipo &&
+      desc_tipo.trim().length < 1
     ) {
-      throw new Error("O campo 'desc_tipo' deve ter pelo menos um caractere.");
+      throw new Error("A descrição do tipo de usuário deve ter pelo menos um caractere.");
     }
 
     const newTipoUsuario = tipoUsuarioRepository.create({
-      desc_tipo: tipoUsuarioData.desc_tipo.trim(),
+      desc_tipo: desc_tipo.trim(),
     });
 
     await tipoUsuarioRepository.save(newTipoUsuario);
@@ -33,21 +36,24 @@ class TipoUsuarioService {
   }
 
   async putTipoUsuario(id, tipoUsuarioData) {
+
+    const {desc_tipo} = tipoUsuarioData;
+
     if (isNaN(Number(id))) {
-      throw new Error("O 'id' precisa ser um valor numérico.");
+      throw new Error("O ID precisa ser um valor numérico.");
     }
 
     if (
-      !tipoUsuarioData.desc_Tipo ||
-      tipoUsuarioData.desc_tipo.trim().length < 1
+      !desc_tipo &&
+      desc_tipo.trim().length < 1
     ) {
-      throw new Error("O campo 'desc_tipo' deve ter pelo menos um caractere.");
+      throw new Error("A descrição do tipo de usuário deve ter pelo menos um caractere.");
     }
 
     await tipoUsuarioRepository.update(
       { id },
       {
-        desc_Tipo: tipoUsuarioData.desc_Tipo.trim(),
+        desc_tipo: desc_tipo.trim()
       }
     );
 
@@ -56,7 +62,7 @@ class TipoUsuarioService {
 
   async deleteTipoUsuario(id) {
     if(isNaN(Number(id))) {
-        throw new Error("O 'id' precisa ser um valor numérico.");
+        throw new Error("O ID precisa ser um valor numérico.");
     }
 
     await tipoUsuarioRepository.update({id}, {

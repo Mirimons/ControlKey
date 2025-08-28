@@ -36,11 +36,12 @@ class UsuarioService {
   }
 
   cadastroExtra(id_tipo) {
-    const tipoCad = [2, 3];
+    const tipoCad = [1, 2];
     return tipoCad.includes(Number(id_tipo));
   }
 
   async postUsuario(usuarioData) {
+  
     // Validações:
     const {
       id_tipo,
@@ -59,7 +60,7 @@ class UsuarioService {
       );
     }
 
-    if (!nome?.trim() && nome.length.trim() < 2) {
+    if (!nome?.trim() && nome.trim().length < 2) {
       throw new Error("O nome deve ter pelo menos 2 caracteres.");
     }
 
@@ -170,7 +171,7 @@ class UsuarioService {
       );
     }
 
-    if (!nome?.trim() && nome.length.trim() < 2) {
+    if (!nome?.trim() && nome.trim().length < 2) {
       throw new Error("O nome deve ter pelo menos 2 caracteres.");
     }
 
@@ -220,14 +221,14 @@ class UsuarioService {
       }
     }
 
-    // Verifica se o CPF já existe:
-    const usuarioExiste = await usuarioRepository.findOneBy({
+    // Verifica se o CPF é de outro usuário:
+    const cpfExiste = await usuarioRepository.findOneBy({
       cpf,
       deletedAt: IsNull(),
     });
 
-    if (usuarioExiste) {
-      throw new Error("CPF já cadastrado.");
+    if (cpfExiste && cpfExiste.id !== Number(id)) {
+      throw new Error("CPF já cadastrado em outro usuário.");
     }
 
     const currentUsuario = await usuarioRepository.findOne({
