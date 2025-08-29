@@ -69,7 +69,7 @@ route.post("/", async (request, response) => {
         ...(newUsuario.usuario_cad && {
           cadastro: {
             matricula: newUsuario.usuario_cad.matricula,
-            email_institucional: newUsuario.usuario_cad.email_institucional,
+            email: newUsuario.usuario_cad.email,
             tem_senha: !!newUsuario.usuario_cad.senha,
           },
         }),

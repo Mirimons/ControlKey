@@ -24,7 +24,7 @@ class LoginService {
 
     const user = await usuarioCadRepository.findOneBy({
       where: {
-        email_institucional: email,
+        email: email,
         deletedAt: IsNull(),
       },
       relations: ["usuario"],
@@ -43,7 +43,7 @@ class LoginService {
     const token = generateToken({
       userId: user.id_usuario,
       usuarioId: user.id_usuario,
-      email: user.email_institucional,
+      email: user.email,
     });
 
     return {
@@ -52,7 +52,7 @@ class LoginService {
       user: {
         id: user.id,
         usuarioId: user.id_usuario,
-        email: user.email_institucional,
+        email: user.email,
       },
     };
   }
@@ -63,7 +63,7 @@ class LoginService {
     }
 
     const user = await usuarioCadRepository.findOneBy({
-      email_institucional: email,
+      email: email,
       deletedAt: IsNull(),
     });
 
@@ -83,7 +83,7 @@ class LoginService {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     await usuarioCadRepository.update(
-      { email_institucional: email },
+      { email: email },
       {
         senha: hashedPassword,
         passwordResetAt: new Date()
@@ -91,7 +91,7 @@ class LoginService {
     );
 
     try {
-      await sendEmail(newPassword, user.email_institucional);
+      await sendEmail(newPassword, user.email);
     } catch (emailError) {
       console.error("Erro ao enviar email: ", emailError);
       throw new Error("Senha resetada, mas erro ao enviar email. Contate o administrador.");

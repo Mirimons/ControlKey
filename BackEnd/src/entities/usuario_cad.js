@@ -15,7 +15,7 @@ const usuario_cad = new EntitySchema({
             length: 10,
             nullable: false
         },
-        email_institucional: {
+        email: {
             type: "varchar",
             length: 100,
             unique: true,

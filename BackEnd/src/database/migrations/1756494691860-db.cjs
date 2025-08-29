@@ -6,8 +6,8 @@
  * @class
  * @implements {MigrationInterface}
  */
-module.exports = class Db1756409396806 {
-    name = 'Db1756409396806'
+module.exports = class Db1756494691860 {
+    name = 'Db1756494691860'
 
     async up(queryRunner) {
         await queryRunner.query(`CREATE TABLE \`control\` (\`id\` int UNSIGNED NOT NULL AUTO_INCREMENT, \`id_usuario\` int UNSIGNED NOT NULL, \`id_equip\` int UNSIGNED NULL, \`id_labs\` int UNSIGNED NULL, \`data_inicio\` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), \`data_fim\` timestamp NULL, \`status\` enum ('aberto', 'fechado') NOT NULL DEFAULT 'aberto', \`createdAt\` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), \`deletedAt\` timestamp(6) NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`);

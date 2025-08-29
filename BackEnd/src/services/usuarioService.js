@@ -50,7 +50,7 @@ class UsuarioService {
       data_nasc,
       telefone,
       matricula,
-      email_institucional,
+      email,
       senha,
     } = usuarioData;
 
@@ -102,7 +102,7 @@ class UsuarioService {
           "A matrícula é obrigatória para este tipo de usuário."
         );
       }
-      if (!email_institucional?.includes("@")) {
+      if (!email?.includes("@")) {
         throw new Error("Email está no padrão incorreto.");
       }
       if (senha && senha.length < 6) {
@@ -137,7 +137,7 @@ class UsuarioService {
 
       newUsuario.usuario_cad = usuarioCadRepository.create({
         matricula: matricula.trim(),
-        email_institucional: email_institucional.trim(),
+        email: email.trim(),
         senha: hashedPassword,
         createdAt: new Date(),
       });
@@ -156,7 +156,7 @@ class UsuarioService {
       data_nasc,
       telefone,
       matricula,
-      email_institucional,
+      email,
       senha,
     } = usuarioData;
 
@@ -213,7 +213,7 @@ class UsuarioService {
           "A matrícula é obrigatória para este tipo de usuário."
         );
       }
-      if (!email_institucional?.includes("@")) {
+      if (!email?.includes("@")) {
         throw new Error("Email está no padrão incorreto.");
       }
       if (senha && senha.length < 6) {
@@ -258,7 +258,7 @@ class UsuarioService {
 
       await usuarioCadRepository.update(currentUsuario.usuario_cad.id_usuario, {
         matricula: matricula.trim(),
-        email_institucional: email_institucional.trim(),
+        email: email.trim(),
         senha: hashedPassword
       });
     }
