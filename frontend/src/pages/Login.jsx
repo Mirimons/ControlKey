@@ -1,5 +1,4 @@
 import "./Login.css";
-import imgLogin from '../assets/imagem-cadeado.png';
 import logo from '../assets/LOGOCERTO.png';
 import { useState, useEffect } from "react";
 import axios from 'axios';
@@ -7,35 +6,35 @@ import api from "../services/api";
 
 export default function Login() {
 
-  const [email, setEmail] = useState([])
-  const [senha, setSenha] = useState([])
+  const [login, setLogin] = useState("");
+  const [senha, setSenha] = useState("");
 
-  function handleSubmit(){
-    api.post('/usuarios', )
-  }
+  function handleLogin(e) {
+    e.preventDefault();
+    api.post('/usuario',)
+  } 
+    
 
   return (
-     <div className="login-container">
-      {/* Lado esquerdo */}
-      <div className="login-left">
-      <img src={imgLogin}></img>
-      </div>
-
-      {/* Lado direito */}
+    <div className="login-container">
       <div className="login-right">
-        <form className="login-box">
+        <form className="login-box" onSubmit={handleLogin}>
           <img src={logo}></img>
-          <img src="/logo-controlkey.png" alt="ControlKey" />
           <h2>CONTROLKEY</h2>
-          <input type="text" 
-            placeholder="UserName" 
-            onChange={setLogin}
+
+          <input type="text"
+            placeholder="Username"
+            value={login}
+            onChange={(e) => { setLogin(e.target.value) }}
           />
-          <input type="password" 
-          placeholder="PassWord"
-          onChange={setSenha}
+
+          <input type="password"
+            placeholder="Password"
+            value={senha}
+            onChange={(e) => { setSenha(e.target.value) }}
           />
-          <button>Entrar</button>
+
+          <button type="submit">Entrar</button>
           <a href="#">Esqueceu a senha?</a>
         </form>
       </div>
