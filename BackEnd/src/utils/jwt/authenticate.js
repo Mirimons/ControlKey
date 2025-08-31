@@ -1,36 +1,50 @@
 import dotenv from "dotenv";
-import jwt from 'jsonwebtoken';
+import { verifyToken } from "./generateToken";
 
 dotenv.config();
 
-const secret = process.env.JWT_SECRET;
+async function authenticate(request, response, next) {
+  try {
+    const { authorization } = request.headers;
 
-function authenticate(request, response, next) {
-  const { authorization } = request.headers;
-
-  if (!authorization) {
-    return response.status(401).send({
-      message: "Token não informado."
-    });
-  }
-
-  const bearer = authorization.split(" ")[0];
-  const token = authorization.split(" ")[1];
-
-  if (bearer != "Bearer" && !token) {
-    return response.status(401).send({
-      message: "Formato de token inválido. Use: Bearer <token>",
-    });
-  }
-
-  jwt.verify(token, secret, (erro, user) => {
-    if (erro)
+    if (!authorization) {
       return response.status(401).send({
-        message: "Acesso não autorizado. Token inválido",
+        message: "Token não informado.",
       });
-    request.user = user;
+    }
+
+    const [bearer, token] = authorization.split(" ");
+
+    if (bearer !== "Bearer" && !token) {
+      return response.status(401).send({
+        message: "Formato de token inválido. Use: Bearer <token>",
+      });
+    }
+
+    const usuario = await verifyToken(token, false);
+
+    request.usuario = usuario;
     next();
-  });
+
+  } catch (error) {
+    console.error("Erro na autenticação: ", error.message);
+
+    if (error.name === "TokenExpiredError") {
+      return response.status(401).json({
+        message: "Token expirado. Faça login novamente.",
+      });
+    }
+
+    if(error.name === "JsonWebTokenError") {
+      return response.status(401).json({
+        message: "Token inválido.",
+      });
+    }
+
+    return response.status(401).json({
+      message: "Acesso não autorizado.",
+    });
+  }
 }
 
-export {authenticate};
+export { authenticate };

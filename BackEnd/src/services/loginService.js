@@ -22,7 +22,7 @@ class LoginService {
       throw new Error("A senha deve conter no mínimo 6 caracteres.");
     }
 
-    const user = await usuarioCadRepository.findOne({
+    const usuario = await usuarioCadRepository.findOne({
       where: {
         email: email,
         deletedAt: IsNull(),
@@ -30,29 +30,29 @@ class LoginService {
       relations: ["usuario"],
     });
 
-    if (!user) {
+    if (!usuario) {
       throw new Error("Credenciais inválidas.");
     }
 
-    const isPasswordValid = await bcrypt.compare(senha, user.senha);
+    const isPasswordValid = await bcrypt.compare(senha, usuario.senha);
 
     if (!isPasswordValid) {
       throw new Error("Credenciais inválidas.");
     }
 
     const token = generateToken({
-      userId: user.id_usuario,
-      usuarioId: user.id_usuario,
-      email: user.email,
+      userId: usuario.id_usuario,
+      usuarioId: usuario.id_usuario,
+      email: usuario.email,
     });
 
     return {
       message: "Login efetuado com sucesso!",
       token,
-      user: {
-        id: user.id,
-        usuarioId: user.id_usuario,
-        email: user.email,
+      usuario: {
+        id: usuario.id,
+        usuarioId: usuario.id_usuario,
+        email: usuario.email,
       },
     };
   }
@@ -62,21 +62,21 @@ class LoginService {
       throw new Error("O email informado é inválido");
     }
 
-    const user = await usuarioCadRepository.findOne({
+    const usuario = await usuarioCadRepository.findOne({
       where: {
         email: email,
         deletedAt: IsNull(),
       },
     });
 
-    if (!user) {
+    if (!usuario) {
       throw new Error("Email não encontrado");
     }
 
     const recentReset = new Date(Date.now() - 5 * 60 * 1000);
 
-    if(user.passwordResetAt && user.passwordResetAt >= recentReset) {
-      const tempoRestante = Math.ceil((user.passwordResetAt.getTime() - recentReset.getTime()) / 1000 / 60);
+    if(usuario.passwordResetAt && usuario.passwordResetAt >= recentReset) {
+      const tempoRestante = Math.ceil((usuario.passwordResetAt.getTime() - recentReset.getTime()) / 1000 / 60);
       throw new Error (`Aguarde ${tempoRestante} minutos antes de solicitar outro reset de senha.`);
     }
 
@@ -93,7 +93,7 @@ class LoginService {
     );
 
     try {
-      await sendEmail(newPassword, user.email);
+      await sendEmail(newPassword, usuario.email);
     } catch (emailError) {
       console.error("Erro ao enviar email: ", emailError);
       throw new Error("Senha resetada, mas erro ao enviar email. Contate o administrador.");
