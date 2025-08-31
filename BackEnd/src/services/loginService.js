@@ -22,7 +22,7 @@ class LoginService {
       throw new Error("A senha deve conter no mínimo 6 caracteres.");
     }
 
-    const user = await usuarioCadRepository.findOneBy({
+    const user = await usuarioCadRepository.findOne({
       where: {
         email: email,
         deletedAt: IsNull(),
@@ -62,9 +62,11 @@ class LoginService {
       throw new Error("O email informado é inválido");
     }
 
-    const user = await usuarioCadRepository.findOneBy({
-      email: email,
-      deletedAt: IsNull(),
+    const user = await usuarioCadRepository.findOne({
+      where: {
+        email: email,
+        deletedAt: IsNull(),
+      },
     });
 
     if (!user) {

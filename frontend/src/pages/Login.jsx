@@ -1,17 +1,31 @@
 import "./Login.css";
 import logo from '../assets/LOGOCERTO.png';
 import { useState, useEffect } from "react";
-import axios from 'axios';
 import api from "../services/api";
 
 export default function Login() {
 
-  const [login, setLogin] = useState("");
+  const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
   function handleLogin(e) {
     e.preventDefault();
-    api.post('/usuario',)
+    api.post('/login', {
+      email: email,
+      senha: senha
+    })
+    .then(response => {
+      console.log("Login bem-sucedido: ", response.data);
+
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('usuario', JSON.stringify(response.data.usuario));
+
+      window.location.href = "/home";
+    })
+    .catch(error => {
+      console.error("Erro no login: ", error);
+      alert(error.response?.data?.error || "Email ou senha incorretos!");
+    });
   } 
     
 
@@ -22,16 +36,18 @@ export default function Login() {
           <img src={logo}></img>
           <h2>CONTROLKEY</h2>
 
-          <input type="text"
-            placeholder="Username"
-            value={login}
-            onChange={(e) => { setLogin(e.target.value) }}
+          <input type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => { setEmail(e.target.value) }}
+            required
           />
 
           <input type="password"
-            placeholder="Password"
+            placeholder="Senha"
             value={senha}
             onChange={(e) => { setSenha(e.target.value) }}
+            required
           />
 
           <button type="submit">Entrar</button>
@@ -41,4 +57,3 @@ export default function Login() {
     </div>
   );
 }
-
