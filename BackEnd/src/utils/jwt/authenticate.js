@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { verifyToken } from "./generateToken";
+import { verifyToken } from "./generateToken.js";
 
 dotenv.config();
 

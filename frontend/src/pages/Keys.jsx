@@ -1,6 +1,6 @@
 import React from 'react';
 import './Keys.css';
-import SideBar from "../components/sidebar";
+import Navbar from "../components/navbar";
 
 function Keys() {
     return (

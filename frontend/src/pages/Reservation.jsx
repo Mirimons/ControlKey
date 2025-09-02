@@ -1,6 +1,6 @@
 import React from 'react';
 import './Reservation.css';
-import SideBar from "../components/sidebar";
+import Navbar from "../components/navbar";
 
 function User() {
     return (

@@ -1,0 +1,53 @@
+.navbar {
+  width: 100%;
+  height: 70px; /* altura do menu */
+  background-color: white;
+  color: black;
+  padding: 0 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* logo à esquerda, menu à direita */
+  box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+   gap: 100px;
+}
+
+.navbar-logo {
+  height: 50px;
+  width: auto;
+}
+
+.navbar ul {
+  list-style: none;
+  display: flex;
+  gap: 20px; /* espaçamento entre itens */
+  margin: 0;
+  padding: 0;
+}
+
+.navbar ul li {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.navbar ul li:hover {
+  color: #57606f;
+}
+
+.navbar ul li a {
+  text-decoration: none;
+  color: black;
+  display: flex;
+  align-items: center;
+  gap: 6px; /* espaço entre ícone e texto */
+  font-size: 15px;
+}
+
+.navbar ul li a:hover {
+  color: #57606f;
+}

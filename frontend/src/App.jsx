@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
-import Sidebar from './components/sidebar';
+import Navbar from './components/navbar';
 import Home from './pages/Home';
 import User from './pages/User';
 import Keys from './pages/Keys';
@@ -14,7 +14,7 @@ function App() {
   const location = useLocation();
   return (
     <div className='app-container'>
-      {location.pathname !== '/' && <Sidebar />}
+      {location.pathname !== '/' && <Navbar />}
       <div className='main-content'>
           <Routes>
             <Route path="/Home" element={<Home />} />

@@ -6,7 +6,7 @@ body {
 .usuarios-container {
   margin-left: 200px;
   padding-left: 70px;
-  padding-top: 30px;
+  padding-top: 90px;
   padding-right: 90px;
 }
 
@@ -14,7 +14,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .usuarios-header h2 {

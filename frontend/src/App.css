@@ -47,7 +47,7 @@ body {
   min-height: 100vh;
 }
 
-.sidebar {
+.navbar {
   width: 250px;
   background-color: #f8f8f8;
   height: 100vh;

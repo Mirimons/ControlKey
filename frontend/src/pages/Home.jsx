@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import './Home.css';
-import SideBar from "../components/sidebar";
+import Navbar from "../components/navbar";
 
 const Bemvindo = (props) => {
   return (
@@ -27,7 +27,7 @@ class Cards extends Component {
 function Home() {
   return (
     <div style={{ display: "flex" }}>
-      {/* <SideBar /> */}
+      {/* <navbar /> */}
 
       <div className="container" style={{ marginLeft: "250px", padding: "20px", flexGrow: 1 }}>
         <h1>Página Inicial</h1>
