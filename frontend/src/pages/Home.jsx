@@ -26,10 +26,10 @@ class Cards extends Component {
 
 function Home() {
   return (
-    <div style={{ display: "flex" }}>
+    <div style={{ display: "flex", paddingTop: "70px" }}>
       {/* <navbar /> */}
 
-      <div className="container" style={{ marginLeft: "250px", padding: "20px", flexGrow: 1 }}>
+      <div className="container" style={{ marginLeft: "30px", padding: "20px", flexGrow: 1 }}>
         <h1>Página Inicial</h1>
         <Bemvindo nome="Fulano de Tal!" />
 

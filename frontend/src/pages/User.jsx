@@ -115,9 +115,9 @@ function User() {
                             <select
                                 value={id_tipo}
                                 onChange={(e) => setId_tipo(Number(e.target.value))}
-                                required
+                                required defaultValue=""
                             >
-                                <option value="" disabled hidden>Selecione o tipo de usuário</option>
+                                <option value="" disabled selected hidden>Selecione o tipo de usuário</option>
                                 <option value={1}>Administrador</option>
                                 <option value={2}>Comum</option>
                                 <option value={3}>Terceiro</option>
