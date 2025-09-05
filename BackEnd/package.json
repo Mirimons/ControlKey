@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "executar": "nodemon src/index.js",
+    "start": "nodemon src/index.js",
     "generate_migration": "npx typeorm -d ./src/database/data-source.js migration:generate ./src/database/migrations/db --outputJs",
     "run_migrations": "npx typeorm -d ./src/database/data-source.js migration:run"
   },
@@ -17,8 +17,10 @@
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.14.1",
     "nodemailer": "^7.0.5",
-    "nodemon": "^3.1.10",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^0.3.24"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }

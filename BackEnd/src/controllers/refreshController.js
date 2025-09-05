@@ -7,6 +7,8 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+const route = express.Router();
+
 const usuarioCadRepository = AppDataSource.getRepository(UsuarioCad);
 
 export const refreshToken = async (request, response) => {
@@ -67,3 +69,5 @@ export const refreshToken = async (request, response) => {
     response.status(500).json({ message: "Erro interno no servidor" });
   }
 };
+
+export default route;

@@ -3,7 +3,7 @@ import loginService from "../services/loginService.js";
 
 const route = express.Router();
 
-//Para que os dados do usuário, como o login e senha, não sejam expostos com o get,é usado o post
+//Para que os dados do usuário, como o login e senha, não sejam expostos com o get, é usado o post
 route.post("/", async (request, response) => {
   try {
     const { email, senha } = request.body;
