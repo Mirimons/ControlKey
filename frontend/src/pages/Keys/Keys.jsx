@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import './Keys.css';
 import Navbar from "../../components/navbar";
 
 
 function Keys() {
     const [modalAberto, setModalAberto] = useState(false);
-
     const [nomeLab, setNomeLab] = useState("");
     const [descLab, setDescLab] = useState("");
-
     const [labs, setLabs] = useState([]);
+
+    const modalRef = useRef();
 
     const abrirModal = () => setModalAberto(true);
     const fecharModal = () => setModalAberto(false);
@@ -18,13 +18,35 @@ function Keys() {
         e.preventDefault();
         const novoLab = { nome_lab: nomeLab, desc_lab: descLab };
         setLabs([...labs, novoLab]);
-
         // Limpar campos
         setNomeLab("");
         setDescLab("");
-
         fecharModal();
     };
+
+    useEffect(() => {
+        function handleClickFora(event) {
+            if (modalRef.current && !modalRef.current.contains(event.target)) {
+                fecharModal();
+            }
+        }
+
+        function handleEsc(event) {
+            if (event.key == 'Escape') {
+                fecharModal();
+            }
+        }
+
+        if (modalAberto) {
+            document.addEventListener('mousedown', handleClickFora);
+            document.addEventListener('keydown', handleEsc);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickFora);
+            document.removeEventListener('keydown', handleEsc);
+        };
+    }, [modalAberto]);
 
     return (
         <div className="chaves-container">
@@ -73,7 +95,7 @@ function Keys() {
             {/* Modal */}
             {modalAberto && (
                 <div className="modal-fundo">
-                    <div className="modal-conteudo">
+                    <div className="modal-conteudo" ref={modalRef}>
                         <h2>Adicionar Laboratório</h2>
                         <form onSubmit={handleSalvar}>
                             <input
@@ -85,7 +107,7 @@ function Keys() {
                             />
                             <input
                                 type="text"
-                                placeholder="Descrição"
+                                placeholder="Descrição (Opcional)"
                                 value={descLab}
                                 onChange={(e) => setDescLab(e.target.value)}
                             />

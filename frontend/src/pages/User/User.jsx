@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './User.css';
 import Navbar from "../../components/navbar";
 import api from '../../services/api';
@@ -6,7 +6,6 @@ import api from '../../services/api';
 function User() {
     const [modalAberto, setModalAberto] = useState(false);
     const [id_tipo, setId_tipo] = useState("");
-
     const [nome, setNome] = useState("");
     const [cpf, setCpf] = useState("");
     const [email, setEmail] = useState("");
@@ -14,9 +13,12 @@ function User() {
     const [matricula, setMatricula] = useState("");
     const [data_nasc, setData_nasc] = useState("");
     const [senha, setSenha] = useState("");
-    
+
+    const modalRef = useRef();
+
     const abrirModal = () => setModalAberto(true);
     const fecharModal = () => setModalAberto(false);
+
 
     const handleSalvar = (e) => {
         e.preventDefault();
@@ -53,6 +55,30 @@ function User() {
                 alert(error.response?.data?.error || "Erro ao cadastrar usuário!");
             });
     };
+
+    useEffect(() => {
+        function handleClickFora(event) {
+            if (modalRef.current && !modalRef.current.contains(event.target)) {
+                fecharModal();
+            }
+        }
+
+        function handleEsc(event) {
+            if (event.key == 'Escape') {
+                fecharModal();
+            }
+        }
+
+        if (modalAberto) {
+            document.addEventListener('mousedown', handleClickFora);
+            document.addEventListener('keydown', handleEsc);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickFora);
+            document.removeEventListener('keydown', handleEsc);
+        };
+    }, [modalAberto]);
 
 
     return (
@@ -107,7 +133,7 @@ function User() {
             {/* Modal */}
             {modalAberto && (
                 <div className="modal-fundo">
-                    <div className="modal-conteudo">
+                    <div className="modal-conteudo" ref={modalRef}>
                         <form onSubmit={handleSalvar}>
                             <h2>Adicionar Usuário</h2>
 
