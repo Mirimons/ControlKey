@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './User.css';
-import Navbar from "../components/navbar";
-import api from '../services/api';
+import Navbar from "../../components/navbar";
+import api from '../../services/api';
 
 function User() {
     const [modalAberto, setModalAberto] = useState(false);
@@ -59,7 +59,6 @@ function User() {
         <div className="usuarios-container">
             <header className="usuarios-header">
                 <h1>Usuários</h1>
-                <span>Olá, Fulano de Tal!</span>
             </header>
 
             <div className="usuarios-filtros">

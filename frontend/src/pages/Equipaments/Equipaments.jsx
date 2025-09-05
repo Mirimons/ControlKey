@@ -1,13 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Equipaments.css';
-import Navbar from "../components/navbar";
+import Navbar from "../../components/navbar";
 
 function User() {
+    const [modalAberto, setModalAberto] = useState(false);
+    
+        const [tipoEquip, setTipoEquip] = useState("");
+        const [descEquip, setDescEquip] = useState("");
+    
+        const abrirModal = () => setModalAberto(true);
+        const fecharModal = () => setModalAberto(false);
+    
     return (
         <div className="equipamentos-container">
             <header className="equipamentos-header">
                 <h1>Equipamentos</h1>
-                <span>Olá, Fulano de Tal!</span>
             </header>
 
             <div className="equipamentos-filtros">

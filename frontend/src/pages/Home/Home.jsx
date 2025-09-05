@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import './Home.css';
-import Navbar from "../components/navbar";
+import Navbar from "../../components/navbar";
 
 const Bemvindo = (props) => {
   return (

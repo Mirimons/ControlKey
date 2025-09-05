@@ -1,0 +1,23 @@
+#Banco de Dados
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=control_key
+
+#Chave de Criptografia do jwt
+JWT_SECRET=Ch@vedeCriptogr@fi@MuitoBemPensad@!AiM3uD3usComoIssoVaiSerDificilDe3ncontrarem@**&!@_
+JWT_SECRET_EXPIRES_IN=15m
+JWT_REFRESH=RefreshAgor@DeCriptogr@fi@!!NaoS3iOqColocarEIsso@@@%&**!_
+JWT_REFRESH_EXPIRES_IN=7d
+
+#Email da recuperação de senha
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=controlkeyltda@gmail.com
+EMAIL_PASS=nfro eomv yzzu bfba
+
+# Ambiente
+PORT=3333
+FRONTEND_URL=http://localhost:5173
+NODE_ENV=development
