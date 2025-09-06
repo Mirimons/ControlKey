@@ -6,6 +6,7 @@ import UsuarioCad from "../entities/usuario_cad.js";
 import dotenv from "dotenv";
 
 dotenv.config();
+const route = express.Router();
 
 const route = express.Router();
 

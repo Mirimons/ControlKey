@@ -1,20 +1,20 @@
 import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
-import Sidebar from './components/sidebar';
-import Home from './pages/Home';
-import User from './pages/User';
-import Keys from './pages/Keys';
-import Equipaments from './pages/Equipaments';
-import Reservation from './pages/Reservation';
-import Login from './pages/Login';
+import Navbar from './components/navbar';
+import Home from './pages/Home/Home';
+import User from './pages/User/User';
+import Keys from './pages/Keys/Keys';
+import Equipaments from './pages/Equipaments/Equipaments';
+import Reservation from './pages/Reservation/Reservation';
+import Login from './pages/Login/Login';
 
 
 function App() {
   const location = useLocation();
   return (
     <div className='app-container'>
-      {location.pathname !== '/' && <Sidebar />}
+      {location.pathname !== '/' && <Navbar />}
       <div className='main-content'>
           <Routes>
             <Route path="/Home" element={<Home />} />

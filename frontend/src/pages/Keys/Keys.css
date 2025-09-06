@@ -3,10 +3,9 @@ body {
 }
 
 .chaves-container {
-  background-color: #e6f2f7;
   margin-left: 200px;
   padding-left: 70px;
-  padding-top: 30px;
+  padding-top: 90px;
   padding-right: 90px;
   /* height: 100vh;
   overflow-y: auto; */
@@ -85,4 +84,26 @@ body {
   border: none;
   cursor: pointer;
   font-size: 18px;
+}
+
+.modal-conteudo {
+  gap: 15px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 100%;
+}
+
+.modal-fundo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 }

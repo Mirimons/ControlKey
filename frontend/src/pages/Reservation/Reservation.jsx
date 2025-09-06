@@ -1,13 +1,12 @@
 import React from 'react';
 import './Reservation.css';
-import SideBar from "../components/sidebar";
+import Navbar from "../../components/navbar";
 
 function User() {
     return (
         <div className="reservas-container">
             <header className="reservas-header">
                 <h1>Reservas</h1>
-                <span>Olá, Fulano de Tal!</span>
             </header>
 
             <div className="reservas-filtros">
