@@ -54,7 +54,7 @@ class UsuarioService {
     // Criação do usuário base
     const newUsuario = usuarioRepository.create({
       id_tipo: Number(id_tipo),
-      tipo: tipo,
+      tipo: tipoData,
       nome: nome,
       cpf: cpf,
       data_nasc: data_nasc,
