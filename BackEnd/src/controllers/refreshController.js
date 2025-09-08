@@ -8,8 +8,6 @@ import dotenv from "dotenv";
 dotenv.config();
 const route = express.Router();
 
-const route = express.Router();
-
 const usuarioCadRepository = AppDataSource.getRepository(UsuarioCad);
 
 export const refreshToken = async (request, response) => {
