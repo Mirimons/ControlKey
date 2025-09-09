@@ -208,6 +208,17 @@ class UsuarioRequestDTO extends BaseDTO {
 
     return this.isValid();
   }
+
+  async validateDelete() {
+    this.clearValidatedData();
+    if(!this.data.id && isNaN(Number(this.data.id))) {
+      this.addError('id', 'O ID é obrigatório e precisa ser numérico.');
+      return false;
+    }
+
+    this.validatedData.id = Number(this.data.id);
+    return this.isValid();
+  }
 }
 
 export default UsuarioRequestDTO;

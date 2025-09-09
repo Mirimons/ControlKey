@@ -37,7 +37,7 @@ const control = new EntitySchema({
         },
         status: {
             type: "enum",
-            enum: ["aberto", "fechado"],
+            enum: ["aberto", "fechado", "pendente"],
             default: "aberto"
         },
         createdAt: {

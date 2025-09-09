@@ -1,11 +1,14 @@
 import Usuario from "../entities/usuario.js";
 import UsuarioCad from "../entities/usuario_cad.js";
+import TipoUsuario from "../entities/tipo_usuario.js";
 import { AppDataSource } from "../database/data-source.js";
-import { IsNull } from "typeorm";
+import { Like, IsNull } from "typeorm";
+import { validateAndFormatDate } from "../utils/dateValidator.js";
 import bcrypt from "bcrypt";
 
 const usuarioRepository = AppDataSource.getRepository(Usuario);
 const usuarioCadRepository = AppDataSource.getRepository(UsuarioCad);
+const tipoUsuarioRepository = AppDataSource.getRepository(TipoUsuario);
 
 class UsuarioService {
   async getUsuarios() {
@@ -48,13 +51,14 @@ class UsuarioService {
       requiresCadastroExtra,
       matricula,
       email,
-      senha
+      senha,
+      tipo,
     } = usuarioData;
 
     // Criação do usuário base
     const newUsuario = usuarioRepository.create({
       id_tipo: Number(id_tipo),
-      tipo: tipoData,
+      tipo: tipo,
       nome: nome,
       cpf: cpf,
       data_nasc: data_nasc,
@@ -75,7 +79,13 @@ class UsuarioService {
     }
 
     await usuarioRepository.save(newUsuario);
-    return newUsuario;
+
+    const usuarioCompleto = await usuarioRepository.findOne({
+      where: { id: newUsuario.id },
+      relations: ["tipo", "usuario_cad"],
+    });
+
+    return usuarioCompleto;
   }
 
   async putUsuario(id, usuarioData) {
@@ -89,16 +99,38 @@ class UsuarioService {
       requiresCadastroExtra,
       matricula,
       email,
-      senha
+      senha,
+      tipo,
     } = usuarioData;
 
     const currentUsuario = await usuarioRepository.findOne({
       where: { id, deletedAt: IsNull() },
-      relations: ['usuario_cad']
+      relations: ["usuario_cad"],
     });
 
     if (!currentUsuario) {
       throw new Error("Usuário não encontrado.");
+    }
+
+    await usuarioRepository.update(
+      { id },
+      {
+        id_tipo: Number(id_tipo),
+        nome: nome,
+        cpf: cpf,
+        data_nasc: data_nasc,
+        telefone: telefone,
+      }
+    );
+
+    if(currentUsuario.usuario_cad) {
+      const hashedPassword = senha ? await bcrypt.hash(senha, 10): currentUsuario.usuario_cad.senha;
+
+      await usuarioCadRepository.update(currentUsuario.usuario_cad.id_usuario, {
+        matricula: matricula,
+        email: email,
+        senha: hashedPassword
+      });
     }
 
     // Atualização dos dados básicos
@@ -108,11 +140,11 @@ class UsuarioService {
     if (cpf !== undefined) updateData.cpf = cpf;
     if (data_nasc !== undefined) updateData.data_nasc = data_nasc;
     if (telefone !== undefined) updateData.telefone = telefone;
-
+    
     if (Object.keys(updateData).length > 0) {
       await usuarioRepository.update({ id }, updateData);
     }
-
+    
     // Atualização do cadastro extra
     if (requiresCadastroExtra && currentUsuario.usuario_cad) {
       const updateCadData = {};
@@ -122,7 +154,7 @@ class UsuarioService {
       if (senha !== undefined) {
         updateCadData.senha = await bcrypt.hash(senha, 10);
       }
-
+      
       if (Object.keys(updateCadData).length > 0) {
         await usuarioCadRepository.update(
           { id_usuario: currentUsuario.usuario_cad.id_usuario },
@@ -130,22 +162,21 @@ class UsuarioService {
         );
       }
     }
-
     return await this.getUsuarioById(id);
+
   }
 
   async deleteUsuario(id) {
+    if(isNaN(Number(id))) {
+      throw new Error("O id precisa ser um valor numérico.");
+    }
+
     await usuarioRepository.update({ id }, { deletedAt: new Date() });
     return true;
   }
 }
 
 export default new UsuarioService();
-
-
-
-
-
 
 // import Usuario from "../entities/usuario.js";
 // import UsuarioCad from "../entities/usuario_cad.js";
@@ -190,7 +221,7 @@ export default new UsuarioService();
 //   }
 
 //   async postUsuario(usuarioData) {
-  
+
 //     // Validações:
 //     const {
 //       id_tipo,
@@ -355,7 +386,7 @@ export default new UsuarioService();
 
 //     //Vendo se precisa do cadastro Extra
 //     const cadastro = this.cadastroExtra(Number(id_tipo));
-    
+
 //     if (cadastro) {
 //       if (!matricula?.trim()) {
 //         throw new Error(
@@ -411,7 +442,7 @@ export default new UsuarioService();
 //         senha: hashedPassword
 //       });
 //     }
-    
+
 //     return await this.getUsuarioById(id);
 //   }
 

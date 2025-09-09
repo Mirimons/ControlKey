@@ -59,7 +59,10 @@ route.get("/:id", async (request, response) => {
 
 route.post("/", validateCreate, async (request, response) => {
   try {
-    const newUsuario = await usuarioService.postUsuario(request.validatedData);
+    const validatedData = request.validatedData;
+
+    const newUsuario = await usuarioService.postUsuario(validatedData);
+    
     return response.status(201).json({
       response: "Usuário cadastrado com sucesso!",
       data: {
