@@ -23,6 +23,13 @@ function User() {
     const handleSalvar = (e) => {
         e.preventDefault();
 
+        const token = localStorage.getItem('token');
+
+        if(!token) {
+            alert('Você precisa estar logado para cadastrar usuários!');
+            return;
+        }
+
         api.post("/usuario", {
             id_tipo,
             nome,
@@ -32,6 +39,10 @@ function User() {
             matricula,
             email,
             senha
+        }, {
+            headers: {
+                'Authorization' : `Bearer ${token}`
+            }
         })
             .then(response => {
                 console.log("Usuário cadastrado:", response.data);
@@ -48,7 +59,6 @@ function User() {
                 setId_tipo("");
                 setSenha("");
 
-                sessionStorage.setItem("tokenJwt", data.token);
             })
             .catch(error => {
                 console.error("Erro ao cadastrar:", error);
@@ -140,9 +150,9 @@ function User() {
                             <select
                                 value={id_tipo}
                                 onChange={(e) => setId_tipo(Number(e.target.value))}
-                                required defaultValue=""
+                                required 
                             >
-                                <option value="" disabled selected hidden>Selecione o tipo de usuário</option>
+                                <option value="" disabled hidden>Selecione o tipo de usuário</option>
                                 <option value={1}>Administrador</option>
                                 <option value={2}>Comum</option>
                                 <option value={3}>Terceiro</option>

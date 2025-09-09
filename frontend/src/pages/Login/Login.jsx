@@ -18,7 +18,10 @@ export default function Login() {
       console.log("Login bem-sucedido: ", response.data);
 
       localStorage.setItem('token', response.data.token);
-      localStorage.setItem('usuario', JSON.stringify(response.data.usuario));
+      localStorage.setItem('usuario', JSON.stringify({
+        id: response.data.usuario.usuarioId,
+        email: response.data.usuario.email
+      }));
 
       window.location.href = "/home";
     })
