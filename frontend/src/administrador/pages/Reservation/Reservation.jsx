@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Reservation.css';
-import Navbar from "../../components/navbar";
-import api from '../../services/api';
+import Navbar from "../../../components/navbar";
+import api from '../../../services/api';
 
 function Reservation() {
     const [modalAberto, setModalAberto] = useState(false);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, use } from 'react';
 import './Equipaments.css';
-import Navbar from "../../components/navbar";
+import Navbar from "../../../components/navbar";
 
 function Equipaments() {
     const [modalAberto, setModalAberto] = useState(false);

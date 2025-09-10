@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './Keys.css';
-import Navbar from "../../components/navbar";
+import Navbar from "../../../components/navbar";
 
 
 function Keys() {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './User.css';
-import Navbar from "../../components/navbar";
-import api from '../../services/api';
+import Navbar from "../../../components/navbar";
+import api from '../../../services/api';
 
 function User() {
     const [modalAberto, setModalAberto] = useState(false);
