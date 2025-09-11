@@ -44,7 +44,7 @@ const labs = new EntitySchema({
             target: "Agendamento",
             inverseSide: "laboratorio"
         },
-         controls: {
+        controls: {
             type: "one-to-many",
             target: "Control",
             inverseSide: "laboratorio"

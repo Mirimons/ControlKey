@@ -6,7 +6,11 @@ import {
 
 function authorize(requiredTypes = []) {
   return (request, response, next) => {
+    console.log("Usuário na request: ", request.usuario);
+    console.log("Tipos requeridos: ", requiredTypes);
+
     if (!request.usuario) {
+      console.log("Usuário não autenticado");
       return response.status(401).json({
         message: "Usuário não autenticado",
       });

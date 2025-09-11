@@ -43,7 +43,7 @@ const equipamento = new EntitySchema ({
             nullable: false,
             inverseSide: "equipamentos"
         },
-         controls: {
+        controls: {
             type: "one-to-many",
             target: "Control",
             inverseSide: "equipamento"

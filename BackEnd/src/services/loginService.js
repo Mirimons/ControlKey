@@ -1,9 +1,8 @@
 import UsuarioCad from "../entities/usuario_cad.js";
 import { AppDataSource } from "../database/data-source.js";
 import { IsNull } from "typeorm";
-import { generateToken } from "../utils/jwt/generateToken.js";
+import { generateToken, generateRefreshToken, generateNewPassword } from "../utils/index.js";
 import { sendEmail } from "../helpers/nodemail.js";
-import { generateNewPassword } from "../utils/login.js";
 import bcrypt from "bcrypt";
 
 const usuarioCadRepository = AppDataSource.getRepository(UsuarioCad);
@@ -27,7 +26,7 @@ class LoginService {
         email: email,
         deletedAt: IsNull(),
       },
-      relations: ["usuario"],
+      relations: ["usuario", "usuario.tipo"],
     });
 
     if (!usuario) {
@@ -40,19 +39,23 @@ class LoginService {
       throw new Error("Credenciais inválidas.");
     }
 
-    const token = generateToken({
-      userId: usuario.id_usuario,
-      usuarioId: usuario.id_usuario,
+    const tokenPayload = {
+      id: usuario.id_usuario,
       email: usuario.email,
-    });
+      id_tipo: usuario.usuario.tipo.id
+    };
+
+    const token = generateToken(tokenPayload);
+    const refreshToken = generateRefreshToken(tokenPayload);
 
     return {
       message: "Login efetuado com sucesso!",
       token,
+      refreshToken,
       usuario: {
-        id: usuario.id,
-        usuarioId: usuario.id_usuario,
+        id: usuario.id_usuario,
         email: usuario.email,
+        id_tipo: usuario.usuario.tipo.id
       },
     };
   }

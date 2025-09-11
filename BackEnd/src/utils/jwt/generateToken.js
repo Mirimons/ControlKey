@@ -28,7 +28,6 @@ function generateRefreshToken(payload) {
 
 function verifyToken(token, isRefresh = false) {
   const isSecret = isRefresh ? refresh : secret;
-
   return new Promise((resolve, reject) => {
     jwt.verify(token, isSecret, (error, decoded) => {
       if(error) {

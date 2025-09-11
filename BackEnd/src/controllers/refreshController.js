@@ -24,9 +24,10 @@ export const refreshToken = async (request, response) => {
     // Busca o usuário no banco
     const usuario = await usuarioCadRepository.findOne({
       where: {
-        id_usuario: decoded.userId,
+        id_usuario: decoded.id,
         deletedAt: null,
       },
+      relations: ["usuario", "usuario.tipo"],
     });
 
     if (!usuario) {
@@ -34,24 +35,22 @@ export const refreshToken = async (request, response) => {
     }
 
     // Gera novos tokens
-    const newAccessToken = generateToken({
-      userId: usuario.id_usuario,
+    const newTokenPayload = {
+      id: usuario.id_usuario,
       email: usuario.email,
-      tipo_id: usuario.tipo_id,
-    });
+      id_tipo: usuario.usuario.tipo.id,
+    };
 
-    const newRefreshToken = generateRefreshToken({
-      userId: usuario.id_usuario,
-    });
+    const newAccessToken = generateToken(newTokenPayload);
+    const newRefreshToken = generateRefreshToken(newTokenPayload);
 
     response.json({
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
       usuario: {
-        id: usuario.id,
-        usuarioId: usuario.id_usuario,
+        id: usuario.id_usuario,
         email: usuario.email,
-        tipo_id: usuario.tipo_id,
+        id_tipo: usuario.usuario.tipo.id,
       },
     });
   } catch (error) {
