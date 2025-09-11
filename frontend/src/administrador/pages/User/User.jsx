@@ -48,7 +48,7 @@ function User() {
                 setId_tipo("");
                 setSenha("");
 
-                sessionStorage.setItem("tokenJwt", data.token);
+                sessionStorage.setItem("tokenJwt", response.data.token);
             })
             .catch(error => {
                 console.error("Erro ao cadastrar:", error);
@@ -140,9 +140,9 @@ function User() {
                             <select
                                 value={id_tipo}
                                 onChange={(e) => setId_tipo(Number(e.target.value))}
-                                required defaultValue=""
+                                required
                             >
-                                <option value="" disabled selected hidden>Selecione o tipo de usuário</option>
+                                <option value="" disabled hidden>Selecione o tipo de usuário</option>
                                 <option value={1}>Administrador</option>
                                 <option value={2}>Comum</option>
                                 <option value={3}>Terceiro</option>
@@ -203,7 +203,9 @@ function User() {
                                 value={senha}
                                 onChange={(e) => setSenha(e.target.value)}
                                 required
+                                autoComplete="current-password"
                             />
+                            
                             <div className="modal-botoes">
                                 <button type="button" onClick={fecharModal}>Cancelar</button>
                                 <button type="submit">Salvar</button>

@@ -8,12 +8,15 @@ import Keys from './administrador/pages/Keys/Keys';
 import Equipaments from './administrador/pages/Equipaments/Equipaments';
 import Reservation from './administrador/pages/Reservation/Reservation';
 import Login from './administrador/pages/Login/Login';
-import RetiradaDevolução from './usuarios/pages/retiradaDevolução';
+import RetiradaDevolucao from './usuarios/pages/retiradaDevolucao';
+import Retirar from './usuarios/pages/Retirar/Retirar';
+import Devolver from './usuarios/pages/Devolver/Devolver';
+import RetirarChave from './usuarios/pages/Retirar/RetirarChave/retirarChave';
 
 
 function App() {
   const location = useLocation();
-  const hideNavbarPaths = ['/', '/RetiradaDevolucao'];
+  const hideNavbarPaths = ['/', '/retiradaDevolucao', '/Retirar', '/Devolver', '/retirarChave'];
   return (
     <div className='app-container'>
      {!hideNavbarPaths.includes(location.pathname) && <Navbar />}
@@ -25,7 +28,10 @@ function App() {
             <Route path="/Equipaments" element={<Equipaments />} />
             <Route path="/Reservation" element={<Reservation />} />
             <Route path="/" element={<Login />} />
-            <Route path="/RetiradaDevolucao" element={<RetiradaDevolução />} />
+            <Route path="/RetiradaDevolucao" element={<RetiradaDevolucao />} />
+            <Route path="/Retirar" element={<Retirar />} />
+            <Route path="/Devolver" element={<Devolver />} />
+            <Route path="/RetirarChave" element={<RetirarChave />} />
           </Routes>
       </div>
     </div>
