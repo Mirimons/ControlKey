@@ -19,7 +19,7 @@ import DevolverEquipamento from './usuarios/pages/Devolver/DevolverEquipamento/d
 
 function App() {
   const location = useLocation();
-  const hideNavbarPaths = ['/', '/retiradaDevolucao', '/Retirar', '/Devolver', '/Retirar/RetirarChave', 
+  const hideNavbarPaths = ['/', '/retiradaDevolucao', '/retirar', '/Devolver', '/Retirar/RetirarChave', 
   '/Retirar/RetirarEquipamento', '/Devolver/DevolverChave', '/Devolver/DevolverEquipamento'];
   return (
     <div className='app-container'>

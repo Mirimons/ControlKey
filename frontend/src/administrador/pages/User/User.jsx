@@ -172,6 +172,7 @@ function User() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
+                                disabled={id_tipo === 3 }
                             />
 
                             <input
@@ -188,6 +189,7 @@ function User() {
                                 value={matricula}
                                 onChange={(e) => setMatricula(e.target.value)}
                                 required
+                                disabled={id_tipo === 3}
                             />
 
                             <input
@@ -205,6 +207,7 @@ function User() {
                                 onChange={(e) => setSenha(e.target.value)}
                                 required
                                 autoComplete="current-password"
+                                disabled={id_tipo === 2 || id_tipo === 3}
                             />
 
                             <div className="modal-botoes">
