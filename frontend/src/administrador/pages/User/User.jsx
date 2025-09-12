@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './User.css';
 import Navbar from "../../../components/navbar";
 import api from '../../../services/api';
+import BotaoSair from "../../../components/botaoSair/sair";
 
 function User() {
     const [modalAberto, setModalAberto] = useState(false);
@@ -205,7 +206,7 @@ function User() {
                                 required
                                 autoComplete="current-password"
                             />
-                            
+
                             <div className="modal-botoes">
                                 <button type="button" onClick={fecharModal}>Cancelar</button>
                                 <button type="submit">Salvar</button>
@@ -214,6 +215,7 @@ function User() {
                     </div>
                 </div>
             )}
+            <BotaoSair />
         </div>
     );
 }

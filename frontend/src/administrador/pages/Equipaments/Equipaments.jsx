@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, use } from 'react';
 import './Equipaments.css';
 import Navbar from "../../../components/navbar";
+import BotaoSair from "../../../components/botaoSair/sair";
 
 function Equipaments() {
     const [modalAberto, setModalAberto] = useState(false);
@@ -127,6 +128,7 @@ function Equipaments() {
                     </div>
                 </div>
             )}
+            <BotaoSair />
         </div>
     );
 }

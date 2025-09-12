@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './Keys.css';
 import Navbar from "../../../components/navbar";
+import BotaoSair from "../../../components/botaoSair/sair";
 
 
 function Keys() {
@@ -122,6 +123,7 @@ function Keys() {
                     </div>
                 </div>
             )}
+            <BotaoSair />
         </div>
     );
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './Reservation.css';
 import Navbar from "../../../components/navbar";
 import api from '../../../services/api';
+import BotaoSair from "../../../components/botaoSair/sair";
 
 function Reservation() {
     const [modalAberto, setModalAberto] = useState(false);
@@ -180,6 +181,7 @@ function Reservation() {
                     </div>
                 </div>
             )}
+            <BotaoSair />
         </div>
     );
 }

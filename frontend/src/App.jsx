@@ -12,11 +12,15 @@ import RetiradaDevolucao from './usuarios/pages/retiradaDevolucao';
 import Retirar from './usuarios/pages/Retirar/Retirar';
 import Devolver from './usuarios/pages/Devolver/Devolver';
 import RetirarChave from './usuarios/pages/Retirar/RetirarChave/retirarChave';
+import RetirarEquipamento from './usuarios/pages/Retirar/RetirarEquipamento/retirarEquipamento';
+import DevolverChave from './usuarios/pages/Devolver/DevolverChave/devolverChave';
+import DevolverEquipamento from './usuarios/pages/Devolver/DevolverEquipamento/devolverEquipamento';
 
 
 function App() {
   const location = useLocation();
-  const hideNavbarPaths = ['/', '/retiradaDevolucao', '/Retirar', '/Devolver', '/retirarChave'];
+  const hideNavbarPaths = ['/', '/retiradaDevolucao', '/Retirar', '/Devolver', '/Retirar/RetirarChave', 
+  '/Retirar/RetirarEquipamento', '/Devolver/DevolverChave', '/Devolver/DevolverEquipamento'];
   return (
     <div className='app-container'>
      {!hideNavbarPaths.includes(location.pathname) && <Navbar />}
@@ -31,7 +35,10 @@ function App() {
             <Route path="/RetiradaDevolucao" element={<RetiradaDevolucao />} />
             <Route path="/Retirar" element={<Retirar />} />
             <Route path="/Devolver" element={<Devolver />} />
-            <Route path="/RetirarChave" element={<RetirarChave />} />
+            <Route path="/Retirar/RetirarChave" element={<RetirarChave />} />
+            <Route path="/Retirar/RetirarEquipamento" element={<RetirarEquipamento />} />
+            <Route path="/Devolver/DevolverChave" element={<DevolverChave />} />
+            <Route path="/Devolver/DevolverEquipamento" element={<DevolverEquipamento />} />
           </Routes>
       </div>
     </div>

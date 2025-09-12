@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import './Home.css';
 import Navbar from "../../../components/navbar";
+import BotaoSair from "../../../components/botaoSair/sair"
 
 const Bemvindo = (props) => {
   return (
@@ -40,6 +41,7 @@ function Home() {
           <Cards titulo="Chaves Atrasadas" quantidade={1} cor="#f44336" />
         </div>
       </div>
+      <BotaoSair />
     </div>
   );  
 }
