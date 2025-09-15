@@ -21,6 +21,12 @@ const equipamento = new EntitySchema ({
             length: 100,
             nullable: false
         },
+        status: {
+            type: "enum",
+            enum: ["livre", "ocupado"],
+            default: "livre",
+            nullable: false
+        },
         createdAt: {
             type: "timestamp", 
             createDate: true,

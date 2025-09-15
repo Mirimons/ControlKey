@@ -58,6 +58,8 @@ class LabsService {
   }
 
   async putLabs(id, labsData) {
+    const { desc_lab, nome_lab, status } = labsData;
+    
     if (!id && isNaN(Number(id))) {
       throw new Error("ID do laboratório é obrigatório e deve ser numérico.");
     }
@@ -71,7 +73,6 @@ class LabsService {
       throw new Error("Laboratório não encontrado.");
     }
 
-    const { desc_lab, nome_lab, status } = labsData;
 
     if (!desc_lab?.trim() && desc_lab.trim().length < 2) {
       throw new Error(
@@ -88,7 +89,7 @@ class LabsService {
     if (nome_lab.trim() != existingLab.nome_lab) {
       const existingNome = await labsRepository.findOneBy({
         nome_lab: nome_lab.trim(),
-        deletedAt: IsNull()
+        deletedAt: IsNull(),
       });
 
       if (existingNome) {
@@ -96,7 +97,7 @@ class LabsService {
       }
     }
 
-    const statusLower = status?.toLowerCase();
+    const statusLower = (status || "livre")?.toLowerCase();
     if (statusLower != "livre" && statusLower != "ocupado") {
       throw new Error("Status deve ser 'livre' ou 'ocupado'.");
     }
