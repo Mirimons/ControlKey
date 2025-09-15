@@ -1,13 +1,12 @@
-import React, { useEffect, useState, useRef } from 'react';
-import './Keys.css';
-import Navbar from "../../components/navbar";
+import React, { useState, useEffect, useRef, use } from 'react';
+import './Equipaments.css';
+import Navbar from "../../../components/navbar";
+import BotaoSair from "../../../components/botaoSair/sair";
 
-
-function Keys() {
+function Equipaments() {
     const [modalAberto, setModalAberto] = useState(false);
-    const [nomeLab, setNomeLab] = useState("");
-    const [descLab, setDescLab] = useState("");
-    const [labs, setLabs] = useState([]);
+    const [tipoEquip, setTipoEquip] = useState("");
+    const [descEquip, setDescEquip] = useState("");
 
     const modalRef = useRef();
 
@@ -16,11 +15,11 @@ function Keys() {
 
     const handleSalvar = (e) => {
         e.preventDefault();
-        const novoLab = { nome_lab: nomeLab, desc_lab: descLab };
-        setLabs([...labs, novoLab]);
+        const novoEquip = { id_tipo: tipoEquip, desc_equip: descEquip };
+        setLabs([...labs, novoEquip]);
         // Limpar campos
-        setNomeLab("");
-        setDescLab("");
+        setTipoEquip("");
+        setDescEquip("");
         fecharModal();
     };
 
@@ -48,34 +47,35 @@ function Keys() {
         };
     }, [modalAberto]);
 
+
+
     return (
-        <div className="chaves-container">
-            <header className="chaves-header">
-                <h1>Chaves</h1>
+        <div className="equipamentos-container">
+            <header className="equipamentos-header">
+                <h1>Equipamentos</h1>
             </header>
 
-            <div className="chaves-filtros">
+            <div className="equipamentos-filtros">
                 <div>
-                    <h3>Ambiente:</h3>
-                    <input type="text" placeholder="Ambiente" />
+                    <h3>Equipamento:</h3>
+                    <input type="text" placeholder="Equipamento" />
                 </div>
                 <div>
                     <h3>Descrição:</h3>
                     <input type="text" placeholder="Descrição" />
                 </div>
-
             </div>
 
-            <div className="chaves-acoes">
-                <button onClick={abrirModal}>Adicionar Chave</button>
-                <button>Pesquisar</button>
+            <div className="equipamentos-acoes">
+                <button type="button" onClick={abrirModal}>Adicionar Equipamento</button>
+                <button type="button">Pesquisar</button>
             </div>
 
-            <table className="chaves-tabela">
+            <table className="equipamentos-tabela">
                 <thead>
                     <tr>
                         <th>Código</th>
-                        <th>Ambiente</th>
+                        <th>Equipamento</th>
                         <th>Descrição</th>
                         <th>Editar</th>
                     </tr>
@@ -92,24 +92,30 @@ function Keys() {
                 </tbody>
             </table>
 
-            {/* Modal */}
             {modalAberto && (
                 <div className="modal-fundo">
                     <div className="modal-conteudo" ref={modalRef}>
-                        <h2>Adicionar Laboratório</h2>
                         <form onSubmit={handleSalvar}>
-                            <input
-                                type="text"
-                                placeholder="Nome do laboratório"
-                                value={nomeLab}
-                                onChange={(e) => setNomeLab(e.target.value)}
-                                required
-                            />
+                            <h2>Adicionar Equipamento</h2>
+
+                            <select
+                                value={tipoEquip}
+                                onChange={(e) => setTipoEquip(Number(e.target.value))}
+                                required defaultValue=""
+                            >
+
+                                <option value="" disabled selected
+                                    hidden> Selecione o tipo do equipamento</option>
+                                <option value={1}>1</option>
+                                <option value={2}>2</option>
+                                <option value={3}>3</option>
+                            </select>
+
                             <input
                                 type="text"
                                 placeholder="Descrição (Opcional)"
-                                value={descLab}
-                                onChange={(e) => setDescLab(e.target.value)}
+                                value={descEquip}
+                                onChange={(e) => setDescEquip(e.target.value)}
                             />
 
                             <div className="modal-botoes">
@@ -122,8 +128,9 @@ function Keys() {
                     </div>
                 </div>
             )}
+            <BotaoSair />
         </div>
     );
 }
 
-export default Keys;
+export default Equipaments;

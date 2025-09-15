@@ -160,3 +160,12 @@ body {
 .modal-conteudo input[type="date"]::placeholder {
   color: #999;
 }
+
+/* Estilo geral para inputs desabilitados */
+input:disabled,
+select:disabled {
+    background-color: #c9c9c9; 
+    color: #888; 
+    cursor: not-allowed; 
+}
+

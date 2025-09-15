@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './User.css';
-import Navbar from "../../components/navbar";
-import api from '../../services/api';
+import Navbar from "../../../components/navbar";
+import api from '../../../services/api';
+import BotaoSair from "../../../components/botaoSair/sair";
 
 function User() {
     const [modalAberto, setModalAberto] = useState(false);
@@ -181,6 +182,7 @@ function User() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
+                                disabled={id_tipo === 3 }
                             />
 
                             <input
@@ -197,6 +199,7 @@ function User() {
                                 value={matricula}
                                 onChange={(e) => setMatricula(e.target.value)}
                                 required
+                                disabled={id_tipo === 3}
                             />
 
                             <input
@@ -213,7 +216,10 @@ function User() {
                                 value={senha}
                                 onChange={(e) => setSenha(e.target.value)}
                                 required
+                                autoComplete="current-password"
+                                disabled={id_tipo === 2 || id_tipo === 3}
                             />
+
                             <div className="modal-botoes">
                                 <button type="button" onClick={fecharModal}>Cancelar</button>
                                 <button type="submit">Salvar</button>
@@ -222,6 +228,7 @@ function User() {
                     </div>
                 </div>
             )}
+            <BotaoSair />
         </div>
     );
 }
