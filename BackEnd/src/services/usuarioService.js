@@ -3,12 +3,10 @@ import UsuarioCad from "../entities/usuario_cad.js";
 import TipoUsuario from "../entities/tipo_usuario.js";
 import { AppDataSource } from "../database/data-source.js";
 import { Like, IsNull } from "typeorm";
-import { validateAndFormatDate } from "../utils/dateValidator.js";
 import bcrypt from "bcrypt";
 
 const usuarioRepository = AppDataSource.getRepository(Usuario);
 const usuarioCadRepository = AppDataSource.getRepository(UsuarioCad);
-const tipoUsuarioRepository = AppDataSource.getRepository(TipoUsuario);
 
 class UsuarioService {
   async getUsuarios() {

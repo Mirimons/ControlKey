@@ -21,8 +21,8 @@ routes.use("/labs", labsController);
 routes.use("/equipamento", equipamentoController);
 
 routes.use("/agendamento", authenticate, authorize(PERMISSIONS.ADMIN), agendamentoController);
-routes.use("/tipo_usuario", authenticate, authorize(PERMISSIONS.ADMIN), tipo_usuarioController);
-routes.use("/usuario", authenticate, authorize(PERMISSIONS.ADMIN),usuarioController);
+routes.use("/tipo_usuario", tipo_usuarioController);
+routes.use("/usuario", usuarioController);
 routes.use("/tipo_equip", authenticate, authorize(PERMISSIONS.ADMIN), tipo_equipController);
 
 export default routes;

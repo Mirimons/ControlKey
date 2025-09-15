@@ -41,7 +41,7 @@ class LabsService {
       throw new Error("Já existe um laboratório com este nome.");
     }
 
-    const statusLower = status?.toLowerCase();
+    const statusLower = (status || "livre")?.toLowerCase();
     if (statusLower != "livre" && statusLower != "ocupado") {
       throw new Error("Status deve ser 'livre' ou 'ocupado'.");
     }
