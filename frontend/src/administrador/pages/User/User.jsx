@@ -15,6 +15,13 @@ function User() {
     const [data_nasc, setData_nasc] = useState("");
     const [senha, setSenha] = useState("");
 
+    const [filtroNome, setFiltroNome] = useState("");
+    const [filtroTipo, setFiltroTipo] = useState("");
+
+    const [usuarios, setUsuarios] = useState([]);
+
+    console.log(usuarios)
+
     const modalRef = useRef();
 
     const abrirModal = () => setModalAberto(true);
@@ -26,7 +33,7 @@ function User() {
 
         const token = localStorage.getItem('token');
 
-        if(!token) {
+        if (!token) {
             alert('Você precisa estar logado para cadastrar usuários!');
             return;
         }
@@ -42,7 +49,7 @@ function User() {
             senha
         }, {
             headers: {
-                'Authorization' : `Bearer ${token}`
+                'Authorization': `Bearer ${token}`
             }
         })
             .then(response => {
@@ -68,7 +75,26 @@ function User() {
     };
 
     useEffect(() => {
-        function handleClickFora(event) {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        api.get("/usuario", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                setUsuarios(response.data);
+            })
+            .catch(error => {
+                console.error("Erro ao buscar usuários:", error);
+            });
+
+    }, [usuarios])
+
+    useEffect(() => {
+
+     function handleClickFora(event) {
             if (modalRef.current && !modalRef.current.contains(event.target)) {
                 fecharModal();
             }
@@ -101,7 +127,11 @@ function User() {
             <div className="usuarios-filtros">
                 <div>
                     <h3>Nome completo</h3>
-                    <input type="text" placeholder="Nome completo" />
+                    <input type="text"
+                        placeholder="Nome completo"
+                        value={filtroNome}
+                        onChange={(e) => setFiltroNome(e.target.value)}
+                    />
                 </div>
                 <div>
                     <h3>Selecione o tipo de usuário:</h3>
@@ -129,12 +159,12 @@ function User() {
                     </tr>
                 </thead>
                 <tbody>
-                    {[...Array(6)].map((_, i) => (
-                        <tr key={i}>
-                            <td>Celula</td>
-                            <td>Celula</td>
-                            <td>Celula</td>
-                            <td>Celula</td>
+                    {usuarios && usuarios.map((user) => (
+                        <tr key={user.id}>
+                            <td>{user.id}</td>
+                            <td>{user.nome}</td>
+                            <td>{user.tipo?.nome || user.id_tipo}</td>
+                            <td>{user.telefone}</td>
                             <td><button className="editar-btn">✏️</button></td>
                         </tr>
                     ))}
@@ -151,7 +181,7 @@ function User() {
                             <select
                                 value={id_tipo}
                                 onChange={(e) => setId_tipo(Number(e.target.value))}
-                                required 
+                                required
                             >
                                 <option value="" disabled hidden>Selecione o tipo de usuário</option>
                                 <option value={1}>Administrador</option>
@@ -182,7 +212,7 @@ function User() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                disabled={id_tipo === 3 }
+                                disabled={id_tipo === 3}
                             />
 
                             <input

@@ -2,13 +2,13 @@ import React, { useEffect, useState, useRef } from 'react';
 import './Keys.css';
 import Navbar from "../../../components/navbar";
 import BotaoSair from "../../../components/botaoSair/sair";
+import api from "../../../services/api"
 
 
 function Keys() {
     const [modalAberto, setModalAberto] = useState(false);
-    const [nomeLab, setNomeLab] = useState("");
-    const [descLab, setDescLab] = useState("");
-    const [labs, setLabs] = useState([]);
+    const [nome_lab, setNome_lab] = useState("");
+    const [desc_lab, setDesc_lab] = useState("");
 
     const modalRef = useRef();
 
@@ -17,13 +17,39 @@ function Keys() {
 
     const handleSalvar = (e) => {
         e.preventDefault();
-        const novoLab = { nome_lab: nomeLab, desc_lab: descLab };
-        setLabs([...labs, novoLab]);
-        // Limpar campos
-        setNomeLab("");
-        setDescLab("");
-        fecharModal();
+
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            alert('Você precisa estar logado para cadastrar usuários!');
+            return;
+        }
+        // const novoLab = { nome_lab, desc_lab };
+        // setLabs([...labs, novoLab]);
+
+        api.post("/labs", {
+            nome_lab,
+            desc_lab
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                console.log("Chave cadastrada:", response.data);
+                alert("Chave cadastrada com sucesso!");
+                fecharModal();
+
+                // limpa os campos
+                setNome_lab("");
+                setDesc_lab("");
+            })
+            .catch(error => {
+                console.error("Erro ao cadastrar:", error);
+                alert(error.response?.data?.error || "Erro ao cadastrar chave!");
+            });
     };
+
 
     useEffect(() => {
         function handleClickFora(event) {
@@ -102,15 +128,15 @@ function Keys() {
                             <input
                                 type="text"
                                 placeholder="Nome do laboratório"
-                                value={nomeLab}
-                                onChange={(e) => setNomeLab(e.target.value)}
+                                value={nome_lab}
+                                onChange={(e) => setNome_lab(e.target.value)}
                                 required
                             />
                             <input
                                 type="text"
                                 placeholder="Descrição (Opcional)"
-                                value={descLab}
-                                onChange={(e) => setDescLab(e.target.value)}
+                                value={desc_lab}
+                                onChange={(e) => setDesc_lab(e.target.value)}
                             />
 
                             <div className="modal-botoes">

@@ -14,7 +14,7 @@ const validateDelete = validationMiddleware(UsuarioRequestDTO, 'validateDelete')
 route.get("/", async (request, response) => {
   try {
     const usuarios = await usuarioService.getUsuarios();
-    return response.status(200).json({ response: usuarios });
+    return response.status(200).json(usuarios);
   } catch (error) {
     console.error("Erro ao listar usuários: ", error);
     return response.status(500).json({
