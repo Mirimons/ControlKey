@@ -7,16 +7,16 @@ const route = express.Router();
 route.get("/", async (request, response) => {
     try {
         const equips = await EquipService.getEquip();
-        return response.status(200).json({response: equips});
+        return response.status(200).json(equips);
     } catch (error) {
         return response.status(500).json({ error: error.message });
     }
 });
 
-route.get("/:nameFound", async (request, response) => {
+route.get("/:nome", async (request, response) => {
     try {
         const equips = await EquipService.getByDesc(request.params.nameFound);
-        return response.status(200).json({response: equips})
+        return response.status(200).json(equips)
     } catch (error) {
         return response.status(500).json ({error: error.message});
     }

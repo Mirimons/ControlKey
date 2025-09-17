@@ -1,4 +1,4 @@
-import validationUtils from '../utils/validationUtils.js'
+import validationUtils from "../utils/validationUtils.js";
 
 class BaseDTO {
   constructor(data) {
@@ -7,8 +7,12 @@ class BaseDTO {
     this.validatedData = {};
   }
 
-  validateRequiredNumber(field, fieldName) {
+  validateNumber(field, fieldName) {
     const value = this.data[field];
+    if (!value) {
+      this.addError(field, `${fieldName} é obrigatório.`);
+      return false;
+    }
     if (!validationUtils.isNumber(value)) {
       this.addError(field, `${fieldName} é obrigatório e precisa ser numérico`);
       return false;
@@ -17,8 +21,12 @@ class BaseDTO {
     return true;
   }
 
-  validateRequiredString(field, fieldName, minLength = 2) {
+  validateString(field, fieldName, minLength = 2) {
     const value = this.data[field];
+    if (!value) {
+      this.addError(field, `${fieldName} é obrigatório.`);
+      return false;
+    }
     if (
       !validationUtils.isString(value) &&
       !validationUtils.validateMinLength(value, minLength)
@@ -57,7 +65,7 @@ class BaseDTO {
       this.addError(field, `${fieldName} deve ter 11 dígitos numéricos`);
       return false;
     }
-    this.validatedData[field] = value.toString().replace(/\D/g, '');
+    this.validatedData[field] = value.toString().replace(/\D/g, "");
     return true;
   }
 
@@ -71,11 +79,11 @@ class BaseDTO {
       this.addError(field, `${fieldName} inválido`);
       return false;
     }
-    this.validatedData[field] = value.toString().replace(/\D/g, '');
+    this.validatedData[field] = value.toString().replace(/\D/g, "");
     return true;
   }
 
-   validateDate(field, fieldName) {
+  validateDate(field, fieldName) {
     const value = this.data[field];
     if (!value) {
       this.addError(field, `${fieldName} é obrigatório`);

@@ -15,9 +15,12 @@ class TipoEquipService {
         });
     }
     async postTipoEquip(tipoEquipData) {
+
+        const {desc_tipo} = tipoEquipData;
+
         if (
-            !tipoEquipData.desc_tipo ||
-            tipoEquipData.desc_tipo.trim().length < 1
+            !desc_tipo &&
+            desc_tipo.trim().length < 1
         ) {
             throw new Error("O campo 'desc_tipo' deve ter pelo menos um caractere.");
         }
@@ -32,7 +35,7 @@ class TipoEquipService {
             throw new Error("O 'id' precisa ser um valor numérico.");
         }
         if (
-            !tipoEquipData.desc_Tipo ||
+            !tipoEquipData.desc_Tipo &&
             tipoEquipData.desc_tipo.trim().length < 1
         ) {
             throw new Error("O campo 'desc_tipo' deve ter pelo menos um caractere.");

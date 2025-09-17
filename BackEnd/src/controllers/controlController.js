@@ -15,9 +15,11 @@ const labsRepository = AppDataSource.getRepository(Labs);
 
 route.get("/", async (request, response) => {
     const control = await controlRepository.findBy({ deletedAt: IsNull() });
-    return response.status(200).send({ "response": control });
+    return response.status(200).json(control );
 });
 
+
+///Adicionar get de usuario(pelo nome dele), de equip, de lab, de data e status
 route.get("/:nameFound", async (request, response) => {
     const { nameFound } = request.params;
     const controlFound = await controlRepository.findBy({ nome: Like(`%${nameFound}%`) });
