@@ -74,8 +74,12 @@ function Reservation() {
     return (
         <div className="reservas-container">
             <header className="reservas-header">
-                <h1>Reservas</h1>
+                <h1>Reservas </h1>
             </header>
+
+            <div className="reservas-acoes">
+                <button type="button" onClick={abrirModal}>Reservar</button>
+            </div>
 
             <div className="reservas-filtros">
                 <div>
@@ -92,10 +96,6 @@ function Reservation() {
                 </div>
             </div>
 
-            <div className="reservas-acoes">
-                <button type="button" onClick={abrirModal}>Reservar</button>
-                <button type='button'>Pesquisar</button>
-            </div>
 
             <table className="reservas-tabela">
                 <thead>

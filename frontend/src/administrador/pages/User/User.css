@@ -1,12 +1,16 @@
-body {
-  background-color: #e6f2f7;
-}
+/* body {
+  height: 100%;              
+  margin: 0;                 
+  padding: 0;
+  background: linear-gradient(135deg, #bdd8e9, #7bbde8); 
+} */
 
 .usuarios-container {
-  margin-left: 200px;
+  margin-left: 243px;
   padding-left: 70px;
   padding-top: 90px;
   padding-right: 90px;
+  background: transparent;
 }
 
 .usuarios-header {
@@ -47,14 +51,14 @@ body {
   margin-right: 10px;
   border: none;
   border-radius: 6px;
-  background-color: #4da6ff;
-  color: white;
+  background-color: #7BBDE8;
+  color: rgb(0, 0, 0);
   cursor: pointer;
   transition: background 0.3s;
 }
 
 .usuarios-acoes button:hover {
-  background-color: #3399ff;
+  background-color: #6e96b1;
 }
 
 .usuarios-tabela {
@@ -69,11 +73,12 @@ body {
 .usuarios-tabela td {
   padding: 12px;
   text-align: center;
-  border: 1px solid #c0c0c0;
+  border: 1px solid #E5ECFE;
 }
 
 .usuarios-tabela th {
-  background-color: #d1d1ff;
+  color: #072355;
+  background-color: #7BBDE8;
   font-weight: bold;
 }
 

@@ -40,7 +40,7 @@ export default function Login() {
           <h2>CONTROLKEY</h2>
 
           <input type="email"
-            placeholder="Email"
+            placeholder="seunome@email.com"
             value={email}
             onChange={(e) => { setEmail(e.target.value) }}
             required
@@ -53,8 +53,8 @@ export default function Login() {
             required
           />
 
-          <button type="submit">Entrar</button>
           <a href="#">Esqueceu a senha?</a>
+          <button type="submit">Entrar</button>
         </form>
       </div>
     </div>

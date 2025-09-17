@@ -3,14 +3,6 @@ import './Home.css';
 import Navbar from "../../../components/navbar";
 import BotaoSair from "../../../components/botaoSair/sair"
 
-const Bemvindo = (props) => {
-  return (
-    <div>
-      <h2>Olá, {props.nome} </h2>
-    </div>
-  );
-}
-
 class Cards extends Component {
   render() {
     const { titulo, quantidade, cor } = this.props;
@@ -27,18 +19,17 @@ class Cards extends Component {
 
 function Home() {
   return (
-    <div style={{ display: "flex", paddingTop: "70px" }}>
+    <div style={{ display: "flex", paddingTop: "70px", paddingLeft:"200px" }}>
       {/* <navbar /> */}
 
       <div className="container" style={{ marginLeft: "30px", padding: "20px", flexGrow: 1 }}>
         <h1>Página Inicial</h1>
-        <Bemvindo nome="Fulano de Tal!" />
 
         <div className="cards-container">
-          <Cards titulo="Total de Chaves Cadastradas" quantidade={15} cor="#2196f3" />
-          <Cards titulo="Chaves Emprestadas no Momento" quantidade={8} cor="#4caf50" />
-          <Cards titulo="Reservas Pendentes" quantidade={4} cor="#ff9800" />
-          <Cards titulo="Chaves Atrasadas" quantidade={1} cor="#f44336" />
+          <Cards titulo="Total de Chaves Cadastradas" quantidade={15} cor="#0A4174" />
+          <Cards titulo="Chaves Emprestadas no Momento" quantidade={8} cor="#49769F" />
+          <Cards titulo="Reservas Pendentes" quantidade={4} cor="#4E8EA2" />
+          <Cards titulo="Chaves Atrasadas" quantidade={1} cor="#001D39" />
         </div>
       </div>
       <BotaoSair />

@@ -3,7 +3,7 @@ body {
 }
 
 .chaves-container {
-  margin-left: 200px;
+  margin-left: 243px;
   padding-left: 70px;
   padding-top: 90px;
   padding-right: 90px;
@@ -49,14 +49,14 @@ body {
   margin-right: 10px;
   border: none;
   border-radius: 6px;
-  background-color: #4da6ff;
-  color: white;
+  background-color: #7BBDE8;
+  color: rgb(0, 0, 0);
   cursor: pointer;
   transition: background 0.3s;
 }
 
 .chaves-acoes button:hover {
-  background-color: #3399ff;
+  background-color: #6e96b1;
 }
 
 .chaves-tabela {
@@ -75,7 +75,8 @@ body {
 }
 
 .chaves-tabela th {
-  background-color: #d1d1ff;
+  color: #072355;
+  background-color: #7BBDE8;
   font-weight: bold;
 }
 

@@ -81,6 +81,10 @@ function Keys() {
                 <h1>Chaves</h1>
             </header>
 
+            <div className="chaves-acoes">
+                <button onClick={abrirModal}>Adicionar Chave</button>
+            </div>
+
             <div className="chaves-filtros">
                 <div>
                     <h3>Ambiente:</h3>
@@ -93,10 +97,6 @@ function Keys() {
 
             </div>
 
-            <div className="chaves-acoes">
-                <button onClick={abrirModal}>Adicionar Chave</button>
-                <button>Pesquisar</button>
-            </div>
 
             <table className="chaves-tabela">
                 <thead>

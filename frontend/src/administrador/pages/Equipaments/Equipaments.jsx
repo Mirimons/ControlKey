@@ -55,6 +55,10 @@ function Equipaments() {
                 <h1>Equipamentos</h1>
             </header>
 
+            <div className="equipamentos-acoes">
+                <button type="button" onClick={abrirModal}>Adicionar Equipamento</button>
+            </div>
+
             <div className="equipamentos-filtros">
                 <div>
                     <h3>Equipamento:</h3>
@@ -66,10 +70,6 @@ function Equipaments() {
                 </div>
             </div>
 
-            <div className="equipamentos-acoes">
-                <button type="button" onClick={abrirModal}>Adicionar Equipamento</button>
-                <button type="button">Pesquisar</button>
-            </div>
 
             <table className="equipamentos-tabela">
                 <thead>

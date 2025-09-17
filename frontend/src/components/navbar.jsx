@@ -20,32 +20,32 @@ const navbar = () => {
         <ul>
           <li>
             <Link to="/home">
-              <FaHome /> Página Inicial
+              Página Inicial
             </Link>
           </li>
           <li>
             <Link to="/user">
-              <FaUser /> Usuários
+              Usuários
             </Link>
           </li>
           <li>
             <Link to="/keys">
-              <FaKey /> Chaves
+              Chaves
             </Link>
           </li>
           <li>
             <Link to="/equipaments">
-              <FaTools /> Equipamentos
+              Equipamentos
             </Link>
           </li>
           <li>
             <Link to="/reservation">
-              <FaClipboardList /> Reservas
+              Reservas
             </Link>
           </li>
           <li>
             <Link to="/relatorio">
-              <FaChartBar /> Relatório
+              Relatório
             </Link>
           </li>
         </ul>
