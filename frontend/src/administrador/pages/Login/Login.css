@@ -43,7 +43,7 @@
 }
 
 .login-box button {
-  width: 40%;
+  width: 100%;
   padding: 12px;
   margin-top: 10px;
   background-color: #fff;
@@ -77,6 +77,32 @@
 
 .login-box a:hover {
   text-decoration: underline;
+}
+
+.senha-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.senha-container input {
+  width: 100%;
+  padding: 12px 40px 12px 12px; /* espaço à direita para o ícone */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.toggle-senha {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #000000;
+  font-size: 18px;
+  padding: 0;
 }
 
 /* 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
 import Navbar from './components/navbar';
@@ -19,27 +19,37 @@ import DevolverEquipamento from './usuarios/pages/Devolver/DevolverEquipamento/d
 
 function App() {
   const location = useLocation();
-  const hideNavbarPaths = ['/', '/retiradaDevolucao', '/Retirar', '/Devolver', '/Retirar/RetirarChave', 
-  '/Retirar/RetirarEquipamento', '/Devolver/DevolverChave', '/Devolver/DevolverEquipamento'];
+
+  // título fixo da aba
+  useEffect(() => {
+    document.title = "ControlKey";
+  }, []);
+
+  const hideNavbarPaths = [
+    '/', '/retiradaDevolucao', '/Retirar', '/Devolver',
+    '/Retirar/RetirarChave', '/Retirar/RetirarEquipamento',
+    '/Devolver/DevolverChave', '/Devolver/DevolverEquipamento'
+  ];
+  
   return (
     <div className='app-container'>
-     {!hideNavbarPaths.includes(location.pathname) && <Navbar />}
+      {!hideNavbarPaths.includes(location.pathname) && <Navbar />}
       <div className='main-content'>
-          <Routes>
-            <Route path="/Home" element={<Home />} />
-            <Route path="/User" element={<User />} />
-            <Route path="/Keys" element={<Keys />} />
-            <Route path="/Equipaments" element={<Equipaments />} />
-            <Route path="/Reservation" element={<Reservation />} />
-            <Route path="/" element={<Login />} />
-            <Route path="/RetiradaDevolucao" element={<RetiradaDevolucao />} />
-            <Route path="/Retirar" element={<Retirar />} />
-            <Route path="/Devolver" element={<Devolver />} />
-            <Route path="/Retirar/RetirarChave" element={<RetirarChave />} />
-            <Route path="/Retirar/RetirarEquipamento" element={<RetirarEquipamento />} />
-            <Route path="/Devolver/DevolverChave" element={<DevolverChave />} />
-            <Route path="/Devolver/DevolverEquipamento" element={<DevolverEquipamento />} />
-          </Routes>
+        <Routes>
+          <Route path="/Home" element={<Home />} />
+          <Route path="/User" element={<User />} />
+          <Route path="/Keys" element={<Keys />} />
+          <Route path="/Equipaments" element={<Equipaments />} />
+          <Route path="/Reservation" element={<Reservation />} />
+          <Route path="/" element={<Login />} />
+          <Route path="/RetiradaDevolucao" element={<RetiradaDevolucao />} />
+          <Route path="/Retirar" element={<Retirar />} />
+          <Route path="/Devolver" element={<Devolver />} />
+          <Route path="/Retirar/RetirarChave" element={<RetirarChave />} />
+          <Route path="/Retirar/RetirarEquipamento" element={<RetirarEquipamento />} />
+          <Route path="/Devolver/DevolverChave" element={<DevolverChave />} />
+          <Route path="/Devolver/DevolverEquipamento" element={<DevolverEquipamento />} />
+        </Routes>
       </div>
     </div>
   );

@@ -2,11 +2,14 @@ import React, { useState, useEffect, useRef, use } from 'react';
 import './Equipaments.css';
 import Navbar from "../../../components/navbar";
 import BotaoSair from "../../../components/botaoSair/sair";
+import api from "../../../services/api"
 
 function Equipaments() {
     const [modalAberto, setModalAberto] = useState(false);
     const [tipoEquip, setTipoEquip] = useState("");
     const [descEquip, setDescEquip] = useState("");
+
+    const [equipamentos, setEquipamentos] = useState([]);
 
     const modalRef = useRef();
 
@@ -15,13 +18,54 @@ function Equipaments() {
 
     const handleSalvar = (e) => {
         e.preventDefault();
-        const novoEquip = { id_tipo: tipoEquip, desc_equip: descEquip };
-        setLabs([...labs, novoEquip]);
-        // Limpar campos
-        setTipoEquip("");
-        setDescEquip("");
-        fecharModal();
+
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            alert('Você precisa estar logado para cadastrar equipamentos!');
+            return;
+        }
+
+        api.post("/equipamento", {
+            tipoEquip,
+            descEquip
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                console.log("Equipamento cadastrado:", response.data);
+                alert("Equipamento cadastrado com sucesso!");
+                fecharModal();
+
+                // limpa os campos
+                setTipoEquip("");
+                setDescEquip("");
+            })
+            .catch(error => {
+                console.error("Erro ao cadastrar:", error);
+                alert(error.response?.data?.error || "Erro ao cadastrar Equipamento!");
+            });
     };
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        api.get("/equipamento", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                setEquipamentos(response.data);
+            })
+            .catch(error => {
+                console.error("Erro ao buscar equipamento:", error);
+            });
+
+    }, [equipamentos])
 
     useEffect(() => {
         function handleClickFora(event) {
@@ -81,11 +125,11 @@ function Equipaments() {
                     </tr>
                 </thead>
                 <tbody>
-                    {[...Array(6)].map((_, i) => (
-                        <tr key={i}>
-                            <td>Celula</td>
-                            <td>Celula</td>
-                            <td>Celula</td>
+                    {equipamentos && equipamentos.map((equipaments) => (
+                        <tr key={equipaments.id}>
+                            <td>{equipaments.id}</td>
+                            <td>{equipaments.id_tipo}</td>
+                            <td>{equipaments.desc_equip}</td>
                             <td><button className="editar-btn">✏️</button></td>
                         </tr>
                     ))}
@@ -97,7 +141,7 @@ function Equipaments() {
                     <div className="modal-conteudo" ref={modalRef}>
                         <form onSubmit={handleSalvar}>
                             <h2>Adicionar Equipamento</h2>
-
+{/* 
                             <select
                                 value={tipoEquip}
                                 onChange={(e) => setTipoEquip(Number(e.target.value))}
@@ -109,8 +153,16 @@ function Equipaments() {
                                 <option value={1}>1</option>
                                 <option value={2}>2</option>
                                 <option value={3}>3</option>
-                            </select>
+                            </select> */}
 
+
+                            <input
+                                type="text"
+                                placeholder="Digite o número do equipamento"
+                                value={tipoEquip}
+                                onChange={(e) => setTipoEquip(e.target.value)}
+                            />
+                            
                             <input
                                 type="text"
                                 placeholder="Descrição (Opcional)"

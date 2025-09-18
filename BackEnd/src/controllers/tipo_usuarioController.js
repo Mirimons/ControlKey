@@ -1,7 +1,7 @@
 import express from "express";
 import tipoUsuarioService from "../services/tipoUsuarioService.js";
 import validationMiddleware from "../middleware/validationMiddleware.js";
-import TipoUsuarioRequestDTO from "../DTOs/index.js";
+import {TipoUsuarioRequestDTO} from "../DTOs/index.js";
 
 const route = express.Router();
 

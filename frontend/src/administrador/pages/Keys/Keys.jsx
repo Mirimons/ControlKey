@@ -10,6 +10,8 @@ function Keys() {
     const [nome_lab, setNome_lab] = useState("");
     const [desc_lab, setDesc_lab] = useState("");
 
+    const [chaves, setChaves] = useState([]);
+
     const modalRef = useRef();
 
     const abrirModal = () => setModalAberto(true);
@@ -21,7 +23,7 @@ function Keys() {
         const token = localStorage.getItem('token');
 
         if (!token) {
-            alert('Você precisa estar logado para cadastrar usuários!');
+            alert('Você precisa estar logado para cadastrar chave!');
             return;
         }
         // const novoLab = { nome_lab, desc_lab };
@@ -49,6 +51,24 @@ function Keys() {
                 alert(error.response?.data?.error || "Erro ao cadastrar chave!");
             });
     };
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        api.get("/labs", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                setChaves(response.data);
+            })
+            .catch(error => {
+                console.error("Erro ao buscar chave:", error);
+            });
+
+    }, [chaves])
 
 
     useEffect(() => {
@@ -108,11 +128,11 @@ function Keys() {
                     </tr>
                 </thead>
                 <tbody>
-                    {[...Array(6)].map((_, i) => (
-                        <tr key={i}>
-                            <td>Celula</td>
-                            <td>Celula</td>
-                            <td>Celula</td>
+                    {chaves && chaves.map((keys) => (
+                        <tr key={keys.id}>
+                            <td>{keys.id}</td>
+                            <td>{keys.nome_lab}</td>
+                            <td>{keys.desc_lab}</td>
                             <td><button className="editar-btn">✏️</button></td>
                         </tr>
                     ))}

@@ -174,3 +174,30 @@ select:disabled {
     cursor: not-allowed; 
 }
 
+.senha-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.senha-container input {
+  width: 100%;
+  padding: 12px 40px 12px 12px; /* espaço para o ícone dentro do input */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.toggle-senha {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888;
+  font-size: 18px;
+  padding: 0;
+}
+
+

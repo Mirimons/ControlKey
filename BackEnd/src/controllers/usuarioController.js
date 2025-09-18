@@ -3,7 +3,7 @@ import usuarioService from "../services/usuarioService.js";
 import { getErrorMessage } from "../helpers/errorHandler.js";
 import { handleDatabaseError } from "../helpers/errorHandler.js";
 import validationMiddleware from "../middleware/validationMiddleware.js";
-import UsuarioRequestDTO from "../DTOs/index.js";
+import {UsuarioRequestDTO} from "../DTOs/index.js";
 
 const route = express.Router();
 
