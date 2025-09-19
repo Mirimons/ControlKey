@@ -19,7 +19,7 @@
     routes.use("/control", controlController);
 
     //routes.use("/labs", authenticate, authorize(PERMISSIONS.ADMIN), labsController);
-    routes.use("/labs", labsController);s
+    routes.use("/labs", labsController);
     //routes.use("/equipamento", authenticate, authorize(PERMISSIONS.ADMIN), equipamentoController);
     routes.use("/equipamento", equipamentoController);
     //routes.use("/agendamento", authenticate, authorize(PERMISSIONS.ADMIN), agendamentoController);
