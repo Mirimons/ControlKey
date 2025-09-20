@@ -1,14 +1,34 @@
 import express from "express";
 import agendamentoService from "../services/agendamentoServices.js";
+import validationMiddleware from "../middleware/validationMiddleware.js";
+import AgendamentoRequestDTO from "../DTOs/index.js";
 
 const route = express.Router();
 
-// GET /agendamentos?nomeProfessor=&laboratorio=&dataUtilizacao=&status=&page=&limit=
-route.get("/", async (request, response) => {
+const validateCreate = validationMiddleware(
+  AgendamentoRequestDTO,
+  "validateCreate"
+);
+const validateUpdate = validationMiddleware(
+  AgendamentoRequestDTO,
+  "validateUpdate"
+);
+const validateDelete = validationMiddleware(
+  AgendamentoRequestDTO,
+  "validateDelete"
+);
+const validateGetFiltros = validationMiddleware(
+  AgendamentoRequestDTO,
+  "validateGetFiltros"
+);
+
+//GET com os filtros
+route.get("/", validateGetFiltros, async (request, response) => {
   try {
-    const filtros = request.query;
-    const resultado = await agendamentoService.getAgendamentos(filtros);
-    return response.status(200).json({ response: resultado });
+    const resultado = await agendamentoService.getAgendamentos(
+      request.validatedData
+    );
+    return response.status(200).json(resultado);
   } catch (error) {
     console.error("Erro ao buscar agendamentos:", error);
     return response.status(500).json({ response: error.message });
@@ -18,9 +38,8 @@ route.get("/", async (request, response) => {
 // GET /agendamentos/:id
 route.get("/:id", async (request, response) => {
   try {
-    const { id } = request.params;
-    const agendamento = await agendamentoService.getAgendamentoById(id);
-    return response.status(200).json({ response: agendamento });
+    const agendamento = await agendamentoService.getAgendamentoById(request.validatedData.id);
+    return response.status(200).json(agendamento);
   } catch (error) {
     console.error("Erro ao buscar agendamento:", error);
     if (error.message.includes("não encontrado")) {
@@ -31,16 +50,21 @@ route.get("/:id", async (request, response) => {
 });
 
 // POST /agendamentos
-route.post("/", async (request, response) => {
+route.post("/", validateCreate, async (request, response) => {
   try {
-    const novoAgendamento = await agendamentoService.postAgendamento(request.body);
+    const novoAgendamento = await agendamentoService.postAgendamento(
+      request.validatedData
+    );
     return response.status(201).json({
       response: "Agendamento criado com sucesso!",
-      agendamento: novoAgendamento
+      agendamento: novoAgendamento,
     });
   } catch (error) {
     console.error("Erro ao criar agendamento:", error);
-    if (error.message.includes("Conflito") || error.message.includes("não encontrado")) {
+    if (
+      error.message.includes("Conflito") ||
+      error.message.includes("não encontrado")
+    ) {
       return response.status(409).json({ response: error.message });
     }
     return response.status(400).json({ response: error.message });
@@ -48,13 +72,15 @@ route.post("/", async (request, response) => {
 });
 
 // PUT /agendamentos/:id
-route.put("/:id", async (request, response) => {
+route.put("/:id", validateUpdate, async (request, response) => {
   try {
-    const { id } = request.params;
-    const agendamentoAtualizado = await agendamentoService.putAgendamento(id, request.body);
+    const agendamentoAtualizado = await agendamentoService.putAgendamento(
+      request.validatedData.id,
+      request.validatedData
+    );
     return response.status(200).json({
       response: "Agendamento atualizado com sucesso!",
-      agendamento: agendamentoAtualizado
+      agendamento: agendamentoAtualizado,
     });
   } catch (error) {
     console.error("Erro ao atualizar agendamento:", error);
@@ -68,10 +94,9 @@ route.put("/:id", async (request, response) => {
 // DELETE /agendamentos/:id
 route.delete("/:id", async (request, response) => {
   try {
-    const { id } = request.params;
-    await agendamentoService.deleteAgendamento(id);
-    return response.status(200).json({ 
-      response: "Agendamento excluído com sucesso!" 
+    await agendamentoService.deleteAgendamento(request.validatedData.id);
+    return response.status(200).json({
+      response: "Agendamento excluído com sucesso!",
     });
   } catch (error) {
     console.error("Erro ao excluir agendamento:", error);

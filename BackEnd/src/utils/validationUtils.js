@@ -1,4 +1,5 @@
 import { validateAndFormatDate } from "./dateValidator.js";
+import { validateAndFormatTime, isTime, compareTimes,getTimeDifferenceInMinutes } from "./timeValidator.js";
 
 const validationUtils = {
   isEmail: (email) => {
@@ -29,6 +30,20 @@ const validationUtils = {
 
   validateDate: (date) => {
     return validateAndFormatDate(date);
+  },
+
+  validateTime: (time) => {
+    return validateAndFormatTime(time);
+  },
+
+  isTime: (time) => {
+    return isTime(time);
+  },
+  compareTimes: (hora1, hora2) => {
+    return compareTimes(hora1, hora2);
+  },
+  getTimeDifferenceInMinutes: (horaInicio, horaFim) => {
+    return getTimeDifferenceInMinutes(horaInicio, horaFim);
   }
 };
 
