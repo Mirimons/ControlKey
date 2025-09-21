@@ -1,6 +1,7 @@
 import Agendamento from "../entities/agendamento.js";
 import { AppDataSource } from "../database/data-source.js";
 import { Like, IsNull } from "typeorm";
+import AgendamentoRequestDTO from "../DTOs/agendamentoRequestDTO.js";
 
 const agendamentoRepository = AppDataSource.getRepository(Agendamento);
 
@@ -47,15 +48,15 @@ class AgendamentoService {
       if (hora_inicio && hora_fim) {
         query.andWhere("agendamento.data_utilizacao BETWEEN :start AND :end", {
           start: hora_inicio,
-          end: hora_fim
+          end: hora_fim,
         });
       } else if (hora_inicio) {
         query.andWhere("agendamento.data_utilizacao >= :start", {
-          start: hora_inicio
+          start: hora_inicio,
         });
       } else if (hora_fim) {
         query.andWhere("agendamento.data_utilizacao <= :end", {
-          end: hora_fim
+          end: hora_fim,
         });
       }
 
@@ -69,8 +70,14 @@ class AgendamentoService {
 
       const [agendamentos, total] = await query.getManyAndCount();
 
+      const agendamentoDTO = new AgendamentoRequestDTO();
+      const agendamentosAtualizados = await Promise.all(
+        agendamentos.map((agendamento) =>
+          agendamentoDTO.verificarAtualizarStatus(agendamento)
+        )
+      );
       return {
-        agendamentos,
+        agendamentos: agendamentosAtualizados,
         paginacao: {
           page: parseInt(page),
           limit: parseInt(limit),
@@ -94,7 +101,8 @@ class AgendamentoService {
         throw new Error("Agendamento não encontrado");
       }
 
-      return agendamento;
+      const agendamentoDTO = new AgendamentoRequestDTO();
+      return await agendamentoDTO.verificarAtualizarStatus(agendamento);
     } catch (error) {
       throw new Error(`Erro ao buscar agendamento: ${error.message}`);
     }

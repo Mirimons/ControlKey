@@ -1,5 +1,11 @@
-import { validateAndFormatDate } from "./dateValidator.js";
-import { validateAndFormatTime, isTime, compareTimes,getTimeDifferenceInMinutes } from "./timeValidator.js";
+import {
+  validateAndFormatDate,
+  validateAndFormatDateForSchedule,
+  validateAndFormatTime,
+  isTime,
+  compareTimes,
+  getTimeDifferenceInMinutes,
+} from "./index.js";
 
 const validationUtils = {
   isEmail: (email) => {
@@ -9,27 +15,37 @@ const validationUtils = {
 
   isCPF: (cpf) => {
     if (!cpf) return false;
-    const cleanedCPF = cpf.toString().replace(/\D/g, '');
+    const cleanedCPF = cpf.toString().replace(/\D/g, "");
     return cleanedCPF.length === 11 && !isNaN(cleanedCPF);
   },
 
   isPhone: (telefone) => {
     if (!telefone) return false;
-    const cleanedPhone = telefone.toString().replace(/\D/g, '');
-    return cleanedPhone.length >= 10 && cleanedPhone.length <= 11 && !isNaN(cleanedPhone);
+    const cleanedPhone = telefone.toString().replace(/\D/g, "");
+    return (
+      cleanedPhone.length >= 10 &&
+      cleanedPhone.length <= 11 &&
+      !isNaN(cleanedPhone)
+    );
   },
 
-  isString: (value) => typeof value === 'string',
-  isNumber: (value) => typeof value === 'number' && !isNaN(value),
+  isString: (value) => typeof value === "string",
+  isNumber: (value) => typeof value === "number" && !isNaN(value),
   isOptional: (value) => value === undefined || value === null,
-  
+
   validateMinLength: (value, min) => {
     if (value === undefined || value === null) return true;
     return value.toString().trim().length >= min;
   },
 
+  //Data que não usa no futuro
   validateDate: (date) => {
     return validateAndFormatDate(date);
+  },
+
+  //Data que não usa no passado
+  validateDateSchedule: (date) => {
+    return validateAndFormatDateForSchedule(date);
   },
 
   validateTime: (time) => {
@@ -44,7 +60,7 @@ const validationUtils = {
   },
   getTimeDifferenceInMinutes: (horaInicio, horaFim) => {
     return getTimeDifferenceInMinutes(horaInicio, horaFim);
-  }
+  },
 };
 
 export default validationUtils;

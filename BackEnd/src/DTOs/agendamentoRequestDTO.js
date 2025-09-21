@@ -33,7 +33,7 @@ class AgendamentoRequestDTO extends BaseDTO {
     if (!this.validateNumber("id_labs", "ID do Laboratório")) return false;
     if (!this.validateNumber("id_usuario", "ID do Usuário")) return false;
     if (!this.validateString("finalidade", "Finalidade", 5)) return false;
-    if (!this.validateDate("data_utilizacao", "Data de utilização"))
+    if (!this.validateDateSchedule("data_utilizacao", "Data de utilização"))
       return false;
     if (!this.validateTime("hora_inicio", "Hora do início")) return false;
     if (!this.validateTime("hora_fim", "Hora do fim")) return false;
@@ -132,6 +132,9 @@ class AgendamentoRequestDTO extends BaseDTO {
         "hora_inicio",
         "Erro ao verificar conflitos de agendamento"
       );
+
+      this.validatedData.status = "pendente";
+
       return false;
     }
     return this.isValid();
@@ -366,11 +369,12 @@ class AgendamentoRequestDTO extends BaseDTO {
     }
 
     if (hora_inicio !== undefined) {
-      if (!this.validateDate("hora_inicio", "Data inicial")) return false;
+      if (!this.validateDateSchedule("hora_inicio", "Data inicial"))
+        return false;
     }
 
     if (hora_fim !== undefined) {
-      if (!this.validateDate("hora_fim", "Data final")) return false;
+      if (!this.validateDateSchedule("hora_fim", "Data final")) return false;
     }
 
     if ((hora_inicio && !hora_fim) || (!hora_inicio && hora_fim)) {
@@ -383,6 +387,27 @@ class AgendamentoRequestDTO extends BaseDTO {
 
     return this.isValid();
   }
+
+
+  async verificarAtualizarStatus(agendamento) {
+    const hoje = new Date();
+    const dataAgendamento = new Date(agendamento.data_utilizacao);
+
+    if(dataAgendamento < hoje && agendamento.status === "pendente") {
+      try {
+        await agendamentoRepository.update(
+          {id: agendamento.id},
+          {status: "confirmado"}
+        );
+        agendamento.status = "confirmado"
+      } catch (error) {
+        console.error("Erro ao atualizar status do agendamento: ", error);
+      }
+    }
+    return agendamento;
+  }
 }
+
+
 
 export default AgendamentoRequestDTO;

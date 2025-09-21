@@ -35,7 +35,6 @@ route.get("/", validateGetFiltros, async (request, response) => {
   }
 });
 
-// GET /agendamentos/:id
 route.get("/:id", async (request, response) => {
   try {
     const agendamento = await agendamentoService.getAgendamentoById(request.validatedData.id);
@@ -49,7 +48,6 @@ route.get("/:id", async (request, response) => {
   }
 });
 
-// POST /agendamentos
 route.post("/", validateCreate, async (request, response) => {
   try {
     const novoAgendamento = await agendamentoService.postAgendamento(
@@ -71,7 +69,6 @@ route.post("/", validateCreate, async (request, response) => {
   }
 });
 
-// PUT /agendamentos/:id
 route.put("/:id", validateUpdate, async (request, response) => {
   try {
     const agendamentoAtualizado = await agendamentoService.putAgendamento(
@@ -91,8 +88,7 @@ route.put("/:id", validateUpdate, async (request, response) => {
   }
 });
 
-// DELETE /agendamentos/:id
-route.delete("/:id", async (request, response) => {
+route.delete("/:id",validateDelete, async (request, response) => {
   try {
     await agendamentoService.deleteAgendamento(request.validatedData.id);
     return response.status(200).json({
