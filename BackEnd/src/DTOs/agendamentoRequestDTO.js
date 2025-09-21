@@ -2,7 +2,7 @@ import BaseDTO from "./BaseDTO.js";
 import Agendamento from "../entities/agendamento.js";
 import Labs from "../entities/labs.js";
 import Usuario from "../entities/usuario.js";
-import { AppDataSource } from "../database/data-source";
+import { AppDataSource } from "../database/data-source.js";
 import { IsNull } from "typeorm";
 import validationUtils from "../utils/validationUtils.js";
 

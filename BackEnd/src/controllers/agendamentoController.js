@@ -1,7 +1,7 @@
 import express from "express";
 import agendamentoService from "../services/agendamentoServices.js";
 import validationMiddleware from "../middleware/validationMiddleware.js";
-import AgendamentoRequestDTO from "../DTOs/index.js";
+import {AgendamentoRequestDTO} from "../DTOs/index.js";
 
 const route = express.Router();
 
