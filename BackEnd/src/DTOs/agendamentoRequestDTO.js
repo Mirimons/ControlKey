@@ -169,6 +169,7 @@ class AgendamentoRequestDTO extends BaseDTO {
     }
     this.validatedData.id = Number(this.data.id);
 
+
     if(!this.data.id_labs && isNaN(Number(this.data.id_labs))) {
       this.addError('id', 'O ID do Laboratório é obrigatório e precisa ser numérico.');
       return false;
@@ -180,6 +181,7 @@ class AgendamentoRequestDTO extends BaseDTO {
       return false;
     }
     this.validatedData.id = Number(this.data.id);
+
 
     if (data_utilizacao !== undefined)
       this.data.data_utilizacao = data_utilizacao;
@@ -436,4 +438,6 @@ class AgendamentoRequestDTO extends BaseDTO {
   }
 }
 
+
 export default AgendamentoRequestDTO;
+

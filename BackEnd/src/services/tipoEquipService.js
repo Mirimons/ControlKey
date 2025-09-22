@@ -14,44 +14,29 @@ class TipoEquipService {
             deletedAt: IsNull(),
         });
     }
-    async postTipoEquip(tipoEquipData) {
 
+    async postTipoEquip(tipoEquipData) {
         const {desc_tipo} = tipoEquipData;
 
-        if (
-            !desc_tipo &&
-            desc_tipo.trim().length < 1
-        ) {
-            throw new Error("O campo 'desc_tipo' deve ter pelo menos um caractere.");
-        }
         const newTipoEquip = tipoEquipRepository.create({
-            desc_tipo: tipoEquipData.desc_tipo.trim(),
+            desc_tipo: desc_tipo,
         });
+
         await tipoEquipRepository.save(newTipoEquip);
         return newTipoEquip;
     }
+
     async putTipoEquip(id, tipoEquipData) {
-        if (isNaN(Number(id))) {
-            throw new Error("O 'id' precisa ser um valor numérico.");
-        }
-        if (
-            !tipoEquipData.desc_Tipo &&
-            tipoEquipData.desc_tipo.trim().length < 1
-        ) {
-            throw new Error("O campo 'desc_tipo' deve ter pelo menos um caractere.");
-        }
+        const { desc_tipo } = tipoEquipData;
         await tipoEquipRepository.update(
             { id },
             {
-                desc_Tipo: tipoEquipData.desc_Tipo.trim(),
+                desc_tipo: desc_tipo,
             }
         );
         return await tipoEquipRepository.findOneBy({ id });
     }
     async deleteTipoEquip(id) {
-        if (isNaN(Number(id))) {
-            throw new Error("O 'id' precisa ser um valor numérico.");
-        }
         await tipoEquipRepository.update({ id }, {
             deletedAt: () => "CURRENT_TIMESTAMP"
         });

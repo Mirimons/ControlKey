@@ -19,85 +19,47 @@ class EquipService {
 
   async postEquip(equipData) {
     const { id_tipo, desc_equip, status } = equipData;
-    if (!id_tipo && isNaN(Number(id_tipo))) {
-      throw new Error(
-        "O campo 'id_tipo' é obrigatório e precisa ser numérico."
-      );
-    }
-    if (!desc_equip && desc_equip.length < 1) {
-      throw new Error(
-        "O campo 'desc_equip' é obrigatório deve ter pelo menos um caractere."
-      );
-    }
+
     const tipo_equip = await tipoEquipRepository.findOneBy({
       id: Number(id_tipo),
       deletedAt: IsNull(),
     });
 
-    if (!tipo_equip) {
-      throw new Error("Tipo de equipamento infomado não encontrado.");
-    }
-
     const statusLower = (status || "livre")?.toLowerCase();
-    if (statusLower != "livre" && statusLower != "ocupado") {
-      throw new Error("Status deve ser 'livre' ou 'ocupado'.");
-    }
-
     const newEquipamento = equipamentoRepository.create({
       id_tipo: Number(id_tipo),
       tipo: tipo_equip,
-      desc_equip,
+      desc_equip: desc_equip,
+      status: statusLower,
       createdAt: new Date(),
     });
 
     await equipamentoRepository.save(newEquipamento);
     return newEquipamento;
   }
+
   async putEquip(id, equipData) {
     const { id_tipo, desc_equip, status } = equipData;
-    if (!id && isNaN(Number(id))) {
-      throw new Error("O campo 'id' precisa ser um valor numérico.");
-    }
-    if (!id_tipo && isNaN(Number(id_tipo))) {
-      throw new Error(
-        "O campo 'id_tipo' é obrigatório e precisa ser numérico."
-      );
-    }
-    if (!desc_equip && desc_equip.length < 1) {
-      throw new Error(
-        "O campo 'desc_equip' é obrigatório deve ter pelo menos um caractere."
-      );
-    }
 
     const statusLower = (status || "livre")?.toLowerCase();
-    if (statusLower != "livre" && statusLower != "ocupado") {
-      throw new Error("Status deve ser 'livre' ou 'ocupado'.");
-    }
+
     
-    const tipo_equip = await tipoEquipRepository.findOneBy({
-      id: Number(id_tipo),
-      deletedAt: IsNull(),
-    });
-    if (!tipo_equip) {
-      return response
-        .status(404)
-        .send({ response: "Tipo de equipamento informado não encontrado." });
-    }
+    // const tipo_equip = await tipoEquipRepository.findOneBy({
+    //   id: Number(id_tipo),
+    //   deletedAt: IsNull(),
+    // });
     await equipamentoRepository.update(
       { id },
       {
         id_tipo,
-        desc_equip,
+        status: statusLower,
+        desc_equip: desc_equip,
       }
     );
     return await equipamentoRepository.findOneBy({ id });
   }
   async deleteEquip(id) {
-    if (isNaN(Number(id))) {
-      throw new Error("O id precisa ser um valor numérico.");
-    }
-
-    await equipamentoRepository.update({ id }, { deletedAt: () => new Date() });
+    await equipamentoRepository.update({ id }, { deletedAt: new Date() });
     return true;
   }
 }
