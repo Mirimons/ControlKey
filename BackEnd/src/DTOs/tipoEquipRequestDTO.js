@@ -1,44 +1,39 @@
 import BaseDTO from "./BaseDTO.js";
-import TipoUsuario from "../entities/tipo_usuario.js";
+import TipoEquip from "../entities/tipo_equip.js";
 import { AppDataSource } from "../database/data-source.js";
 import { IsNull, Not } from "typeorm";
 
-const tipoUsuarioRepository = AppDataSource.getRepository(TipoUsuario);
+const tipoEquipRepository = AppDataSource.getRepository(TipoEquip);
 
-class TipoUsuarioRequestDTO extends BaseDTO {
-  async validateCreate() {
-    this.clearValidatedData();
+class TipoEquipRequestDTO extends BaseDTO {
+    async validateCreate() {
+        this.clearValidatedData();
+        const { desc_tipo } = this.data;
 
-    const { desc_tipo } = this.data;
-
-    this.data.desc_tipo = desc_tipo;
-
-    if (!this.validateString("desc_tipo", "Descrição do tipo", 2)) {
-      return false;
+        this.data.desc_tipo = desc_tipo;
+        if (!this.validateString("desc_tipo", "Descrição do tipo", 2)) {
+            return false;
+        }
+        try {
+            const tipoExiste = await tipoEquipRepository.findOne({
+                where: {
+                    desc_tipo: this.validatedData.desc_tipo,
+                    deletedAt: IsNull(),
+                },
+            });
+            if (tipoExiste) {
+                this.addError(
+                    "desc_tipo",
+                    "Já existe um tipo de equipamento com esta descrição"
+                );
+                return false;
+            }
+        } catch (error) {
+            this.addError("desc_tipo", "Erro ao verificar tipo de equipamento existente");
+            return false;
+        }
+        return this.isValid();
     }
-
-    try {
-      const tipoExiste = await tipoUsuarioRepository.findOne({
-        where: {
-          desc_tipo: this.validatedData.desc_tipo,
-          deletedAt: IsNull(),
-        },
-      });
-      if (tipoExiste) {
-        this.addError(
-          "desc_tipo",
-          "Já existe um tipo de usuário com esta descrição"
-        );
-        return false;
-      }
-    } catch (error) {
-      this.addError("desc_tipo", "Erro ao verificar tipo de usuário existente");
-      return false;
-    }
-
-    return this.isValid();
-  }
-
   async validateUpdate() {
     this.clearValidatedData();
 
@@ -60,7 +55,7 @@ class TipoUsuarioRequestDTO extends BaseDTO {
         }
 
         try {
-          const tipoExiste = await tipoUsuarioRepository.findOne({
+          const tipoExiste = await tipoEquipRepository.findOne({
             where: {
               desc_tipo: this.validatedData.desc_tipo,
               deletedAt: IsNull(),
@@ -70,14 +65,14 @@ class TipoUsuarioRequestDTO extends BaseDTO {
           if (tipoExiste) {
             this.addError(
               "desc_tipo",
-              "Já existe um tipo de usuário com esta descrição"
+              "Já existe um tipo de equipamento com esta descrição"
             );
             return false;
           }
         } catch (error) {
           this.addError(
             "desc_tipo",
-            "Erro ao verificar tipo de usuário existente"
+            "Erro ao verificar tipo de equipamento existente"
           );
           return false;
         }
@@ -85,11 +80,9 @@ class TipoUsuarioRequestDTO extends BaseDTO {
     }
     return this.isValid();
   }
-
   async validateDelete() {
     this.clearValidatedData();
-
-     if(!this.data.id && isNaN(Number(this.data.id))) {
+    if(!this.data.id && isNaN(Number(this.data.id))) {
       this.addError('id', 'O ID é obrigatório e precisa ser numérico.');
       return false;
     }
@@ -98,5 +91,4 @@ class TipoUsuarioRequestDTO extends BaseDTO {
     return this.isValid();
   }
 }
-
-export default TipoUsuarioRequestDTO;
+export default TipoEquipRequestDTO;

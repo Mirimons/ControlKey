@@ -27,8 +27,9 @@ class BaseDTO {
       this.addError(field, `${fieldName} é obrigatório.`);
       return false;
     }
+    
     if (
-      !validationUtils.isString(value) &&
+      !validationUtils.isString(value) ||
       !validationUtils.validateMinLength(value, minLength)
     ) {
       this.addError(
@@ -95,6 +96,36 @@ class BaseDTO {
       return false;
     }
     this.validatedData[field] = dateValidation.dateFormatted;
+    return true;
+  }
+
+  validateDateSchedule(field, fieldName) {
+    const value = this.data[field];
+    if (!value) {
+      this.addError(field, `${fieldName} é obrigatório`);
+      return false;
+    }
+    const dateValidation = validationUtils.validateDateSchedule(value);
+    if (!dateValidation.isValid) {
+      this.addError(field, dateValidation.error);
+      return false;
+    }
+    this.validatedData[field] = dateValidation.dateFormatted;
+    return true;
+  }
+
+  validateTime(field, fieldName) {
+    const value = this.data[field];
+    if (!value) {
+      this.addError(field, `${fieldName} é obrigatório`);
+      return false;
+    }
+    const timeValidation = validationUtils.validateTime(value);
+    if (!timeValidation.isValid) {
+      this.addError(field, timeValidation.error);
+      return false;
+    }
+    this.validatedData[field] = value;
     return true;
   }
 
