@@ -73,7 +73,7 @@ class UsuarioRequestDTO extends BaseDTO {
     this.validatedData.requiresCadastroExtra = cadastro;
 
     if (cadastro) {
-      if (!matricula && !matricula.trim()) {
+      if (!matricula ) {
         this.addError('matricula', 'A matrícula é obrigatória para este tipo de usuário.');
         return false;
       }

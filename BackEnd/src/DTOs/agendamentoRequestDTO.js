@@ -30,9 +30,19 @@ class AgendamentoRequestDTO extends BaseDTO {
     this.data.hora_fim = hora_fim;
     this.data.finalidade = finalidade;
 
-    if (!this.validateNumber("id_labs", "ID do Laboratório")) return false;
-    if (!this.validateNumber("id_usuario", "ID do Usuário")) return false;
-    if (!this.validateString("finalidade", "Finalidade", 5)) return false;
+    if(!this.data.id_labs && isNaN(Number(this.data.id_labs))) {
+      this.addError('id', 'O ID do Laboratório é obrigatório e precisa ser numérico.');
+      return false;
+    }
+    this.validatedData.id = Number(this.data.id);
+
+    if(!this.data.id_usuario && isNaN(Number(this.data.id_usuario))) {
+      this.addError('id', 'O ID do Laboratório é obrigatório e precisa ser numérico.');
+      return false;
+    }
+    this.validatedData.id = Number(this.data.id);
+
+    if (!this.validateString("finalidade", "Finalidade", 4)) return false;
     if (!this.validateDateSchedule("data_utilizacao", "Data de utilização"))
       return false;
     if (!this.validateTime("hora_inicio", "Hora do início")) return false;
@@ -159,32 +169,42 @@ class AgendamentoRequestDTO extends BaseDTO {
     }
     this.validatedData.id = Number(this.data.id);
 
-    if (id_labs !== undefined) this.data.id_labs = id_labs;
-    if (id_usuario !== undefined) this.data.id_usuario = id_usuario;
+    if(!this.data.id_labs && isNaN(Number(this.data.id_labs))) {
+      this.addError('id', 'O ID do Laboratório é obrigatório e precisa ser numérico.');
+      return false;
+    }
+    this.validatedData.id = Number(this.data.id);
+
+    if(!this.data.id_usuario && isNaN(Number(this.data.id_usuario))) {
+      this.addError('id', 'O ID do Laboratório é obrigatório e precisa ser numérico.');
+      return false;
+    }
+    this.validatedData.id = Number(this.data.id);
+
     if (data_utilizacao !== undefined)
       this.data.data_utilizacao = data_utilizacao;
     if (hora_inicio !== undefined) this.data.hora_inicio = hora_inicio;
     if (hora_fim !== undefined) this.data.hora_fim = hora_fim;
     if (finalidade !== undefined) this.data.finalidade = finalidade;
 
-    if (id_labs !== undefined) {
-      if (!this.validateNumber("id_labs", "ID do Laboratório")) return false;
-    }
+    // if (id_labs !== undefined) {
+    //   if (!this.validateNumber("id_labs", "ID do Laboratório")) return false;
+    // }
 
-    if (id_usuario !== undefined) {
-      if (!this.validateNumber("id_usuario", "ID do Usuário")) return false;
-    }
+    // if (id_usuario !== undefined) {
+    //   if (!this.validateNumber("id_usuario", "ID do Usuário")) return false;
+    // }
 
     if (finalidade !== undefined) {
-      if (!this.validateNumber("finalidade", "Finalidade", 5)) return false;
+      if (!this.validateString("finalidade", "Finalidade", 5)) return false;
     }
 
     if (hora_inicio !== undefined) {
-      if (!this.validateNumber("hora_inicio", "Hora do início")) return false;
+      if (!this.validateString("hora_inicio", "Hora do início")) return false;
     }
 
     if (hora_fim !== undefined) {
-      if (!this.validateNumber("hora_fim", "Hora do fim")) return false;
+      if (!this.validateString("hora_fim", "Hora do fim")) return false;
     }
 
     if (hora_inicio !== undefined && hora_fim !== undefined) {
@@ -363,7 +383,7 @@ class AgendamentoRequestDTO extends BaseDTO {
     }
 
     //Campos de texto para pesquisa
-    const { nomeProfessor, laboratorio, data_utilizacao } = this.data;
+    const { nomeProfessor, laboratorio, data_utilizacao, hora_inicio, hora_fim } = this.data;
 
     if (nomeProfessor !== undefined) {
       this.validatedData.nomeProfessor = nomeProfessor.toString().trim();
