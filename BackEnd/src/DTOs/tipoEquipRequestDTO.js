@@ -5,7 +5,7 @@ import { IsNull, Not } from "typeorm";
 
 const tipoEquipRepository = AppDataSource.getRepository(tipoEquip);
 
-class tipoEquipRequestDTO extends BaseDTO {
+class TipoEquipRequestDTO extends BaseDTO {
     async validateCreate() {
         this.clearValidatedData();
         const { desc_tipo } = this.data;
@@ -91,4 +91,4 @@ class tipoEquipRequestDTO extends BaseDTO {
     return this.isValid();
   }
 }
-export default tipoEquipRequestDTO;
+export default TipoEquipRequestDTO;

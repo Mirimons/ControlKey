@@ -1,20 +1,20 @@
 import express from "express";
 import tipoEquipService from "../services/tipoEquipService.js";
 import validationMiddleware from "../middleware/validationMiddleware.js";
-import { tipoEquipRequestDTO } from "../DTOs/index.js";
+import { TipoEquipRequestDTO } from "../DTOs/index.js";
 
 const route = express.Router();
 
 const validateCreate = validationMiddleware(
-  tipoEquipRequestDTO,
+  TipoEquipRequestDTO,
   "validateCreate"
 );
 const validateUpdate = validationMiddleware(
-  tipoEquipRequestDTO,
+  TipoEquipRequestDTO,
   "validateUpdate"
 );
 const validateDelete = validationMiddleware(
-  tipoEquipRequestDTO,
+  TipoEquipRequestDTO,
   "validateDelete"
 );
 
