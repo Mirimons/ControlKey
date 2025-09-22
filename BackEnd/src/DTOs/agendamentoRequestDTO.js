@@ -153,7 +153,12 @@ class AgendamentoRequestDTO extends BaseDTO {
       status,
     } = this.data;
 
-    if (!this.validateNumber("id", "ID do Agendamento")) return false;
+    if (!this.data.id && isNaN(Number(this.data.id))) {
+      this.addError("id", "O ID é obrigatório e precisa ser numérico.");
+      return false;
+    }
+    this.validatedData.id = Number(this.data.id);
+
     if (id_labs !== undefined) this.data.id_labs = id_labs;
     if (id_usuario !== undefined) this.data.id_usuario = id_usuario;
     if (data_utilizacao !== undefined)
@@ -321,8 +326,12 @@ class AgendamentoRequestDTO extends BaseDTO {
   async validateDelete() {
     this.clearValidatedData();
 
-    if (!this.validateNumber("id", "ID do Agendamento")) return false;
+    if (!this.data.id && isNaN(Number(this.data.id))) {
+      this.addError("id", "O ID é obrigatório e precisa ser numérico.");
+      return false;
+    }
 
+    this.validatedData.id = Number(this.data.id);
     return this.isValid();
   }
 
@@ -388,18 +397,17 @@ class AgendamentoRequestDTO extends BaseDTO {
     return this.isValid();
   }
 
-
   async verificarAtualizarStatus(agendamento) {
     const hoje = new Date();
     const dataAgendamento = new Date(agendamento.data_utilizacao);
 
-    if(dataAgendamento < hoje && agendamento.status === "pendente") {
+    if (dataAgendamento < hoje && agendamento.status === "pendente") {
       try {
         await agendamentoRepository.update(
-          {id: agendamento.id},
-          {status: "confirmado"}
+          { id: agendamento.id },
+          { status: "confirmado" }
         );
-        agendamento.status = "confirmado"
+        agendamento.status = "confirmado";
       } catch (error) {
         console.error("Erro ao atualizar status do agendamento: ", error);
       }
@@ -407,7 +415,5 @@ class AgendamentoRequestDTO extends BaseDTO {
     return agendamento;
   }
 }
-
-
 
 export default AgendamentoRequestDTO;
