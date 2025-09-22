@@ -15,8 +15,8 @@ class AgendamentoService {
         nomeProfessor,
         laboratorio,
         dataInicio,
-        dataFim,
         dataUtilizacao,
+        dataFim,
         status,
         page = 1,
         limit = 10

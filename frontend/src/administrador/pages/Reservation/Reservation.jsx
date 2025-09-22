@@ -8,9 +8,15 @@ function Reservation() {
     const [modalAberto, setModalAberto] = useState(false);
     const [nomeProfessor, setNomeProfessor] = useState("");
     const [laboratorio, setLaboratorio] = useState("");
-    const [dataInicio, setDataInicio] = useState("");
-    const [dataFim, setDataFim] = useState("");
+    const [horaInicio, setHoraInicio] = useState("");
+    const [horaFim, setHoraFim] = useState("");
     const [dataUtilizacao, setDataUtilizacao] = useState("");
+    const [status, setStatus] = useState("");
+    const [chaves, setChaves] = useState("");
+
+    const [reservas, setReservas] = useState([]);
+
+    console.log(reservas);
 
     const modalRef = useRef();
 
@@ -20,12 +26,24 @@ function Reservation() {
     const handleSalvar = (e) => {
         e.preventDefault();
 
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            alert('Você precisa estar logado para reservar!');
+            return;
+        }
+
         api.post("/agendamento", {
             nomeProfessor,
             laboratorio,
-            dataInicio,
-            dataFim,
-            dataUtilizacao
+            horaInicio,
+            horaFim,
+            dataUtilizacao,
+            status
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         })
             .then(response => {
                 console.log("Agendamento realizado:", response.data);
@@ -35,9 +53,10 @@ function Reservation() {
                 // limpa os campos
                 setNomeProfessor("");
                 setLaboratorio("");
-                setDataInicio("");
-                setDataFim("");
+                setHoraInicio("");
+                setHoraFim("");
                 setDataUtilizacao("");
+                setStatus("");
 
                 sessionStorage.setItem("tokenJwt", data.token);
             })
@@ -46,6 +65,39 @@ function Reservation() {
                 alert(error.response?.data?.error || "Erro ao agendar!");
             });
     };
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        api.get("/labs", {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(response => {
+                setChaves(response.data); // guarda os labs
+            })
+            .catch(error => {
+                console.error("Erro ao buscar chaves:", error);
+            });
+    }, []);
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        api.get("/labs", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                setReservas(response.data);
+            })
+            .catch(error => {
+                console.error("Erro ao buscar reserva:", error);
+            });
+
+    }, [reservas])
 
     useEffect(() => {
         function handleClickFora(event) {
@@ -74,7 +126,7 @@ function Reservation() {
     return (
         <div className="reservas-container">
             <header className="reservas-header">
-                <h1>Reservas </h1>
+                <h1>Reservas</h1>
             </header>
 
             <div className="reservas-acoes">
@@ -100,20 +152,24 @@ function Reservation() {
             <table className="reservas-tabela">
                 <thead>
                     <tr>
-                        <th>Código</th>
-                        <th>Nome</th>
-                        <th>Tp_usuário</th>
-                        <th>Telefone</th>
+                        <th>Solicitante</th>
+                        <th>Ambiente</th>
+                        <th>Data Utilização</th>
+                        <th>Horário InÍcio</th>
+                        <th>Horário Fim</th>
+                        <th>Status</th>
                         <th>Editar</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {[...Array(6)].map((_, i) => (
-                        <tr key={i}>
-                            <td>Celula</td>
-                            <td>Celula</td>
-                            <td>Celula</td>
-                            <td>Celula</td>
+                    {reservas && reservas.map((reservation) => (
+                        <tr key={reservation.id}>
+                            <td>{reservation.nomeProfessor}</td>
+                            <td>{reservation.laboratorio}</td>
+                            <td>{reservation.dataUtilizacao}</td>
+                            <td>{reservation.horaInicio}</td>
+                            <td>{reservation.setHoraFim}</td>
+                            <td>{reservation.status}</td>
                             <td><button className="editar-btn">✏️</button></td>
                         </tr>
                     ))}
@@ -137,30 +193,32 @@ function Reservation() {
 
                             <select
                                 value={laboratorio}
-                                onChange={(e) => setLaboratorio(Number(e.target.value))}
-                                required defaultValue=""
+                                onChange={(e) => setLaboratorio(e.target.value)}
+                                required
                             >
-                                <option value="" disabled selected hidden>Selecione o Ambiente</option>
-                                <option value={1}>Administrador</option>
-                                <option value={2}>Comum</option>
-                                <option value={3}>Terceiro</option>
+                                <option value="" disabled hidden>Selecione o Ambiente</option>
+                                {chaves.map((chave) => (
+                                    <option key={chave.id} value={chave.id}>
+                                        {chave.nome_lab}
+                                    </option>
+                                ))}
                             </select>
 
-                            <label>Data de ínicio</label>
+                            <label>Horário de ínicio</label>
                             <input
-                                type="date"
+                                type="time"
                                 placeholder="Data de Início"
-                                value={dataInicio}
-                                onChange={(e) => setDataInicio(e.target.value)}
+                                value={horaInicio}
+                                onChange={(e) => setHoraInicio(e.target.value)}
                                 required
                             />
 
-                            <label>Data de Fim</label>
+                            <label>Horário de Fim</label>
                             <input
-                                type="date"
+                                type="time"
                                 placeholder="Data de Fim"
-                                value={dataFim}
-                                onChange={(e) => setDataFim(e.target.value)}
+                                value={horaFim}
+                                onChange={(e) => setHoraFim(e.target.value)}
                                 required
                             />
 
