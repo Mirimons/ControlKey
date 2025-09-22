@@ -85,7 +85,8 @@ class TipoUsuarioRequestDTO extends BaseDTO {
 
   async validateDelete() {
     this.vlearValidatedData();
-    if (!this.validateNumber("id", "ID")) {
+    
+    if (!this.validateNumber(this.data.id)) {
       return false;
     }
 
