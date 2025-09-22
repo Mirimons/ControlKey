@@ -31,7 +31,7 @@ class TipoUsuarioService {
     const { desc_tipo } = tipoUsuarioData;
 
     await tipoUsuarioRepository.update(
-      { id },
+      { id: Number(id)},
       {
         desc_tipo: desc_tipo,
       }
@@ -42,7 +42,7 @@ class TipoUsuarioService {
 
   async deleteTipoUsuario(id) {
     await tipoUsuarioRepository.update(
-      { id },
+      { id: Number(id) },
       {
         deletedAt: () => "CURRENT_TIMESTAMP",
       }

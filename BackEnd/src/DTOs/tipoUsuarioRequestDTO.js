@@ -44,9 +44,12 @@ class TipoUsuarioRequestDTO extends BaseDTO {
 
     const { desc_tipo } = this.data;
 
-    if (!this.validateNumber("id", "ID")) {
+    if(!this.data.id && isNaN(Number(this.data.id))) {
+      this.addError('id', 'O ID é obrigatório e precisa ser numérico.');
       return false;
     }
+
+    this.validatedData.id = Number(this.data.id);
 
     if (desc_tipo !== undefined) {
       this.data.desc_tipo = desc_tipo;
@@ -84,12 +87,14 @@ class TipoUsuarioRequestDTO extends BaseDTO {
   }
 
   async validateDelete() {
-    this.vlearValidatedData();
-    
-    if (!this.validateNumber(this.data.id)) {
+    this.clearValidatedData();
+
+     if(!this.data.id && isNaN(Number(this.data.id))) {
+      this.addError('id', 'O ID é obrigatório e precisa ser numérico.');
       return false;
     }
 
+    this.validatedData.id = Number(this.data.id);
     return this.isValid();
   }
 }
