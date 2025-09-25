@@ -11,15 +11,9 @@ class AgendamentoService {
       const {
         nomeProfessor,
         laboratorio,
-<<<<<<< HEAD
-        dataInicio,
-        dataUtilizacao,
-        dataFim,
-=======
         hora_inicio,
         hora_fim,
         data_utilizacao,
->>>>>>> d890552c1eb1445060f19999d3a865c4bdea8e90
         status,
         page = 1,
         limit = 10,

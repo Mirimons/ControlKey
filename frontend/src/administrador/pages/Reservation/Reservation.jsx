@@ -13,6 +13,7 @@ function Reservation() {
     const [dataUtilizacao, setDataUtilizacao] = useState("");
     const [status, setStatus] = useState("");
     const [chaves, setChaves] = useState("");
+    const [solicitante, setSolicitante] = useState([]);
 
     const [reservas, setReservas] = useState([]);
 
@@ -34,7 +35,7 @@ function Reservation() {
         }
 
         api.post("/agendamento", {
-            nomeProfessor,
+            nomeProfessor : nome,
             laboratorio,
             horaInicio,
             horaFim,
@@ -80,6 +81,21 @@ function Reservation() {
                 console.error("Erro ao buscar chaves:", error);
             });
     }, []);
+
+useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    api.get("/usuario", {
+        headers: { Authorization: `Bearer ${token}` }
+    })
+        .then(response => {
+            setSolicitante(response.data); // agora é array de professores
+        })
+        .catch(error => {
+            console.error("Erro ao buscar professores:", error);
+        });
+}, []);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -183,13 +199,26 @@ function Reservation() {
                         <form onSubmit={handleSalvar}>
                             <h2>Fazer Reserva</h2>
 
-                            <input
+                            {/*<input
                                 type="text"
                                 placeholder="Nome professor"
                                 value={nomeProfessor}
                                 onChange={(e) => setNomeProfessor(e.target.value)}
                                 required
-                            />
+                            />*/}
+
+                            <select
+                                value={nomeProfessor}
+                                onChange={(e) => setNomeProfessor(e.target.value)}
+                                required
+                            >
+                                <option value="" disabled hidden>Selecione o professor</option>
+                                {solicitante.map((solicitante) => (
+                                    <option key={solicitante.id} value={solicitante.id}>
+                                        {solicitante.nome}
+                                    </option>
+                                ))}
+                            </select>
 
                             <select
                                 value={laboratorio}

@@ -5,59 +5,58 @@ import "./retiradaDevolucao.css";
 import api from "../../services/api";
 
 function RetiradaDevolucao() {
-    const [retirar, setRetirar] = useState("");
-    const [devolver, setDevolver] = useState("");
-    const [rmCpf, setRmCpf] = useState("");
+    const [identificacao, setidentificacao] = useState("");
+    const [tipo, setTipo] = useState("");
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        console.log("Identificação:", identificacao);
+        console.log("Tipo escolhido:", tipo);
+        // Aqui você chamaria sua API ou salvaria no banco
+    };
 
     return (
-        <div className="container">
-            {/* Header */}
-            <header className="header">
-                <img src="/logo-etec.png" alt="Etec" className="logo" />
-                <img src="/logo-cps.png" alt="CPS" className="logo" />
-            </header>
+        <div className="container-pagprofs">
+            <h2>Retirada e Devolução</h2>
+            <form onSubmit={handleSubmit}>
+                <input
+                    type="text"
+                    placeholder="Digite seu RM ou CPF"
+                    value={identificacao}
+                    onChange={(e) => setIdentificacao(e.target.value)}
+                    className="input-identificacao"
+                />
 
-            {/* Conteúdo */}
-            <main className="content">
-                {/* Select Retirar */}
-                <select
-                    value={retirar}
-                    onChange={(e) => setRetirar(e.target.value)}
-                    className="select"
-                >
-                    <option value="" disabled hidden>Retirar</option>
-                    <option value="chave">Chave</option>
-                    <option value="equipamento">Equipamento</option>
-                </select>
+                <div className="opcoes">
+                    <label className="radio-label">
+                        <input
+                            type="radio"
+                            name="tipo"
+                            value="chave"
+                            checked={tipo === "chave"}
+                            onChange={(e) => setTipo(e.target.value)}
+                        />
+                        <span className="custom-radio"></span>
+                        Chave
+                    </label>
 
-                {/* Select Devolver */}
-                <select 
-                    value={devolver}
-                    onChange={(e) => setDevolver(e.target.value)}
-                    className="select"
-                >
-                    <option value="" disabled hidden>Devolver</option>
-                    <option value="chave">Chave</option>
-                    <option value="equipamento">Equipamento</option>
-                </select>
-
-                {/* Input RM ou CPF */}
-                <div className="input-box">
-                    <label>Informe seu RM ou CPF:</label>
-                    <input
-                        type="text"
-                        value={rmCpf}
-                        onChange={(e) => setRmCpf(e.target.value)}
-                        className="input"
-                        placeholder="Digite aqui"
-                    />
+                    <label className="radio-label">
+                        <input
+                            type="radio"
+                            name="tipo"
+                            value="equipamento"
+                            checked={tipo === "equipamento"}
+                            onChange={(e) => setTipo(e.target.value)}
+                        />
+                        <span className="custom-radio"></span>
+                        Equipamento
+                    </label>
                 </div>
-                <button 
-                
-                
-                
-                className="botaoOk"> OK! </button>
-            </main>
+
+                <button type="submit" className="btn-confirmar">
+                    Confirmar
+                </button>
+            </form>
         </div>
     );
 }

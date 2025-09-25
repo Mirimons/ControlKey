@@ -42,6 +42,35 @@
   border-radius: 6px;
 }
 
+lupa {
+  position: relative;
+  width: 250px; /* mesmo tamanho do input dos filtros */
+}
+
+.lupa input {
+  width: 100%;
+  padding: 10px 40px 10px 10px; /* espaço para a lupa */
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.lupa button {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #555;
+  font-size: 16px;
+}
+
+.lupa button:hover {
+  color: #000;
+}
+
 .usuarios-acoes {
   margin-bottom: 20px;
 }

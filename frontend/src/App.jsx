@@ -42,7 +42,7 @@ function App() {
           <Route path="/Equipaments" element={<Equipaments />} />
           <Route path="/Reservation" element={<Reservation />} />
           <Route path="/" element={<Login />} />
-          <Route path="/RetiradaDevolucao" element={<RetiradaDevolucao />} />
+          <Route path="/retiradaDevolucao" element={<RetiradaDevolucao />} />
           <Route path="/Retirar" element={<Retirar />} />
           <Route path="/Devolver" element={<Devolver />} />
           <Route path="/Retirar/RetirarChave" element={<RetirarChave />} />

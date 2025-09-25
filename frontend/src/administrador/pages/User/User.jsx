@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaSearch } from "react-icons/fa";
 import './User.css';
 import Navbar from "../../../components/navbar";
 import api from '../../../services/api';
@@ -131,6 +131,7 @@ function User() {
                 <button type="button" onClick={abrirModal}>Adicionar Usuário</button>
             </div>
 
+
             <div className="usuarios-filtros">
                 <div>
                     <h3>Nome completo</h3>
@@ -148,6 +149,16 @@ function User() {
                         <option value="Comum">Comum</option>
                     </select>
                 </div>
+                <button
+                    className="lupa"
+                    type="button"
+                    onClick={() => {
+                        console.log("Pesquisando:", filtroNome);
+                        // aqui você pode filtrar a lista de usuários
+                    }}
+                >
+                    <FaSearch />
+                </button>
             </div>
 
             <table className="usuarios-tabela">
@@ -241,7 +252,7 @@ function User() {
                                 onChange={(e) => setData_nasc(e.target.value)}
                                 required
                             />
-                            
+
                             <div className="senha-container">
                                 <input
                                     type={mostrarSenha ? "text" : "password"}
