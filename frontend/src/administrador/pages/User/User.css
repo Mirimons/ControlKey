@@ -42,35 +42,6 @@
   border-radius: 6px;
 }
 
-lupa {
-  position: relative;
-  width: 250px; /* mesmo tamanho do input dos filtros */
-}
-
-.lupa input {
-  width: 100%;
-  padding: 10px 40px 10px 10px; /* espaço para a lupa */
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-}
-
-.lupa button {
-  position: absolute;
-  right: 5px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #555;
-  font-size: 16px;
-}
-
-.lupa button:hover {
-  color: #000;
-}
-
 .usuarios-acoes {
   margin-bottom: 20px;
 }
@@ -198,9 +169,9 @@ lupa {
 /* Estilo geral para inputs desabilitados */
 input:disabled,
 select:disabled {
-    background-color: #c9c9c9; 
-    color: #888; 
-    cursor: not-allowed; 
+  background-color: #c9c9c9;
+  color: #888;
+  cursor: not-allowed;
 }
 
 .senha-container {
@@ -211,7 +182,8 @@ select:disabled {
 
 .senha-container input {
   width: 100%;
-  padding: 12px 40px 12px 12px; /* espaço para o ícone dentro do input */
+  padding: 12px 40px 12px 12px;
+  /* espaço para o ícone dentro do input */
   border: 1px solid #ccc;
   border-radius: 4px;
 }
@@ -228,5 +200,3 @@ select:disabled {
   font-size: 18px;
   padding: 0;
 }
-
-

@@ -149,16 +149,7 @@ function User() {
                         <option value="Comum">Comum</option>
                     </select>
                 </div>
-                <button
-                    className="lupa"
-                    type="button"
-                    onClick={() => {
-                        console.log("Pesquisando:", filtroNome);
-                        // aqui você pode filtrar a lista de usuários
-                    }}
-                >
-                    <FaSearch />
-                </button>
+
             </div>
 
             <table className="usuarios-tabela">

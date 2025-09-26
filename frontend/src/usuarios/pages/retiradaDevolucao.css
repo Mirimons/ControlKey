@@ -61,9 +61,11 @@ body {
 
 /* Container centralizado */
 .container-pagprofs {
-  max-width: 450px;
-  margin: 50px auto;
-  padding: 30px 25px;
+  width: 50%;
+  max-width: 400px;
+  min-width: 400px;
+  /* margin: 50px auto; */
+  padding: 50px 40px;
   background: #f9f9f9;
   border-radius: 15px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.1);
@@ -115,7 +117,7 @@ body {
 }
 
 .radio-label:hover {
-  color: #4CAF50;
+  color: #4da6ff;
 }
 
 /* Esconde o radio padrão */
@@ -140,7 +142,7 @@ body {
   content: "";
   width: 12px;
   height: 12px;
-  background: #4CAF50;
+  background: #4da6ff;
   border-radius: 50%;
   position: absolute;
   top: 3px;
@@ -148,8 +150,8 @@ body {
 }
 
 /* Botão Confirmar */
-.btn-confirmar {
-  background: #4CAF50;
+.btn-retirar {
+  background-color: #4da6ff;
   color: white;
   border: none;
   padding: 12px 25px;
@@ -159,8 +161,38 @@ body {
   transition: all 0.3s ease;
 }
 
-.btn-confirmar:hover {
-  background: #45a049;
+.btn-devolver {
+  background-color: #4da6ff;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  font-size: 16px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-retirar:hover {
+  background: #3479be;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.btn-devolver:hover {
+  background: #3479be;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.buttons {
+  display: flex;
+  justify-content: center; /* centraliza na tela */
+  gap: 20px; /* distância entre os botões */
+}
+
+/* Wrapper apenas dessa página */
+.wrapper-pagprofs {
+  display: flex;
+  justify-content: center;   /* centraliza na horizontal */
+  align-items: center;       /* centraliza na vertical */
+  min-height: 100vh;         /* ocupa toda a altura da tela */
 }
 

@@ -35,7 +35,7 @@ function Reservation() {
         }
 
         api.post("/agendamento", {
-            nomeProfessor : nome,
+            nomeProfessor: nome,
             laboratorio,
             horaInicio,
             horaFim,
@@ -82,20 +82,20 @@ function Reservation() {
             });
     }, []);
 
-useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
 
-    api.get("/usuario", {
-        headers: { Authorization: `Bearer ${token}` }
-    })
-        .then(response => {
-            setSolicitante(response.data); // agora é array de professores
+        api.get("/usuario", {
+            headers: { Authorization: `Bearer ${token}` }
         })
-        .catch(error => {
-            console.error("Erro ao buscar professores:", error);
-        });
-}, []);
+            .then(response => {
+                setSolicitante(response.data); // agora é array de professores
+            })
+            .catch(error => {
+                console.error("Erro ao buscar professores:", error);
+            });
+    }, []);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -207,6 +207,7 @@ useEffect(() => {
                                 required
                             />*/}
 
+                            <label>Solicitante:</label>
                             <select
                                 value={nomeProfessor}
                                 onChange={(e) => setNomeProfessor(e.target.value)}
@@ -220,6 +221,7 @@ useEffect(() => {
                                 ))}
                             </select>
 
+                            <label>Ambiente:</label>
                             <select
                                 value={laboratorio}
                                 onChange={(e) => setLaboratorio(e.target.value)}
@@ -232,6 +234,15 @@ useEffect(() => {
                                     </option>
                                 ))}
                             </select>
+
+                            <label>Data de Utilização</label>
+                            <input
+                                type="date"
+                                placeholder="Data de Utilização"
+                                value={dataUtilizacao}
+                                onChange={(e) => setDataUtilizacao(e.target.value)}
+                                required
+                            />
 
                             <label>Horário de ínicio</label>
                             <input
@@ -251,14 +262,6 @@ useEffect(() => {
                                 required
                             />
 
-                            <label>Data de Utilização</label>
-                            <input
-                                type="date"
-                                placeholder="Data de Utilização"
-                                value={dataUtilizacao}
-                                onChange={(e) => setDataUtilizacao(e.target.value)}
-                                required
-                            />
 
                             <div className="modal-botoes">
                                 <button type="button" onClick={fecharModal}>Cancelar</button>
