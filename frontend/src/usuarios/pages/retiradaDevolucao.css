@@ -15,8 +15,8 @@ body {
   height: 50px;
 } */
 
-/* conteúdo */
-.content {
+
+/* .content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -24,7 +24,6 @@ body {
   gap: 50px;
 }
 
-/* select */
 .select {
   width: 350px;
   padding: 10px;
@@ -35,23 +34,20 @@ body {
   height: 70px;
 }
 
-/* input */
 .input-box {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px; /* espaçamento entre label e input */
+  gap: 8px; 
 }
 
-/* label */
 .input-box label {
   font-weight: bold;
   margin-bottom: 5px;
-  background: none;  /* garante que não fica com fundo */
+  background: none;  
   color: black;
 }
 
-/* input */
 .input {
   width: 350px;
   height: 70px;
@@ -61,4 +57,142 @@ body {
   background-color: #e0e0e0;
   text-align: center;
   font-size: 20px;
+} */
+
+/* Container centralizado */
+.container-pagprofs {
+  width: 50%;
+  max-width: 400px;
+  min-width: 400px;
+  /* margin: 50px auto; */
+  padding: 50px 40px;
+  background: #f9f9f9;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
+/* Título */
+.container h2 {
+  margin-bottom: 25px;
+  color: #333;
+  font-size: 1.8rem;
+}
+
+/* Input de RM/CPF */
+.input-identificacao {
+  width: 90%;
+  padding: 12px 15px;
+  margin-bottom: 25px;
+  border: 1.5px solid #ccc;
+  border-radius: 25px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+/* .input-identificacao:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+} */
+
+/* Opções de Chave / Equipamento */
+.opcoes {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 30px;
+}
+
+/* Label dos radios */
+.radio-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 16px;
+  position: relative;
+  user-select: none;
+  color: #555;
+  transition: color 0.3s ease;
+}
+
+.radio-label:hover {
+  color: #4da6ff;
+}
+
+/* Esconde o radio padrão */
+.radio-label input {
+  display: none;
+}
+
+/* Bolinha customizada */
+.custom-radio {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #555;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 10px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* Bolinha preenchida quando selecionado */
+.radio-label input:checked + .custom-radio::after {
+  content: "";
+  width: 12px;
+  height: 12px;
+  background: #4da6ff;
+  border-radius: 50%;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+}
+
+/* Botão Confirmar */
+.btn-retirar {
+  background-color: #4da6ff;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  font-size: 16px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-devolver {
+  background-color: #4da6ff;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  font-size: 16px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-retirar:hover {
+  background: #3479be;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.btn-devolver:hover {
+  background: #3479be;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.buttons {
+  display: flex;
+  justify-content: center; /* centraliza na tela */
+  gap: 20px; /* distância entre os botões */
+}
+
+/* Wrapper apenas dessa página */
+.wrapper-pagprofs {
+  display: flex;
+  justify-content: center;   /* centraliza na horizontal */
+  align-items: center;       /* centraliza na vertical */
+  min-height: 100vh;         /* ocupa toda a altura da tela */
+}
+

@@ -13,6 +13,7 @@ function Reservation() {
     const [dataUtilizacao, setDataUtilizacao] = useState("");
     const [status, setStatus] = useState("");
     const [chaves, setChaves] = useState("");
+    const [solicitante, setSolicitante] = useState([]);
 
     const [reservas, setReservas] = useState([]);
 
@@ -34,7 +35,7 @@ function Reservation() {
         }
 
         api.post("/agendamento", {
-            nomeProfessor,
+            nomeProfessor: nome,
             laboratorio,
             horaInicio,
             horaFim,
@@ -78,6 +79,21 @@ function Reservation() {
             })
             .catch(error => {
                 console.error("Erro ao buscar chaves:", error);
+            });
+    }, []);
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        api.get("/usuario", {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(response => {
+                setSolicitante(response.data); // agora é array de professores
+            })
+            .catch(error => {
+                console.error("Erro ao buscar professores:", error);
             });
     }, []);
 
@@ -183,14 +199,29 @@ function Reservation() {
                         <form onSubmit={handleSalvar}>
                             <h2>Fazer Reserva</h2>
 
-                            <input
+                            {/*<input
                                 type="text"
                                 placeholder="Nome professor"
                                 value={nomeProfessor}
                                 onChange={(e) => setNomeProfessor(e.target.value)}
                                 required
-                            />
+                            />*/}
 
+                            <label>Solicitante:</label>
+                            <select
+                                value={nomeProfessor}
+                                onChange={(e) => setNomeProfessor(e.target.value)}
+                                required
+                            >
+                                <option value="" disabled hidden>Selecione o professor</option>
+                                {solicitante.map((solicitante) => (
+                                    <option key={solicitante.id} value={solicitante.id}>
+                                        {solicitante.nome}
+                                    </option>
+                                ))}
+                            </select>
+
+                            <label>Ambiente:</label>
                             <select
                                 value={laboratorio}
                                 onChange={(e) => setLaboratorio(e.target.value)}
@@ -203,6 +234,15 @@ function Reservation() {
                                     </option>
                                 ))}
                             </select>
+
+                            <label>Data de Utilização</label>
+                            <input
+                                type="date"
+                                placeholder="Data de Utilização"
+                                value={dataUtilizacao}
+                                onChange={(e) => setDataUtilizacao(e.target.value)}
+                                required
+                            />
 
                             <label>Horário de ínicio</label>
                             <input
@@ -222,14 +262,6 @@ function Reservation() {
                                 required
                             />
 
-                            <label>Data de Utilização</label>
-                            <input
-                                type="date"
-                                placeholder="Data de Utilização"
-                                value={dataUtilizacao}
-                                onChange={(e) => setDataUtilizacao(e.target.value)}
-                                required
-                            />
 
                             <div className="modal-botoes">
                                 <button type="button" onClick={fecharModal}>Cancelar</button>

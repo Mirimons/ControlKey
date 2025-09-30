@@ -19,8 +19,8 @@ export default function Login() {
       .then(response => {
         console.log("Login bem-sucedido: ", response.data);
 
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('usuario', JSON.stringify({
+        sessionStorage.setItem('token', response.data.token);
+        sessionStorage.setItem('usuario', JSON.stringify({
           id: response.data.usuario.usuarioId,
           email: response.data.usuario.email
         }));

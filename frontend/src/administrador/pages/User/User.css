@@ -169,9 +169,9 @@
 /* Estilo geral para inputs desabilitados */
 input:disabled,
 select:disabled {
-    background-color: #c9c9c9; 
-    color: #888; 
-    cursor: not-allowed; 
+  background-color: #c9c9c9;
+  color: #888;
+  cursor: not-allowed;
 }
 
 .senha-container {
@@ -182,7 +182,8 @@ select:disabled {
 
 .senha-container input {
   width: 100%;
-  padding: 12px 40px 12px 12px; /* espaço para o ícone dentro do input */
+  padding: 12px 40px 12px 12px;
+  /* espaço para o ícone dentro do input */
   border: 1px solid #ccc;
   border-radius: 4px;
 }
@@ -199,5 +200,3 @@ select:disabled {
   font-size: 18px;
   padding: 0;
 }
-
-

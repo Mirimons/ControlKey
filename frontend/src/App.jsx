@@ -28,7 +28,7 @@ function App() {
   const hideNavbarPaths = [
     '/', '/retiradaDevolucao', '/Retirar', '/Devolver',
     '/Retirar/RetirarChave', '/Retirar/RetirarEquipamento',
-    '/Devolver/DevolverChave', '/Devolver/DevolverEquipamento'
+    '/Devolver/DevolverChave', '/Devolver/DevolverEquipamento', '/login'
   ];
   
   return (
@@ -41,8 +41,8 @@ function App() {
           <Route path="/Keys" element={<Keys />} />
           <Route path="/Equipaments" element={<Equipaments />} />
           <Route path="/Reservation" element={<Reservation />} />
-          <Route path="/" element={<Login />} />
-          <Route path="/RetiradaDevolucao" element={<RetiradaDevolucao />} />
+          <Route path="/Login" element={<Login />} />
+          <Route path="/" element={<RetiradaDevolucao />} />
           <Route path="/Retirar" element={<Retirar />} />
           <Route path="/Devolver" element={<Devolver />} />
           <Route path="/Retirar/RetirarChave" element={<RetirarChave />} />

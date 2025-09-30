@@ -27,8 +27,8 @@ function Equipaments() {
         }
 
         api.post("/equipamento", {
-            tipoEquip,
-            descEquip
+            id_tipo : tipoEquip,
+            desc_equip : descEquip
         }, {
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -65,7 +65,7 @@ function Equipaments() {
                 console.error("Erro ao buscar equipamento:", error);
             });
 
-    }, [equipamentos])
+    }, [])
 
     useEffect(() => {
         function handleClickFora(event) {
@@ -141,28 +141,14 @@ function Equipaments() {
                     <div className="modal-conteudo" ref={modalRef}>
                         <form onSubmit={handleSalvar}>
                             <h2>Adicionar Equipamento</h2>
-{/* 
-                            <select
-                                value={tipoEquip}
-                                onChange={(e) => setTipoEquip(Number(e.target.value))}
-                                required defaultValue=""
-                            >
-
-                                <option value="" disabled selected
-                                    hidden> Selecione o tipo do equipamento</option>
-                                <option value={1}>1</option>
-                                <option value={2}>2</option>
-                                <option value={3}>3</option>
-                            </select> */}
-
 
                             <input
                                 type="text"
-                                placeholder="Digite o número do equipamento"
+                                placeholder="Digite o código do equipamento"
                                 value={tipoEquip}
                                 onChange={(e) => setTipoEquip(e.target.value)}
                             />
-                            
+
                             <input
                                 type="text"
                                 placeholder="Descrição (Opcional)"
