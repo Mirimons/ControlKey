@@ -6,11 +6,11 @@
  * @class
  * @implements {MigrationInterface}
  */
-module.exports = class Db1757979153751 {
-    name = 'Db1757979153751'
+module.exports = class Db1759178388935 {
+    name = 'Db1759178388935'
 
     async up(queryRunner) {
-        await queryRunner.query(`CREATE TABLE \`tipo_equip\` (\`id\` int UNSIGNED NOT NULL AUTO_INCREMENT, \`desc_tipo\` varchar(100) NOT NULL, \`createdAt\` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), \`deletedAt\` timestamp(6) NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`);
+        await queryRunner.query(`CREATE TABLE \`tipo_equip\` (\`id\` int UNSIGNED NOT NULL AUTO_INCREMENT, \`desc_tipo\` varchar(100) NOT NULL, \`createdAt\` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), \`updatedAt\` timestamp(6) NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6), \`deletedAt\` timestamp(6) NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`);
         await queryRunner.query(`ALTER TABLE \`usuario_cad\` CHANGE \`senha\` \`senha\` varchar(255) NULL`);
         await queryRunner.query(`ALTER TABLE \`usuario_cad\` CHANGE \`passwordResetAt\` \`passwordResetAt\` timestamp NULL`);
         await queryRunner.query(`ALTER TABLE \`usuario_cad\` CHANGE \`deletedAt\` \`deletedAt\` timestamp(6) NULL`);

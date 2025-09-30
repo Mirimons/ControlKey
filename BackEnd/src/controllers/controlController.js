@@ -1,138 +1,136 @@
-import express from "express";
-import Control from "../entities/control.js";
-import Usuario from "../entities/usuario.js";
-import Equipamento from "../entities/equipamento.js";
-import Labs from "../entities/labs.js";
-import { AppDataSource } from "../database/data-source.js";
-import { Like, IsNull } from "typeorm";
+import express, { response } from "express";
+import controlService from "../services/controlService.js";
+import { ControlRequestDTO } from "../DTOs/index.js";
+import { getErrorMessage } from "../helpers/errorHandler.js";
+import validationMiddleware from "../middleware/validationMiddleware.js";
 
 const route = express.Router();
 
-const controlRepository = AppDataSource.getRepository(Control);
-const usuarioRepository = AppDataSource.getRepository(Usuario);
-const equipamentoRepository = AppDataSource.getRepository(Equipamento);
-const labsRepository = AppDataSource.getRepository(Labs);
+const validateGetControls = validationMiddleware(
+  ControlRequestDTO,
+  "validateGetControls"
+);
+const validateOpen = validationMiddleware(ControlRequestDTO, "validateOpen");
+const validateClose = validationMiddleware(ControlRequestDTO, "validateClose");
+const validateCiente = validationMiddleware(
+  ControlRequestDTO,
+  "validateCiente"
+);
+const validateDelete = validationMiddleware(
+  ControlRequestDTO,
+  "validateDelete"
+);
 
-route.get("/", async (request, response) => {
-    const control = await controlRepository.findBy({ deletedAt: IsNull() });
-    return response.status(200).json(control );
-});
+//Função auxiliar para tratamento de erros
+function handleControlError(response, error) {
+  if (error.message.includes("não encontrado")) {
+    return response.status(404).json({
+      response: error.message,
+      error: "Recurso não encontrado.",
+    });
+  }
 
+  if (error.message.includes("já tem")) {
+    return response.status(409).json({
+      response: error.message,
+      error: "Conflito de dados.",
+    });
+  }
 
-///Adicionar get de usuario(pelo nome dele), de equip, de lab, de data e status
-route.get("/:nameFound", async (request, response) => {
-    const { nameFound } = request.params;
-    const controlFound = await controlRepository.findBy({ nome: Like(`%${nameFound}%`) });
-    return response.status(200).send({ "response": controlFound });
-});
+  return response.status(500).json({
+    response: "Erro interno no servidor.",
+    error: getErrorMessage(error),
+  });
+}
 
-route.post("/", async (request, response) => {
-    //data_fim na const talvez
-    const { id_usuario, id_equip, id_labs, data_inicio, status } = request.body;
-    if (!id_usuario && isNaN(Number(id_usuario))) {
-        return response.status(400).send({ "response": "O campo 'id_usuario' é obrigatório e precisa ser numérico." });
-    }
-    if ((!id_equip && isNaN(Number(id_equip))) || (!id_labs && isNaN(Number(id_labs)))) {
-        return response.status(400).send({ "response": "É necessário preencher um dos campos (id_equip ou id_labs)." });
-    }
-    if (!data_inicio && IsNull(Date(data_inicio))){
-        return response.status(400).send({"response": "O campo 'data_inicio' é obrigatório."})
-    }
-    const dateValidation = validateAndFormatDate(data_inicio);
-    if (!dateValidation.isValid) {
-        return response.status(400).send({ "response": dateValidation.error });
-    }
-    if (status.toLowercase() != 'aberto' && status.toLowercase() != 'fechado'){
-        return response.status(400).send({"response": "O status deve ser 'aberto' ou 'fechado'. "})
-    }
-    
+route.get("/:id", async (request, response) => {
     try {
-        const usuario = await usuarioRepository.findOneBy({
-            id: Number(id_usuario),
-            deletedAt: IsNull()
-        });
-        const equipamento = await equipamentoRepository.findOneBy({
-            id: Number(id_equip),
-            deletedAt: IsNull()
-        });
-        const labs = await labsRepository.findOneBy({
-            id: Number(id_labs),
-            deletedAt: IsNull()
-        });
+        const { id } = request.params;
+        const control = await controlService.getControlById(id);
     
-        if (!usuario && isNaN(Number(usuario))) {
-            return response.status(404).send({ "response": "Usuário não encontrado." });
-        }
-        if (!equipamento && isNaN(Number(equipamento))){
-            return response.status(404).send({ "response": "Equipamento não encontrado." })
-        }
-        if (!labs && isNaN(Number(labs))){
-            return response.status(404).send({ "response": "Laboratório não encontrado." })
+        if (!control) {
+          return response.status(404).json({ response: "Control não encontrada." });
         }
     
-        const newControl = controlRepository.create({
-            id_usuario: Number(id_usuario),
-            id_labs: Number(id_labs),
-            id_equip: Number(id_equip),
-            data_inicio, 
-            data_fim,
-            status,
-            createdAt: new Date(),
+        return response.status(200).json(control);
+      } catch (error) {
+        console.error("Erro ao buscar control: ", error);
+        return response.status(500).json({
+          response: "Erro interno no servidor.",
+          error: getErrorMessage(error),
         });
-    
-        await controlRepository.save(newControl);
-        return response.status(201).send({ "response": "Control registrado com sucesso!" });
-    } catch (error) {
-        console.error("Erro ao registrar control: ", error);
-        return response.status(500).send({ "response": error });
-    };
+      }
+})
+
+route.get("/", validateGetControls, async (request, response) => {
+  try {
+    const controles = await controlService.getControls(request.validatedData);
+    return response.status(200).json(controles);
+  } catch (error) {
+    console.error("Erro ao buscar controles com filtros: ", error);
+    return response.status(500).json({
+      response: "Erro interno no servidor.",
+      error: getErrorMessage(error),
+    });
+  }
 });
-route.put("/:id", async (request, response) => {
-    const { id_usuario, id_equip, id_labs, data_inicio, status } = request.body;
-    const { id } = request.params;
 
-    if (!id_usuario && isNaN(Number(id_usuario))) {
-        return response.status(400).send({ "response": "O campo 'id_usuario' é obrigatório e precisa ser numérico." });
-    }
-    if ((!id_equip && isNaN(Number(id_equip))) || (!id_labs && isNaN(Number(id_labs)))) {
-        return response.status(400).send({ "response": "O campo 'id_equip' é obrigatório e precisa ser numérico." });
-    }
-    if (!data_inicio && IsNull(Date(data_inicio))){
-        return response.status(400).send({"response": "O campo 'data_inicio' é obrigatório."})
-    }
-    const dateValidation = validateAndFormatDate(data_inicio);
-    if (!dateValidation.isValid) {
-        return response.status(400).send({ "response": dateValidation.error });
-    }
-    if (status.toLowercase() != 'aberto' && status.toLowercase() != 'fechado'){
-        return response.status(400).send({"response": "O status deve ser 'aberto' ou 'fechado'. "})
-    }
-
-    try {
-        await controlRepository.update({
-            id_labs: Number(id_labs),
-            id_usuario: Number(id_usuario),
-            id_equip: Number(id_equip),
-            data_inicio, 
-            data_fim,
-            status,
-        });
-
-        return response.status(201).send({"response": "Control atualizado com sucesso!"});
-        } catch(erro){
-            return response.status(500).send({"error": erro});
-        };
+//Retirada
+route.post("/retirada", validateOpen, async (request, response) => {
+  try {
+    const newControl = await controlService.openControl(request.validatedData);
+    return response.status(201).json({
+      response: "Control registrada com sucesso!",
+      data: newControl,
+    });
+  } catch (error) {
+    console.error("Erro ao registrar control: ", error);
+    return handleControlError(response, error);
+  }
 });
-route.delete("/:id", async (request, response) => {
-    const { id } = request.params;
 
-    if (isNaN(Number(id))) {
-        return response.status(400).send({ "response": "O 'id' precisa ser um valor numérico" });
-    }
-    //Soft delete
-    await controlRepository.update({ id }, { deletedAt: () => "CURRENT_TIMESTAMP" });
+//Devolução
+route.put("/devolucao", validateClose, async (request, response) => {
+  try {
+    const updatedControl = await controlService.closeControl(
+      request.validatedData
+    );
+    return response.status(200).json({
+      response: "Controle fechado com sucesso!",
+      data: updatedControl,
+    });
+  } catch (error) {
+    console.error("Erro ao fechar controle: ", error);
+    return handleControlError(response, error);
+  }
+});
 
-    return response.status(200).send({"response": "Control excluído com sucesso!"});
+//Ciente
+route.put("/ciente/:id", validateCiente, async (request, response) => {
+  try {
+    const updatedControl = await controlService.confirmAwareness(
+      request.validatedData
+    );
+    return response.status(200).json({
+      response: "Controle marcado como ciente!",
+      data: updatedControl,
+    });
+  } catch (error) {
+    console.error("Erro ao marcar controle como ciente: ", error);
+    return handleControlError(response, error);
+  }
+});
+
+route.delete("/:id", validateDelete, async (request, response) => {
+  try {
+    await controlService.deleteControl(request.validatedData.id);
+    return response.status(200).json({
+      response: "Controle excluído com sucesso!",
+    });
+  } catch (error) {
+    console.error("Erro ao excluir controle: ", error);
+    return handleControlError(response, error);
+  }
 });
 
 export default route;

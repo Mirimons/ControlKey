@@ -17,13 +17,13 @@ const validateDelete = validationMiddleware(
   AgendamentoRequestDTO,
   "validateDelete"
 );
-const validateGetFiltros = validationMiddleware(
+const validateGetAgendamentos = validationMiddleware(
   AgendamentoRequestDTO,
-  "validateGetFiltros"
+  "validateGetAgendamentos"
 );
 
 //GET com os filtros
-route.get("/", validateGetFiltros, async (request, response) => {
+route.get("/", validateGetAgendamentos, async (request, response) => {
   try {
     const resultado = await agendamentoService.getAgendamentos(
       request.validatedData

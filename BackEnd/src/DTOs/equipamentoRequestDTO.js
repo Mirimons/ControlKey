@@ -1,11 +1,11 @@
 import BaseDTO from "./BaseDTO.js";
-import equip from "../entities/equipamento.js";
+import Equipamento from "../entities/equipamento.js";
 import tipoEquip from "../entities/tipo_equip.js";
 import { AppDataSource } from "../database/data-source.js";
 import { IsNull } from "typeorm";
 
 const tipoEquipRepository = AppDataSource.getRepository(tipoEquip);
-const equipRepository = AppDataSource.getRepository(equip);
+const equipRepository = AppDataSource.getRepository(Equipamento);
 
 class EquipRequestDTO extends BaseDTO {
     async validateCreate() {

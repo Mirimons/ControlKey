@@ -30,7 +30,7 @@ const validationUtils = {
   },
 
   isString: (value) => typeof value === "string",
-  isNumber: (value) => typeof value === "number" && !isNaN(value),
+  isNumber: (value) => !isNaN(Number(value)),
   isOptional: (value) => value === undefined || value === null,
 
   validateMinLength: (value, min) => {

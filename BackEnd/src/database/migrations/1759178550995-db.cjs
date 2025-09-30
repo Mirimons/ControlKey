@@ -6,11 +6,11 @@
  * @class
  * @implements {MigrationInterface}
  */
-module.exports = class Db1757979343914 {
-    name = 'Db1757979343914'
+module.exports = class Db1759178550995 {
+    name = 'Db1759178550995'
 
     async up(queryRunner) {
-        await queryRunner.query(`CREATE TABLE \`control\` (\`id\` int UNSIGNED NOT NULL AUTO_INCREMENT, \`id_usuario\` int UNSIGNED NOT NULL, \`id_equip\` int UNSIGNED NULL, \`id_labs\` int UNSIGNED NULL, \`data_inicio\` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), \`data_fim\` timestamp NULL, \`status\` enum ('aberto', 'fechado', 'pendente') NOT NULL DEFAULT 'aberto', \`createdAt\` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), \`deletedAt\` timestamp(6) NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`);
+        await queryRunner.query(`CREATE TABLE \`control\` (\`id\` int UNSIGNED NOT NULL AUTO_INCREMENT, \`id_usuario\` int UNSIGNED NOT NULL, \`id_equip\` int UNSIGNED NULL, \`id_labs\` int UNSIGNED NULL, \`data_inicio\` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), \`data_fim\` timestamp NULL, \`status\` enum ('aberto', 'fechado', 'pendente') NOT NULL DEFAULT 'aberto', \`aberto\` tinyint NULL, \`createdAt\` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), \`updatedAt\` timestamp(6) NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6), \`deletedAt\` timestamp(6) NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`);
         await queryRunner.query(`ALTER TABLE \`usuario_cad\` CHANGE \`senha\` \`senha\` varchar(255) NULL`);
         await queryRunner.query(`ALTER TABLE \`usuario_cad\` CHANGE \`passwordResetAt\` \`passwordResetAt\` timestamp NULL`);
         await queryRunner.query(`ALTER TABLE \`usuario_cad\` CHANGE \`deletedAt\` \`deletedAt\` timestamp(6) NULL`);

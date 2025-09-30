@@ -1,58 +1,121 @@
-import BaseDTO from './BaseDTO.js';
-import TipoUsuario from '../entities/tipo_usuario.js';
-import Usuario from '../entities/usuario.js'
-import { AppDataSource } from '../database/data-source.js';
-import { IsNull } from 'typeorm';
+import BaseDTO from "./BaseDTO.js";
+import TipoUsuario from "../entities/tipo_usuario.js";
+import Usuario from "../entities/usuario.js";
+import UsuarioCad from "../entities/usuario_cad.js";
+import { AppDataSource } from "../database/data-source.js";
+import { IsNull } from "typeorm";
 
 const tipoUsuarioRepository = AppDataSource.getRepository(TipoUsuario);
 const usuarioRepository = AppDataSource.getRepository(Usuario);
+const usuarioCadRepository = AppDataSource.getRepository(UsuarioCad);
 
 class UsuarioRequestDTO extends BaseDTO {
-  cadastroExtra(id_tipo) {
-    const tipoCad = [1, 2];
-    return tipoCad.includes(Number(id_tipo));
+  async cadastroExtra(tipoInput) {
+    try {
+      let tipoUsuario;
+
+      //Se for número - ID
+      if (typeof tipoInput === "number" || !isNaN(Number(tipoInput))) {
+        tipoUsuario = await tipoUsuarioRepository.findOneBy({
+          id: Number(tipoInput),
+          deletedAt: IsNull(),
+        });
+      } else if (typeof tipoInput === "string") {
+        tipoUsuario = await tipoUsuarioRepository.findOne({
+          where: {
+            desc_tipo: tipoInput.trim(),
+            deletedAt: IsNull(),
+          },
+        });
+      } else if (typeof tipoInput === "object" && tipoInput.desc_tipo) {
+        tipoUsuario = tipoInput;
+      }
+
+      if (!tipoUsuario) return false;
+
+      //Tipos que precisam do cadastroExtra
+      const tipoCad = ["Administrador", "Comum"];
+      return tipoCad.includes(tipoUsuario.desc_tipo);
+    } catch (error) {
+      console.error("Erro ao verificar cadastro extra: ", error);
+      return false;
+    }
+  }
+
+  async validateGetUsuarios() {
+    this.clearValidatedData();
+
+    const { nome, id_tipo, tipo_desc, page = 1, limit = 10 } = this.data;
+
+    if (page !== undefined) {
+      if (!this.validateParamsId("page", "Página", 1, 1000)) return false;
+      this.validatedData.page = Math.max(1, Number(page));
+    }
+
+    if (limit !== undefined) {
+      if (!this.validateParamsId("limit", "Limite", 1, 100)) return false;
+      this.validatedData.limit = Math.min(Math.max(1, Number(limit)), 100);
+    }
+
+    if (nome !== undefined) {
+      if (typeof nome !== "string") {
+        this.addError("nome", "Nome deve ser um texto");
+        return false;
+      }
+      this.validatedData.nome = nome.trim();
+    }
+
+    if (id_tipo !== undefined && id_tipo !== null && id_tipo !== "") {
+      if (!this.validateForeignKeyId("id_tipo", "Tipo de Usuário", false))
+        return false;
+    } else if (
+      tipo_desc !== undefined &&
+      tipo_desc !== null &&
+      tipo_desc !== ""
+    ) {
+      if (typeof tipo_desc !== "string") {
+        this.addError("tipo_desc", "O tipo de usuário deve ser um texto");
+        return false;
+      }
+      this.validatedData.tipo_desc = tipo_desc.trim();
+      this.validatedData.filtro_tipo_tipo = "descricao";
+    }
+    return this.isValid();
   }
 
   async validateCreate() {
     this.clearValidatedData();
-    
-    const { id_tipo, nome, cpf, data_nasc, telefone, matricula, email, senha } = this.data;
 
-    this.data.cpf = cpf;
-    this.data.data_nasc = data_nasc;
-    this.data.telefone = telefone;
+    const { tipo, senha, matricula, email } = this.data;
 
-    if (!id_tipo && isNaN(Number(id_tipo))) {
-      this.addError('id_tipo', 'O Tipo de Usuário é obrigatório e precisa ser numérico.');
+    if (!tipo || !tipo.trim()) {
+      this.addError("tipo", "O tipo de usuário é obrigatório");
       return false;
     }
-    this.validatedData.id_tipo = Number(id_tipo);
-
-    if (!nome && !nome.trim() && nome.trim().length < 2) {
-      this.addError('nome', 'O nome deve ter pelo menos 2 caracteres.');
-      return false;
-    }
-    this.validatedData.nome = nome.trim();
-
-    if (!this.validateCPF('cpf', 'CPF')) return false;
-    if (!this.validateDate('data_nasc', 'Data de Nascimento')) return false;
-    if (!this.validatePhone('telefone', 'Telefone')) return false;
-
+    //Busca o id do tipo pela sua descrição
     try {
-      const tipoUsuario = await tipoUsuarioRepository.findOneBy({
-        id: Number(id_tipo),
-        deletedAt: IsNull(),
+      const tipoFind = await tipoUsuarioRepository.findOne({
+        where: {
+          desc_tipo: tipo.trim(),
+          deletedAt: IsNull(),
+        },
       });
 
-      if (!tipoUsuario) {
-        this.addError('id_tipo', 'Tipo de usuário informado não encontrado.');
+      if (!tipoFind) {
+        this.addError("tipo", "Tipo de usuário não encontrado.");
         return false;
       }
-      this.validatedData.tipo = tipoUsuario;
+      this.validatedData.id_tipo = tipoFind.id;
+      this.validatedData.tipo = tipoFind;
     } catch (error) {
-      this.addError('id_tipo', 'Erro ao validar tipo de usuário');
+      this.addError("tipo", "Erro ao buscar tipo de usuário");
       return false;
     }
+
+    if (!this.validateString("nome", "Nome", 2)) return false;
+    if (!this.validateCPF("cpf", "CPF")) return false;
+    if (!this.validateDate("data_nasc", "Data de Nascimento")) return false;
+    if (!this.validatePhone("telefone", "Telefone")) return false;
 
     try {
       const usuarioExiste = await usuarioRepository.findOneBy({
@@ -61,35 +124,59 @@ class UsuarioRequestDTO extends BaseDTO {
       });
 
       if (usuarioExiste) {
-        this.addError('cpf', 'CPF já cadastrado.');
+        this.addError("cpf", "CPF já cadastrado.");
         return false;
       }
     } catch (error) {
-      this.addError('cpf', 'Erro ao verificar CPF');
+      this.addError("cpf", "Erro ao verificar CPF");
       return false;
     }
 
-    const cadastro = this.cadastroExtra(Number(id_tipo));
+    const cadastro = this.cadastroExtra(this.validatedData.tipo.desc_tipo);
     this.validatedData.requiresCadastroExtra = cadastro;
 
     if (cadastro) {
-      if (!matricula ) {
-        this.addError('matricula', 'A matrícula é obrigatória para este tipo de usuário.');
-        return false;
-      }
-      this.validatedData.matricula = matricula.trim();
+      if (matricula !== undefined && matricula !== null && matricula !== "") {
+        if (!this.validateString("matricula", "Matrícula", 1)) return false;
 
-      if (!email && !email.includes('@')) {
-        this.addError('email', 'Email está no padrão incorreto.');
-        return false;
+        try {
+          const matriculaExiste = await usuarioCadRepository.findOne({
+            where: {
+              matricula: this.validatedData.matricula,
+            },
+            relations: ["usuario"],
+          });
+
+          if (matriculaExiste) {
+            this.addError(
+              "matricula",
+              "Matricula já cadastrada para outro usuário."
+            );
+            return false;
+          }
+        } catch (error) {
+          this.addError("matricula", "Erro ao verificar matrícula");
+          return false;
+        }
       }
-      this.validatedData.email = email.trim();
-      
-      if (senha && senha.length < 6) {
-        this.addError('senha', 'Senha deve conter pelo menos 6 caracteres.');
-        return false;
+      if (email !== undefined && email !== null && email !== "") {
+        if (!this.validateEmail("email", "Email")) return false;
       }
-      this.validatedData.senha = senha;
+
+      const precisaSenha =
+        this.validatedData.tipo.desc_tipo === "Administrador";
+      if (
+        precisaSenha &&
+        senha !== undefined &&
+        senha !== null &&
+        senha !== ""
+      ) {
+        if (senha && senha.length < 6) {
+          this.addError("senha", "Senha deve conter pelo menos 6 caracteres.");
+          return false;
+        }
+        this.validatedData.senha = senha;
+      }
     }
 
     return this.isValid();
@@ -97,65 +184,77 @@ class UsuarioRequestDTO extends BaseDTO {
 
   async validateUpdate() {
     this.clearValidatedData();
-    
-    const { id_tipo, nome, cpf, data_nasc, telefone, matricula, email, senha } = this.data;
 
-    if (!this.data.id && isNaN(Number(this.data.id))) {
-      this.addError('id', 'O ID é obrigatório e precisa ser um valor numérico.');
-      return false;
-    }
-    this.validatedData.id = Number(this.data.id);
+    const {
+      tipo,
+      id_tipo,
+      nome,
+      cpf,
+      data_nasc,
+      telefone,
+      matricula,
+      email,
+      senha,
+    } = this.data;
 
-    if (id_tipo !== undefined) this.data.id_tipo = id_tipo;
-    if (nome !== undefined) this.data.nome = nome;
-    if (cpf !== undefined) this.data.cpf = cpf;
-    if (data_nasc !== undefined) this.data.data_nasc = data_nasc;
-    if (telefone !== undefined) this.data.telefone = telefone;
+    if (!this.validateParamsId("id", "ID do Usuário")) return false;
 
-    if (id_tipo !== undefined) {
-      if (!id_tipo && isNaN(Number(id_tipo))) {
-        this.addError('id_tipo', 'O Tipo de Usuário é obrigatório e precisa ser numérico.');
+    //Tipo de Usuário
+    if (tipo !== undefined && tipo !== null && tipo !== "") {
+      //Busca o id do tipo pela sua descrição
+      try {
+        const tipoFind = await tipoUsuarioRepository.findOne({
+          where: {
+            desc_tipo: tipo.trim(),
+            deletedAt: IsNull(),
+          },
+        });
+
+        if (!tipoFind) {
+          this.addError("tipo", "Tipo de usuário não encontrado.");
+          return false;
+        }
+        this.validatedData.id_tipo = tipoFind.id;
+        this.validatedData.tipo = tipoFind;
+      } catch (error) {
+        this.addError("tipo", "Erro ao buscar tipo de usuário");
         return false;
       }
-      this.validatedData.id_tipo = Number(id_tipo);
-    }
-
-    if (nome !== undefined) {
-      if (!nome && !nome.trim() && nome.trim().length < 2) {
-        this.addError('nome', 'O nome deve ter pelo menos 2 caracteres.');
+    } else if (id_tipo !== undefined && id_tipo !== null && id_tipo !== "") {
+      if (!this.validateForeignKeyId("id_tipo", "ID do Tipo de Usuário"))
         return false;
-      }
-      this.validatedData.nome = nome.trim();
-    }
 
-    if (cpf !== undefined) {
-      if (!this.validateCPF('cpf', 'CPF')) return false;
-    }
-
-    if (data_nasc !== undefined) {
-      if (!this.validateDate('data_nasc', 'Data de Nascimento')) return false;
-    }
-
-    if (telefone !== undefined) {
-      if (!this.validatePhone('telefone', 'Telefone')) return false;
-    }
-
-    if (id_tipo !== undefined) {
       try {
         const tipoUsuario = await tipoUsuarioRepository.findOneBy({
-          id: Number(id_tipo),
+          id: this.validatedData.id_tipo,
           deletedAt: IsNull(),
         });
 
         if (!tipoUsuario) {
-          this.addError('id_tipo', 'Tipo de usuário informado não encontrado.');
+          this.addError("id_tipo", "Tipo de usuário informado não encontrado.");
           return false;
         }
         this.validatedData.tipo = tipoUsuario;
       } catch (error) {
-        this.addError('id_tipo', 'Erro ao validar tipo de usuário');
+        this.addError("id_tipo", "Erro ao validar tipo de usuário");
         return false;
       }
+    }
+
+    if (nome !== undefined) {
+      if (!this.validateString("nome", "Nome", 2)) return false;
+    }
+
+    if (cpf !== undefined) {
+      if (!this.validateCPF("cpf", "CPF")) return false;
+    }
+
+    if (data_nasc !== undefined) {
+      if (!this.validateDate("data_nasc", "Data de Nascimento")) return false;
+    }
+
+    if (telefone !== undefined) {
+      if (!this.validatePhone("telefone", "Telefone")) return false;
     }
 
     if (cpf !== undefined) {
@@ -166,38 +265,50 @@ class UsuarioRequestDTO extends BaseDTO {
         });
 
         if (cpfExiste && cpfExiste.id !== this.validatedData.id) {
-          this.addError('cpf', 'CPF já cadastrado em outro usuário.');
+          this.addError("cpf", "CPF já cadastrado em outro usuário.");
           return false;
         }
       } catch (error) {
-        this.addError('cpf', 'Erro ao verificar CPF');
+        this.addError("cpf", "Erro ao verificar CPF");
         return false;
       }
     }
 
-    if (id_tipo !== undefined) {
-      const cadastro = this.cadastroExtra(Number(id_tipo));
+    if (this.validatedData.tipo) {
+      const cadastro = this.cadastroExtra(this.validatedData.tipo.desc_tipo);
       this.validatedData.requiresCadastroExtra = cadastro;
 
       if (cadastro) {
         if (matricula !== undefined) {
-          if (!matricula.trim()) {
-            this.addError('matricula', 'A matrícula é obrigatória para este tipo de usuário.');
+          if (!this.validateString("matricula", "Matrícula", 1)) return false;
+        }
+
+        try {
+          const matriculaExiste = await usuarioCadRepository.findOne({
+            where: {
+              matricula: this.validatedData.matricula,
+            },
+            relations: ["usuario"],
+          });
+
+          if (matriculaExiste) {
+            this.addError(
+              "matricula",
+              "Matricula já cadastrada para outro usuário."
+            );
             return false;
           }
-          this.validatedData.matricula = matricula.trim();
+        } catch (error) {
+          this.addError("matricula", "Erro ao verificar matrícula");
+          return false;
         }
 
         if (email !== undefined) {
-          if (!email.includes('@')) {
-            this.addError('email', 'Email está no padrão incorreto.');
-            return false;
-          }
-          this.validatedData.email = email.trim();
+          if (!this.validateEmail("email", "Email")) return false;
         }
 
         if (senha !== undefined && senha.length < 6) {
-          this.addError('senha', 'Senha deve conter pelo menos 6 caracteres.');
+          this.addError("senha", "Senha deve conter pelo menos 6 caracteres.");
           return false;
         }
         if (senha) {
@@ -211,12 +322,9 @@ class UsuarioRequestDTO extends BaseDTO {
 
   async validateDelete() {
     this.clearValidatedData();
-    if(!this.data.id && isNaN(Number(this.data.id))) {
-      this.addError('id', 'O ID é obrigatório e precisa ser numérico.');
-      return false;
-    }
 
-    this.validatedData.id = Number(this.data.id);
+    if (!this.validateParamsId("id", "ID do Usuário")) return false;
+
     return this.isValid();
   }
 }

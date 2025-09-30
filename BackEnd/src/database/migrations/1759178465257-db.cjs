@@ -6,11 +6,11 @@
  * @class
  * @implements {MigrationInterface}
  */
-module.exports = class Db1757979283190 {
-    name = 'Db1757979283190'
+module.exports = class Db1759178465257 {
+    name = 'Db1759178465257'
 
     async up(queryRunner) {
-        await queryRunner.query(`CREATE TABLE \`agendamento\` (\`id\` int UNSIGNED NOT NULL AUTO_INCREMENT, \`id_labs\` int UNSIGNED NOT NULL, \`id_usuario\` int UNSIGNED NOT NULL, \`data_agendamento\` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), \`data_utilizacao\` date NOT NULL, \`hora_inicio\` time NOT NULL, \`hora_fim\` time NOT NULL, \`finalidade\` varchar(100) NOT NULL, \`status\` enum ('pendente', 'confirmado', 'cancelado') NOT NULL DEFAULT 'pendente', \`createdAt\` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), \`deletedAt\` timestamp(6) NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`);
+        await queryRunner.query(`CREATE TABLE \`agendamento\` (\`id\` int UNSIGNED NOT NULL AUTO_INCREMENT, \`id_labs\` int UNSIGNED NOT NULL, \`id_usuario\` int UNSIGNED NOT NULL, \`data_agendamento\` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), \`data_utilizacao\` date NOT NULL, \`hora_inicio\` time NOT NULL, \`hora_fim\` time NOT NULL, \`finalidade\` varchar(100) NOT NULL, \`status\` enum ('pendente', 'confirmado', 'cancelado') NOT NULL DEFAULT 'pendente', \`createdAt\` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), \`updatedAt\` timestamp(6) NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6), \`deletedAt\` timestamp(6) NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`);
         await queryRunner.query(`ALTER TABLE \`usuario_cad\` CHANGE \`senha\` \`senha\` varchar(255) NULL`);
         await queryRunner.query(`ALTER TABLE \`usuario_cad\` CHANGE \`passwordResetAt\` \`passwordResetAt\` timestamp NULL`);
         await queryRunner.query(`ALTER TABLE \`usuario_cad\` CHANGE \`deletedAt\` \`deletedAt\` timestamp(6) NULL`);

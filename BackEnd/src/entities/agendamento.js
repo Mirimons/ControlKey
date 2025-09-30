@@ -53,6 +53,11 @@ const agendamento = new EntitySchema ({
             createDate: true,
             nullable: false, 
         },
+        updatedAt: {
+            type: "timestamp",
+            updateDate: true,
+            nullable: true
+        },
         deletedAt: {
             type: "timestamp", 
             deleteDate: true,

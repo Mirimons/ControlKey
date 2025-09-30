@@ -7,36 +7,38 @@ import {UsuarioRequestDTO} from "../DTOs/index.js";
 
 const route = express.Router();
 
+const validateGetUsuarios = validationMiddleware(UsuarioRequestDTO, 'validateGetUsuarios')
 const validateCreate = validationMiddleware(UsuarioRequestDTO, 'validateCreate');
 const validateUpdate = validationMiddleware(UsuarioRequestDTO, 'validateUpdate');
 const validateDelete = validationMiddleware(UsuarioRequestDTO, 'validateDelete');
 
-route.get("/", async (request, response) => {
-  try {
-    const usuarios = await usuarioService.getUsuarios();
-    return response.status(200).json(usuarios);
-  } catch (error) {
-    console.error("Erro ao listar usuários: ", error);
-    return response.status(500).json({
-      response: "Erro interno no servidor.",
-      error: getErrorMessage(error),
+// Função auxiliar para tratamento de erros
+function handleUsuarioError(response, error) {
+  if (error.code?.startsWith('ER_') || error.errno) {
+    return response.status(409).json({
+      response: handleDatabaseError(error),
+      error: "Erro de banco de dados"
     });
   }
-});
 
-route.get("/:nome", async (request, response) => {
-  try {
-    const { nome } = request.params;
-    const usuarios = await usuarioService.getByNome(nome);
-    return response.status(200).json(usuarios);
-  } catch (error) {
-    console.error("Erro ao buscar usuários por nome: ", error);
-    return response.status(500).json({
-      response: "Erro interno no servidor.",
-      error: getErrorMessage(error),
+  if (error.message.includes("já cadastrado")) {
+    return response.status(409).json({
+      response: error.message,
+      error: "Conflito de dados.",
     });
   }
-});
+  if (error.message.includes("não encontrado")) {
+    return response.status(404).json({
+      response: error.message,
+      error: "Usuário não encontrado.",
+    });
+  }
+
+  return response.status(500).json({
+    response: "Erro interno no servidor.",
+    error: getErrorMessage(error),
+  });
+}
 
 route.get("/:id", async (request, response) => {
   try {
@@ -50,6 +52,19 @@ route.get("/:id", async (request, response) => {
     return response.status(200).json(usuario);
   } catch (error) {
     console.error("Erro ao buscar usuário: ", error);
+    return response.status(500).json({
+      response: "Erro interno no servidor.",
+      error: getErrorMessage(error),
+    });
+  }
+});
+
+route.get("/", validateGetUsuarios, async (request, response) => {
+  try {
+    const usuarios = await usuarioService.getUsuarios(request.validatedData);
+    return response.status(200).json(usuarios);
+  } catch(error) {
+    console.error("Erro ao listar usuários: ", error);
     return response.status(500).json({
       response: "Erro interno no servidor.",
       error: getErrorMessage(error),
@@ -118,75 +133,4 @@ route.delete("/:id", validateDelete, async (request, response) => {
   }
 });
 
-// Função auxiliar para tratamento de erros
-function handleUsuarioError(response, error) {
-  if (error.code?.startsWith('ER_') || error.errno) {
-    return response.status(409).json({
-      response: handleDatabaseError(error),
-      error: "Erro de banco de dados"
-    });
-  }
-
-  if (error.message.includes("já cadastrado")) {
-    return response.status(409).json({
-      response: error.message,
-      error: "Conflito de dados.",
-    });
-  }
-  if (error.message.includes("não encontrado")) {
-    return response.status(404).json({
-      response: error.message,
-      error: "Usuário não encontrado.",
-    });
-  }
-
-  return response.status(500).json({
-    response: "Erro interno no servidor.",
-    error: getErrorMessage(error),
-  });
-}
-
 export default route;
-
-
-
-//   } catch (error) {
-//     console.error("Erro ao cadastrar usuário: ", error);
-
-//     if (error.code?.startsWith('ER_') || error.errno) {
-//       return response.status(409).json({
-//         response: handleDatabaseError(error),
-//         error: "Erro de banco de dados"
-//       });
-//     }
-
-//     if (error.message.includes("já cadastrado")) {
-//       return response.status(409).json({
-//         response: error.message,
-//         error: "Conflito de dados.",
-//       });
-//     }
-//     if (error.message.includes("não encontrado")) {
-//       return response.status(404).json({
-//         response: error.message,
-//         error: "Usuário não encontrado.",
-//       });
-//     }
-//     if (
-//       error.message.includes("obrigatório") ||
-//       error.message.includes("inválido") ||
-//       error.message.includes("deve ter") ||
-//       error.message.includes("precisa")
-//     ) {
-//       return response.status(400).json({
-//         response: error.message,
-//         error: "Dados inválidos.",
-//       });
-//     }
-
-//     return response.status(500).json({
-//       response: "Erro interno no servidor.",
-//       error: getErrorMessage(error),
-//     });
-//   }
-// });

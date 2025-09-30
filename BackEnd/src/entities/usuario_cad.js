@@ -11,8 +11,9 @@ const usuario_cad = new EntitySchema({
             nullable: false
         },
         matricula: {
-            type: "varchar", 
+            type: "varchar",
             length: 10,
+            unique: true,
             nullable: false
         },
         email: {
@@ -35,6 +36,11 @@ const usuario_cad = new EntitySchema({
             type: "timestamp", 
             createDate: true,
             nullable: false, 
+        },
+        updatedAt: {
+            type: "timestamp",
+            updateDate: true,
+            nullable: true
         },
         deletedAt: {
             type: "timestamp", 

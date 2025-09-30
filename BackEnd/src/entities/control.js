@@ -40,10 +40,19 @@ const control = new EntitySchema({
             enum: ["aberto", "fechado", "pendente"],
             default: "aberto"
         },
+        aberto: {
+            type: "boolean",
+            nullable: true
+        },
         createdAt: {
             type: "timestamp", 
             createDate: true,
             nullable: false, 
+        },
+        updatedAt: {
+            type: "timestamp",
+            updateDate: true,
+            nullable: true
         },
         deletedAt: {
             type: "timestamp", 

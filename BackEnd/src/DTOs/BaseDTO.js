@@ -13,8 +13,8 @@ class BaseDTO {
       this.addError(field, `${fieldName} é obrigatório.`);
       return false;
     }
-    if (!validationUtils.isNumber(value)) {
-      this.addError(field, `${fieldName} é obrigatório e precisa ser numérico`);
+    if (isNaN(Number(value))) {
+      this.addError(field, `${fieldName} precisa ser numérico`);
       return false;
     }
     this.validatedData[field] = Number(value);
@@ -27,7 +27,7 @@ class BaseDTO {
       this.addError(field, `${fieldName} é obrigatório.`);
       return false;
     }
-    
+
     if (
       !validationUtils.isString(value) ||
       !validationUtils.validateMinLength(value, minLength)
@@ -126,6 +126,51 @@ class BaseDTO {
       return false;
     }
     this.validatedData[field] = value;
+    return true;
+  }
+
+  //ID que fica nos params
+  validateParamsId(field, fieldName) {
+    const value = this.data[field];
+
+    // console.log('DEBUG - Value:', value, 'Type:', typeof value)
+    if (!value) {
+      this.addError(field, `${fieldName} é obrigatório`);
+      return false;
+    }
+
+    if (isNaN(Number(value))) {
+      this.addError(field, `${fieldName} precisa ser numérico`);
+      return false;
+    }
+
+    this.validatedData[field] = Number(value);
+    return true;
+  }
+
+  //ID de FK
+  validateForeignKeyId(field, fieldName, isRequired = false) {
+    const value = this.data[field];
+
+    if (isRequired && !value && value !== 0) {
+      this.addError(field, `${fieldName} é obrigatório`);
+      return false;
+    }
+
+    if (
+      value !== undefined &&
+      value !== null &&
+      value !== "" &&
+      isNaN(Number(value))
+    ) {
+      this.addError(field, `${fieldName} precisa ser numérico`);
+      return false;
+    }
+
+    if (value !== undefined && value !== null && value !== "") {
+      this.validatedData[field] = Number(value);
+    }
+
     return true;
   }
 

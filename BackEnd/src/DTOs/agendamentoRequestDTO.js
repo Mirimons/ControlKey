@@ -30,17 +30,23 @@ class AgendamentoRequestDTO extends BaseDTO {
     this.data.hora_fim = hora_fim;
     this.data.finalidade = finalidade;
 
-    if(!this.data.id_labs && isNaN(Number(this.data.id_labs))) {
-      this.addError('id', 'O ID do Laboratório é obrigatório e precisa ser numérico.');
+    if (!this.data.id_labs && isNaN(Number(this.data.id_labs))) {
+      this.addError(
+        "id",
+        "O ID do Laboratório é obrigatório e precisa ser numérico."
+      );
       return false;
     }
-    this.validatedData.id = Number(this.data.id);
+    this.validatedData.id_labs = Number(id_labs);
 
-    if(!this.data.id_usuario && isNaN(Number(this.data.id_usuario))) {
-      this.addError('id', 'O ID do Laboratório é obrigatório e precisa ser numérico.');
+    if (!this.data.id_usuario && isNaN(Number(this.data.id_usuario))) {
+      this.addError(
+        "id",
+        "O ID do Usuário é obrigatório e precisa ser numérico."
+      );
       return false;
     }
-    this.validatedData.id = Number(this.data.id);
+    this.validatedData.id_usuario = Number(id_usuario);
 
     if (!this.validateString("finalidade", "Finalidade", 4)) return false;
     if (!this.validateDateSchedule("data_utilizacao", "Data de utilização"))
@@ -169,19 +175,26 @@ class AgendamentoRequestDTO extends BaseDTO {
     }
     this.validatedData.id = Number(this.data.id);
 
-
-    if(!this.data.id_labs && isNaN(Number(this.data.id_labs))) {
-      this.addError('id', 'O ID do Laboratório é obrigatório e precisa ser numérico.');
-      return false;
+    if (id_labs !== undefined) {
+      if (!this.data.id_labs && isNaN(Number(this.data.id_labs))) {
+        this.addError(
+          "id",
+          "O ID do Laboratório é obrigatório e precisa ser numérico."
+        );
+        return false;
+      }
+      this.validatedData.id_labs = Number(id_labs);
     }
-    this.validatedData.id = Number(this.data.id);
-
-    if(!this.data.id_usuario && isNaN(Number(this.data.id_usuario))) {
-      this.addError('id', 'O ID do Laboratório é obrigatório e precisa ser numérico.');
-      return false;
+    if (id_usuario !== undefined) {
+      if (!this.data.id_usuario && isNaN(Number(this.data.id_usuario))) {
+        this.addError(
+          "id",
+          "O ID do Usuário é obrigatório e precisa ser numérico."
+        );
+        return false;
+      }
+      this.validatedData.id_usuario = Number(id_usuario);
     }
-    this.validatedData.id = Number(this.data.id);
-
 
     if (data_utilizacao !== undefined)
       this.data.data_utilizacao = data_utilizacao;
@@ -357,7 +370,8 @@ class AgendamentoRequestDTO extends BaseDTO {
     return this.isValid();
   }
 
-  async validateGetFiltros() {
+  //Filtros
+  async validateGetAgendamentos() {
     this.clearValidatedData();
 
     const { page, limit, status } = this.data;
@@ -385,7 +399,13 @@ class AgendamentoRequestDTO extends BaseDTO {
     }
 
     //Campos de texto para pesquisa
-    const { nomeProfessor, laboratorio, data_utilizacao, hora_inicio, hora_fim } = this.data;
+    const {
+      nomeProfessor,
+      laboratorio,
+      data_utilizacao,
+      hora_inicio,
+      hora_fim,
+    } = this.data;
 
     if (nomeProfessor !== undefined) {
       this.validatedData.nomeProfessor = nomeProfessor.toString().trim();
@@ -438,6 +458,4 @@ class AgendamentoRequestDTO extends BaseDTO {
   }
 }
 
-
 export default AgendamentoRequestDTO;
-

@@ -9,6 +9,12 @@ class TipoUsuarioService {
     return await tipoUsuarioRepository.findBy({ deletedAt: IsNull() });
   }
 
+  async getTipoById(id) {
+    return await tipoUsuarioRepository.findOne({
+      where: {id, deletedAt:IsNull()}
+    });
+  }
+
   async getByDescricao(descricao) {
     return await tipoUsuarioRepository.findBy({
       desc_tipo: Like(`%${descricao}%`),

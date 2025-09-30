@@ -44,12 +44,7 @@ class TipoUsuarioRequestDTO extends BaseDTO {
 
     const { desc_tipo } = this.data;
 
-    if(!this.data.id && isNaN(Number(this.data.id))) {
-      this.addError('id', 'O ID é obrigatório e precisa ser numérico.');
-      return false;
-    }
-
-    this.validatedData.id = Number(this.data.id);
+    if (!this.validateParamsId("id", "ID do Tipo de Usuário")) return false;
 
     if (desc_tipo !== undefined) {
       this.data.desc_tipo = desc_tipo;
@@ -64,7 +59,7 @@ class TipoUsuarioRequestDTO extends BaseDTO {
             where: {
               desc_tipo: this.validatedData.desc_tipo,
               deletedAt: IsNull(),
-              id: Not(this.validatedData.id)
+              id: Not(this.validatedData.id),
             },
           });
           if (tipoExiste) {
@@ -89,12 +84,7 @@ class TipoUsuarioRequestDTO extends BaseDTO {
   async validateDelete() {
     this.clearValidatedData();
 
-     if(!this.data.id && isNaN(Number(this.data.id))) {
-      this.addError('id', 'O ID é obrigatório e precisa ser numérico.');
-      return false;
-    }
-
-    this.validatedData.id = Number(this.data.id);
+    if (!this.validateParamsId("id", "ID do Tipo de Usuário")) return false;
     return this.isValid();
   }
 }
