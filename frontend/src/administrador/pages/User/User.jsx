@@ -23,6 +23,9 @@ function User() {
 
     const [usuarios, setUsuarios] = useState([]);
 
+    const [editando, setEditando] = useState(false);
+    const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
+
     console.log(usuarios)
 
     const modalRef = useRef();
@@ -30,52 +33,156 @@ function User() {
     const abrirModal = () => setModalAberto(true);
     const fecharModal = () => setModalAberto(false);
 
+    const abrirModalNovo = () => {
+        setEditando(false);
+        setUsuarioSelecionado(null);
+
+        // limpa os campos
+        setNome("");
+        setCpf("");
+        setEmail("");
+        setTelefone("");
+        setMatricula("");
+        setData_nasc("");
+        setId_tipo("");
+        setSenha("");
+        setModalAberto(true);
+
+    }
+
+    const abrirModalEditar = (user) => {
+        setEditando(true);
+        setUsuarioSelecionado(user);
+
+        setId_tipo(user.id_tipo);
+        setNome(user.nome);
+        setCpf(user.cpf);
+        setEmail(user.usuario_cad?.email || "");
+        setTelefone(user.telefone);
+        setMatricula(user.usuario_cad?.matricula || "");
+        setData_nasc(user.data_nasc || "");
+        setSenha("");
+        setModalAberto(true);
+
+    }
+
+    const fetchUsuarios = () => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        api.get("/usuario", { headers: { Authorization: `Bearer ${token}` } })
+            .then(res => setUsuarios(res.data))
+            .catch(err => console.error("Erro ao buscar usuários:", err));
+    };
 
     const handleSalvar = (e) => {
         e.preventDefault();
-
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
 
         if (!token) {
-            alert('Você precisa estar logado para cadastrar usuários!');
+            alert("Você precisa estar logado!");
             return;
         }
 
-        api.post("/usuario", {
+        let payload = {
             id_tipo,
             nome,
             cpf,
             data_nasc,
             telefone,
-            matricula,
-            email,
-            senha
-        }, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-            .then(response => {
-                console.log("Usuário cadastrado:", response.data);
-                alert("Usuário cadastrado com sucesso!");
-                fecharModal();
+        };
 
-                // limpa os campos
-                setNome("");
-                setCpf("");
-                setEmail("");
-                setTelefone("");
-                setMatricula("");
-                setData_nasc("");
-                setId_tipo("");
-                setSenha("");
+        if (id_tipo !== 3) {
+            payload.email = email;
+            payload.matricula = matricula;
+        }
 
+        if (id_tipo === 1 && senha) {
+            payload.senha = senha;
+        }
+
+        if (editando && usuarioSelecionado) {
+            api.put(`/usuario/${usuarioSelecionado.id}`, payload, {
+                headers: { Authorization: `Bearer ${token}` },
             })
-            .catch(error => {
-                console.error("Erro ao cadastrar:", error);
-                alert(error.response?.data?.error || "Erro ao cadastrar usuário!");
-            });
+                .then((res) => {
+                    alert("Usuário atualizado com sucesso!");
+
+                    setUsuarios(prev => prev.map(u =>
+                        u.id === usuarioSelecionado.id
+                            ? { ...u, ...res.data }  // se res.data não vier completo, use { ...u, ...payload }
+                            : u
+                    ));
+                    
+                    fecharModal();
+                })
+                .catch((err) => {
+                    console.error("Erro ao editar:", err);
+                    alert(err.response?.data?.error || "Erro ao editar usuário!");
+                });
+
+        } else {
+            api.post("/usuario", payload, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then((res) => {
+                    alert("Usuário cadastrado com sucesso!");
+                    fecharModal();
+                    // limpa os campos  
+                    setNome("");
+                    setCpf("");
+                    setEmail("");
+                    setTelefone("");
+                    setMatricula("");
+                    setData_nasc("");
+                    setId_tipo("");
+                    setSenha("");
+                    fetchUsuarios();
+                })
+                .catch((err) => {
+                    console.error("Erro ao cadastrar:", err);
+                    alert(err.response?.data?.error || "Erro ao cadastrar usuário!");
+                });
+        }
+
     };
+
+
+    // api.post("/usuario", {
+    //     id_tipo,
+    //     nome,
+    //     cpf,
+    //     data_nasc,
+    //     telefone,
+    //     matricula,
+    //     email,
+    //     senha
+    // }, {
+    //     headers: {
+    //         'Authorization': `Bearer ${token}`
+    //     }
+    // })
+    // .then(response => {
+    //     console.log("Usuário cadastrado:", response.data);
+    //     alert("Usuário cadastrado com sucesso!");
+    //     fecharModal();
+
+    // limpa os campos
+    // setNome("");
+    // setCpf("");
+    // setEmail("");
+    // setTelefone("");
+    // setMatricula("");
+    // setData_nasc("");
+    // setId_tipo("");
+    // setSenha("");
+
+    //         })
+    //         .catch(error => {
+    //             console.error("Erro ao cadastrar:", error);
+    //             alert(error.response?.data?.error || "Erro ao cadastrar usuário!");
+    //         });
+    // };
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -93,7 +200,7 @@ function User() {
                 console.error("Erro ao buscar usuários:", error);
             });
 
-    }, [usuarios])
+    }, [])
 
     useEffect(() => {
 
@@ -128,7 +235,7 @@ function User() {
             </header>
 
             <div className="usuarios-acoes">
-                <button type="button" onClick={abrirModal}>Adicionar Usuário</button>
+                <button type="button" onClick={abrirModalNovo}>Adicionar Usuário</button>
             </div>
 
 
@@ -169,7 +276,7 @@ function User() {
                             <td>{user.nome}</td>
                             <td>{user.tipo?.nome || user.id_tipo}</td>
                             <td>{user.telefone}</td>
-                            <td><button className="editar-btn">✏️</button></td>
+                            <button className="editar-btn" onClick={() => abrirModalEditar(user)}>✏️</button>
                         </tr>
                     ))}
                 </tbody>
@@ -247,12 +354,12 @@ function User() {
                             <div className="senha-container">
                                 <input
                                     type={mostrarSenha ? "text" : "password"}
-                                    placeholder="Senha"
+                                    placeholder={editando ? "Deixe em branco para manter a atual" : "Senha"}
                                     value={senha}
                                     onChange={(e) => setSenha(e.target.value)}
-                                    required
-                                    autoComplete="current-password"
+                                    autoComplete="new-password"
                                     disabled={id_tipo === 2 || id_tipo === 3}
+                                    required={!editando && id_tipo === 1}
                                 />
                                 <button
                                     type="button"

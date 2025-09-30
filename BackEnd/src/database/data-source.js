@@ -9,7 +9,7 @@ const AppDataSource = new DataSource({
     host: process.env.DB_HOST || "localhost",
     username: process.env.DB_USER || "root",
     port: Number(process.env.DB_PORT) || 3306,
-    password: process.env.DB_PASSWORD || "etecembu@123",
+    password: process.env.DB_PASSWORD || "1804",
     database: process.env.DB_NAME || "control_key",
     entities: ["src/entities/*.js"],
     migrations: ["src/database/migrations/*.cjs"],
