@@ -87,11 +87,11 @@ function User() {
     }
 
     let payload = {
-      tipo,
+      tipo: tipo,
       nome,
-      cpf,
+      cpf: cpf.replace(/\D/g, ''),
       data_nasc,
-      telefone,
+      telefone: telefone.replace(/\D/g, '')
     };
 
     if (cadExtra) {
@@ -101,6 +101,8 @@ function User() {
     if (cadExtraSenha) {
       payload.senha = senha;
     }
+
+    
 
     if (editando && usuarioSelecionado) {
       api
