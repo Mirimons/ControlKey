@@ -23,7 +23,17 @@ function Keys() {
         const token = localStorage.getItem('token');
 
         if (!token) {
-            alert('Você precisa estar logado para cadastrar chave!');
+            // alert('Você precisa estar logado para cadastrar chave!');
+            toast.error('Você precisa estar logado para cadastrar uma chave!', {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'light'
+            })
             return;
         }
         // const novoLab = { nome_lab, desc_lab };
@@ -39,7 +49,17 @@ function Keys() {
         })
             .then(response => {
                 console.log("Chave cadastrada:", response.data);
-                alert("Chave cadastrada com sucesso!");
+                // alert("Chave cadastrada com sucesso!");
+                toast.success('Chave cadastrada com sucesso!', {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light'
+                })
                 fecharModal();
 
                 // limpa os campos
@@ -48,7 +68,17 @@ function Keys() {
             })
             .catch(error => {
                 console.error("Erro ao cadastrar:", error);
-                alert(error.response?.data?.error || "Erro ao cadastrar chave!");
+                // alert(error.response?.data?.error || "Erro ao cadastrar chave!");
+                toast.error('Erro ao cadastrar chave!', {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light'
+                })
             });
     };
 

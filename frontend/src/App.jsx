@@ -15,6 +15,8 @@ import RetirarChave from './usuarios/pages/Retirar/RetirarChave/retirarChave';
 import RetirarEquipamento from './usuarios/pages/Retirar/RetirarEquipamento/retirarEquipamento';
 import DevolverChave from './usuarios/pages/Devolver/DevolverChave/devolverChave';
 import DevolverEquipamento from './usuarios/pages/Devolver/DevolverEquipamento/devolverEquipamento';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 function App() {
@@ -33,6 +35,7 @@ function App() {
   
   return (
     <div className='app-container'>
+    <ToastContainer />
       {!hideNavbarPaths.includes(location.pathname) && <Navbar />}
       <div className='main-content'>
         <Routes>

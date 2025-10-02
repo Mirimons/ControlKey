@@ -4,6 +4,7 @@ import './User.css';
 import Navbar from "../../../components/navbar";
 import api from '../../../services/api';
 import BotaoSair from "../../../components/botaoSair/sair";
+import { toast } from "react-toastify";
 
 function User() {
     const [modalAberto, setModalAberto] = useState(false);
@@ -80,7 +81,17 @@ function User() {
         const token = localStorage.getItem("token");
 
         if (!token) {
-            alert("Você precisa estar logado!");
+            // alert("Você precisa estar logado!");
+            toast.error('Você precisa estar logado!', {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'light'
+            })
             return;
         }
 
@@ -106,19 +117,39 @@ function User() {
                 headers: { Authorization: `Bearer ${token}` },
             })
                 .then((res) => {
-                    alert("Usuário atualizado com sucesso!");
+                    // alert("Usuário atualizado com sucesso!");
+                    toast.success('Usuário atualizado com sucesso!', {
+                        position: "top-right",
+                        autoClose: 2000,
+                        hideProgressBar: false,
+                        closeOnClick: false,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: 'light'
+                    })
 
                     setUsuarios(prev => prev.map(u =>
                         u.id === usuarioSelecionado.id
                             ? { ...u, ...res.data }  // se res.data não vier completo, use { ...u, ...payload }
                             : u
                     ));
-                    
+
                     fecharModal();
                 })
                 .catch((err) => {
                     console.error("Erro ao editar:", err);
-                    alert(err.response?.data?.error || "Erro ao editar usuário!");
+                    // alert(err.response?.data?.error || "Erro ao editar usuário!");
+                    toast.error('Erro ao editar usuário!', {
+                        position: "top-right",
+                        autoClose: 2000,
+                        hideProgressBar: false,
+                        closeOnClick: false,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: 'light'
+                    })
                 });
 
         } else {
@@ -126,7 +157,17 @@ function User() {
                 headers: { Authorization: `Bearer ${token}` },
             })
                 .then((res) => {
-                    alert("Usuário cadastrado com sucesso!");
+                    // alert("Usuário cadastrado com sucesso!");
+                    toast.success('Dados editados com sucesso!', {
+                        position: "top-right",
+                        autoClose: 2000,
+                        hideProgressBar: false,
+                        closeOnClick: false,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: 'light'
+                    })
                     fecharModal();
                     // limpa os campos  
                     setNome("");
@@ -141,48 +182,22 @@ function User() {
                 })
                 .catch((err) => {
                     console.error("Erro ao cadastrar:", err);
-                    alert(err.response?.data?.error || "Erro ao cadastrar usuário!");
+                    // alert(err.response?.data?.error || "Erro ao cadastrar usuário!");
+                    toast.error('Erro ao cadastrar usuário!', {
+                        position: "top-right",
+                        autoClose: 2000,
+                        hideProgressBar: false,
+                        closeOnClick: false,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: 'light'
+                    })
+
                 });
         }
 
     };
-
-
-    // api.post("/usuario", {
-    //     id_tipo,
-    //     nome,
-    //     cpf,
-    //     data_nasc,
-    //     telefone,
-    //     matricula,
-    //     email,
-    //     senha
-    // }, {
-    //     headers: {
-    //         'Authorization': `Bearer ${token}`
-    //     }
-    // })
-    // .then(response => {
-    //     console.log("Usuário cadastrado:", response.data);
-    //     alert("Usuário cadastrado com sucesso!");
-    //     fecharModal();
-
-    // limpa os campos
-    // setNome("");
-    // setCpf("");
-    // setEmail("");
-    // setTelefone("");
-    // setMatricula("");
-    // setData_nasc("");
-    // setId_tipo("");
-    // setSenha("");
-
-    //         })
-    //         .catch(error => {
-    //             console.error("Erro ao cadastrar:", error);
-    //             alert(error.response?.data?.error || "Erro ao cadastrar usuário!");
-    //         });
-    // };
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -287,7 +302,7 @@ function User() {
                 <div className="modal-fundo">
                     <div className="modal-conteudo" ref={modalRef}>
                         <form onSubmit={handleSalvar}>
-                            <h2>Adicionar Usuário</h2>
+                            <h2>{editando ? "Editar Usuário" : "Adicionar Usuário"}</h2>
 
                             <select
                                 value={id_tipo}

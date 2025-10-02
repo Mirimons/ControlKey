@@ -3,14 +3,17 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import logo from '../../../assets/LOGOCERTO.png';
 import { useState, useEffect } from "react";
 import api from "../../../services/api";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
 
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const navigate = useNavigate();
 
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault();
     api.post('/login', {
       email: email,
@@ -18,18 +21,39 @@ export default function Login() {
     })
       .then(response => {
         console.log("Login bem-sucedido: ", response.data);
-
-        sessionStorage.setItem('token', response.data.token);
-        sessionStorage.setItem('usuario', JSON.stringify({
+        toast.success('Login efetuado com sucesso', {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light'
+        }),
+          sessionStorage.setItem('token', response.data.token);
+          sessionStorage.setItem('usuario', JSON.stringify({
           id: response.data.usuario.usuarioId,
           email: response.data.usuario.email
         }));
 
-        window.location.href = "/home";
+        setTimeout(() => {
+          navigate("/home");
+        }, 2000);
       })
       .catch(error => {
         console.error("Erro no login: ", error);
-        alert(error.response?.data?.error || "Email ou senha incorretos!");
+        // alert(error.response?.data?.error || "Email ou senha incorretos!");
+        toast.error('E-mail ou senha incorretos', {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light'
+        })
       });
   }
 

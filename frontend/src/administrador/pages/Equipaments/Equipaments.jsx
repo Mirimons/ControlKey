@@ -22,13 +22,23 @@ function Equipaments() {
         const token = localStorage.getItem('token');
 
         if (!token) {
-            alert('Você precisa estar logado para cadastrar equipamentos!');
+            // alert('Você precisa estar logado para cadastrar equipamentos!');
+            toast.error('Você precisa estar logado para cadastrar um equipamento!', {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'light'
+            })
             return;
         }
 
         api.post("/equipamento", {
-            id_tipo : tipoEquip,
-            desc_equip : descEquip
+            id_tipo: tipoEquip,
+            desc_equip: descEquip
         }, {
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -36,7 +46,17 @@ function Equipaments() {
         })
             .then(response => {
                 console.log("Equipamento cadastrado:", response.data);
-                alert("Equipamento cadastrado com sucesso!");
+                // alert("Equipamento cadastrado com sucesso!");
+                toast.success('Equipamento cadastrado com sucesso!', {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light'
+                })
                 fecharModal();
 
                 // limpa os campos
@@ -45,7 +65,17 @@ function Equipaments() {
             })
             .catch(error => {
                 console.error("Erro ao cadastrar:", error);
-                alert(error.response?.data?.error || "Erro ao cadastrar Equipamento!");
+                // alert(error.response?.data?.error || "Erro ao cadastrar Equipamento!");
+                toast.error('Erro ao cadastrar equipamento!', {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light'
+                })
             });
     };
 

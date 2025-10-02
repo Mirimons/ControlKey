@@ -5,7 +5,7 @@ import "./retiradaDevolucao.css";
 import api from "../../services/api";
 
 function RetiradaDevolucao() {
-    const [identificacao, setidentificacao] = useState("");
+    const [identificacao, setIdentificacao] = useState("");
     const [tipo, setTipo] = useState("");
 
     const handleSubmit = (e) => {

@@ -3,6 +3,7 @@ import './Reservation.css';
 import Navbar from "../../../components/navbar";
 import api from '../../../services/api';
 import BotaoSair from "../../../components/botaoSair/sair";
+import { toast } from "react-toastify";
 
 function Reservation() {
     const [modalAberto, setModalAberto] = useState(false);
@@ -30,7 +31,17 @@ function Reservation() {
         const token = localStorage.getItem('token');
 
         if (!token) {
-            alert('Você precisa estar logado para reservar!');
+            // alert('Você precisa estar logado para reservar!');
+            toast.error('Você precisa estar logado para reservar!', {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'light'
+            })
             return;
         }
 
@@ -48,7 +59,17 @@ function Reservation() {
         })
             .then(response => {
                 console.log("Agendamento realizado:", response.data);
-                alert("Agendamento realizado com sucesso!");
+                // alert("Agendamento realizado com sucesso!");
+                toast.success('Agendamento realizado com sucesso!', {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light'
+                })
                 fecharModal();
 
                 // limpa os campos
@@ -63,7 +84,18 @@ function Reservation() {
             })
             .catch(error => {
                 console.error("Erro ao agendar:", error);
-                alert(error.response?.data?.error || "Erro ao agendar!");
+                // alert(error.response?.data?.error || "Erro ao agendar!");
+                toast.error('Erro ao agendar!', {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light'
+                })
+
             });
     };
 
