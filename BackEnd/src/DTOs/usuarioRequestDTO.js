@@ -10,9 +10,9 @@ const usuarioRepository = AppDataSource.getRepository(Usuario);
 const usuarioCadRepository = AppDataSource.getRepository(UsuarioCad);
 
 class UsuarioRequestDTO extends BaseDTO {
-  async cadastroExtra(tipoInput) {
-    const cadExtra = [1, 2];
-    return cadExtra.includes(Number(id_tipo));
+  async cadastroExtra(id_tipo) {
+    const tipoCad = [1, 2];
+    return tipoCad.includes(Number(id_tipo));
   }
 
   async validateGetUsuarios() {
