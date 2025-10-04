@@ -35,6 +35,7 @@ export default function Login() {
           sessionStorage.setItem('usuario', JSON.stringify({
           id: response.data.usuario.usuarioId,
           email: response.data.usuario.email
+
         }));
 
         setTimeout(() => {

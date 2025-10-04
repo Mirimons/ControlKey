@@ -2,7 +2,7 @@ import { jwtDecode } from "jwt-decode";
 
 
 function getUser() {
-    const token = sessionStorage.getItem("tokenJwt");
+    const token = sessionStorage.getItem("token");
 
     if (!token) return null;
 

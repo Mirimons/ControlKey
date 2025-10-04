@@ -10,27 +10,57 @@ const usuarioRepository = AppDataSource.getRepository(Usuario);
 const usuarioCadRepository = AppDataSource.getRepository(UsuarioCad);
 
 class UsuarioRequestDTO extends BaseDTO {
-  async cadastroExtra(id_tipo) {
-    const tipoCad = [1, 2];
-    return tipoCad.includes(Number(id_tipo));
+  async cadastroExtra(tipoInput) {
+    try {
+      let tipoUsuario;
+
+      //Se for número - ID
+      if (typeof tipoInput === "number" || !isNaN(Number(tipoInput))) {
+        tipoUsuario = await tipoUsuarioRepository.findOneBy({
+          id: Number(tipoInput),
+          deletedAt: IsNull(),
+        });
+      } else if (typeof tipoInput === "string") {
+        tipoUsuario = await tipoUsuarioRepository.findOne({
+          where: {
+            desc_tipo: tipoInput.trim(),
+            deletedAt: IsNull(),
+          },
+        });
+      } else if (typeof tipoInput === "object" && tipoInput.desc_tipo) {
+        tipoUsuario = tipoInput;
+      }
+
+      if (!tipoUsuario) return false;
+
+      //Tipos que precisam do cadastroExtra
+      const tipoCad = ["Administrador", "Comum"];
+      return tipoCad.includes(tipoUsuario.desc_tipo);
+    } catch (error) {
+      console.error("Erro ao verificar cadastro extra: ", error);
+      return false;
+    }
   }
 
   async validateGetUsuarios() {
     this.clearValidatedData();
 
-    const { nome, id_tipo, tipo_desc, page = 1, limit = 10 } = this.data;
+    const { nome, id_tipo, tipo_desc, page, limit } = this.data;
 
-    if (page !== undefined) {
+    this.validatedData.page = 1;
+    this.validatedData.limit = 10;
+
+    if (page !== undefined && page !== null && page !== "") {
       if (!this.validateParamsId("page", "Página", 1, 1000)) return false;
       this.validatedData.page = Math.max(1, Number(page));
     }
 
-    if (limit !== undefined) {
+    if (limit !== undefined && limit !== null && limit !== "") {
       if (!this.validateParamsId("limit", "Limite", 1, 100)) return false;
       this.validatedData.limit = Math.min(Math.max(1, Number(limit)), 100);
     }
 
-    if (nome !== undefined) {
+    if (nome !== undefined && nome !== null && nome !== "") {
       if (typeof nome !== "string") {
         this.addError("nome", "Nome deve ser um texto");
         return false;
@@ -59,25 +89,29 @@ class UsuarioRequestDTO extends BaseDTO {
   async validateCreate() {
     this.clearValidatedData();
 
-    const { id_tipo, senha, matricula, email } = this.data;
+    const { tipo, senha, matricula, email } = this.data;
 
-    if (!this.validateForeignKeyId("id_tipo", "Tipo de Usuário", true))
+    if (!tipo || !tipo.trim()) {
+      this.addError("tipo", "O tipo de usuário é obrigatório");
       return false;
-
-    //Busca o id do tipo pelo ID
+    }
+    //Busca o id do tipo pela sua descrição
     try {
-      const tipoUsuario = await tipoUsuarioRepository.findOneBy({
-        id: this.validatedData.id_tipo,
-        deletedAt: IsNull(),
+      const tipoFind = await tipoUsuarioRepository.findOne({
+        where: {
+          desc_tipo: tipo.trim(),
+          deletedAt: IsNull(),
+        },
       });
 
-      if (!tipoUsuario) {
-        this.addError("id_tipo", "Tipo de usuário informado não encontrado.");
+      if (!tipoFind) {
+        this.addError("tipo", "Tipo de usuário não encontrado.");
         return false;
       }
-      this.validatedData.tipo = tipoUsuario;
+      this.validatedData.id_tipo = tipoFind.id;
+      this.validatedData.tipo = tipoFind;
     } catch (error) {
-      this.addError("id_tipo", "Erro ao validar tipo de usuário");
+      this.addError("tipo", "Erro ao buscar tipo de usuário");
       return false;
     }
 
@@ -101,37 +135,48 @@ class UsuarioRequestDTO extends BaseDTO {
       return false;
     }
 
-    const cadastro = this.cadastroExtra(this.validatedData.id_tipo);
+    const cadastro = await this.cadastroExtra(
+      this.validatedData.tipo.desc_tipo
+    );
     this.validatedData.requiresCadastroExtra = cadastro;
 
     if (cadastro) {
-      if (!this.validateString("matricula", "Matrícula", 1)) return false;
+      if (matricula !== undefined && matricula !== null && matricula !== "") {
+        if (!this.validateString("matricula", "Matrícula", 1)) return false;
 
-      try {
-        const matriculaExiste = await usuarioCadRepository.findOne({
-          where: {
-            matricula: this.validatedData.matricula,
-          },
-          relations: ["usuario"],
-        });
+        try {
+          const matriculaExiste = await usuarioCadRepository.findOne({
+            where: {
+              matricula: this.validatedData.matricula,
+            },
+            relations: ["usuario"],
+          });
 
-        if (matriculaExiste) {
-          this.addError(
-            "matricula",
-            "Matricula já cadastrada para outro usuário."
-          );
+          if (matriculaExiste) {
+            this.addError(
+              "matricula",
+              "Matricula já cadastrada para outro usuário."
+            );
+            return false;
+          }
+        } catch (error) {
+          this.addError("matricula", "Erro ao verificar matrícula");
           return false;
         }
-      } catch (error) {
-        this.addError("matricula", "Erro ao verificar matrícula");
-        return false;
+      }
+      if (email !== undefined && email !== null && email !== "") {
+        if (!this.validateEmail("email", "Email")) return false;
       }
 
-      if (!this.validateEmail("email", "Email")) return false;
-
-      const precisaSenha = this.validatedData.id_tipo === 1;
-      if (precisaSenha) {
-        if (!senha && senha.length < 6) {
+      const precisaSenha =
+        this.validatedData.tipo.desc_tipo === "Administrador";
+      if (
+        precisaSenha &&
+        senha !== undefined &&
+        senha !== null &&
+        senha !== ""
+      ) {
+        if (senha && senha.length < 6) {
           this.addError("senha", "Senha deve conter pelo menos 6 caracteres.");
           return false;
         }
@@ -145,16 +190,45 @@ class UsuarioRequestDTO extends BaseDTO {
   async validateUpdate() {
     this.clearValidatedData();
 
-    const { id_tipo, nome, cpf, data_nasc, telefone, matricula, email, senha } =
-      this.data;
+    const {
+      tipo,
+      id_tipo,
+      nome,
+      cpf,
+      data_nasc,
+      telefone,
+      matricula,
+      email,
+      senha,
+    } = this.data;
 
     if (!this.validateParamsId("id", "ID do Usuário")) return false;
 
     //Tipo de Usuário
-    if (id_tipo !== undefined) {
+    if (tipo !== undefined && tipo !== null && tipo !== "") {
+      //Busca o id do tipo pela sua descrição
+      try {
+        const tipoFind = await tipoUsuarioRepository.findOne({
+          where: {
+            desc_tipo: tipo.trim(),
+            deletedAt: IsNull(),
+          },
+        });
+
+        if (!tipoFind) {
+          this.addError("tipo", "Tipo de usuário não encontrado.");
+          return false;
+        }
+        this.validatedData.id_tipo = tipoFind.id;
+        this.validatedData.tipo = tipoFind;
+      } catch (error) {
+        this.addError("tipo", "Erro ao buscar tipo de usuário");
+        return false;
+      }
+    } else if (id_tipo !== undefined && id_tipo !== null && id_tipo !== "") {
       if (!this.validateForeignKeyId("id_tipo", "ID do Tipo de Usuário"))
         return false;
-      //Busca o id do tipo pela sua descrição
+
       try {
         const tipoUsuario = await tipoUsuarioRepository.findOneBy({
           id: this.validatedData.id_tipo,
@@ -205,41 +279,45 @@ class UsuarioRequestDTO extends BaseDTO {
       }
     }
 
-    if (id_tipo !== undefined) {
-      const cadastro = this.cadastroExtra(this.validatedData.id_tipo);
+    if (this.validatedData.tipo) {
+      const cadastro = await this.cadastroExtra(
+        this.validatedData.tipo.desc_tipo
+      );
       this.validatedData.requiresCadastroExtra = cadastro;
 
       if (cadastro) {
-        if (matricula !== undefined) {
+        if (matricula !== undefined && matricula !== null && matricula !== "") {
           if (!this.validateString("matricula", "Matrícula", 1)) return false;
-        }
 
-        try {
-          const matriculaExiste = await usuarioCadRepository.findOne({
-            where: {
-              matricula: this.validatedData.matricula,
-            },
-            relations: ["usuario"],
-          });
+          try {
+            const matriculaExiste = await usuarioCadRepository.findOne({
+              where: {
+                matricula: this.validatedData.matricula,
+              },
+              relations: ["usuario"],
+            });
 
-          if (matriculaExiste) {
-            this.addError(
-              "matricula",
-              "Matricula já cadastrada para outro usuário."
-            );
+            if (
+              matriculaExiste &&
+              matriculaExiste.usuario?.id !== this.validatedData.id
+            ) {
+              this.addError(
+                "matricula",
+                "Matricula já cadastrada para outro usuário."
+              );
+              return false;
+            }
+          } catch (error) {
+            this.addError("matricula", "Erro ao verificar matrícula");
             return false;
           }
-        } catch (error) {
-          this.addError("matricula", "Erro ao verificar matrícula");
-          return false;
         }
 
-        if (email !== undefined) {
+        if (email !== undefined && email !== null && email !== "") {
           if (!this.validateEmail("email", "Email")) return false;
         }
 
-        const precisaSenha = this.validatedData.id_tipo === 1;
-        if (precisaSenha && senha !== undefined) {
+        if (senha !== undefined && senha !== null && senha !== "") {
           if (senha.length < 6) {
             this.addError(
               "senha",
@@ -247,9 +325,7 @@ class UsuarioRequestDTO extends BaseDTO {
             );
             return false;
           }
-          if (senha) {
-            this.validatedData.senha = senha;
-          }
+          this.validatedData.senha = senha;
         }
       }
     }

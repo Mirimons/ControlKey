@@ -1,402 +1,433 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import { FaEye, FaEyeSlash, FaSearch } from "react-icons/fa";
-import './User.css';
+import "./User.css";
 import Navbar from "../../../components/navbar";
-import api from '../../../services/api';
+import api from "../../../services/api";
 import BotaoSair from "../../../components/botaoSair/sair";
 import { toast } from "react-toastify";
 
 function User() {
-    const [modalAberto, setModalAberto] = useState(false);
-    const [id_tipo, setId_tipo] = useState("");
-    const [nome, setNome] = useState("");
-    const [cpf, setCpf] = useState("");
-    const [email, setEmail] = useState("");
-    const [telefone, setTelefone] = useState("");
-    const [matricula, setMatricula] = useState("");
-    const [data_nasc, setData_nasc] = useState("");
-    const [senha, setSenha] = useState("");
+  const [modalAberto, setModalAberto] = useState(false);
+  const [tipo, setTipo] = useState("");
+  const [nome, setNome] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [email, setEmail] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [matricula, setMatricula] = useState("");
+  const [data_nasc, setData_nasc] = useState("");
+  const [senha, setSenha] = useState("");
 
-    const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
-    const [filtroNome, setFiltroNome] = useState("");
-    const [filtroTipo, setFiltroTipo] = useState("");
+  const [filtroNome, setFiltroNome] = useState("");
+  const [filtroTipo, setFiltroTipo] = useState("");
 
-    const [usuarios, setUsuarios] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
 
-    const [editando, setEditando] = useState(false);
-    const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
+  const [editando, setEditando] = useState(false);
+  const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
 
-    console.log(usuarios)
+  console.log(usuarios);
 
-    const modalRef = useRef();
+  const modalRef = useRef();
 
-    const abrirModal = () => setModalAberto(true);
-    const fecharModal = () => setModalAberto(false);
+  const cadExtra = tipo === "Administrador" || tipo === "Comum";
+  const cadExtraSenha = tipo === "Administrador";
 
-    const abrirModalNovo = () => {
-        setEditando(false);
-        setUsuarioSelecionado(null);
+  const abrirModal = () => setModalAberto(true);
+  const fecharModal = () => setModalAberto(false);
 
-        // limpa os campos
-        setNome("");
-        setCpf("");
-        setEmail("");
-        setTelefone("");
-        setMatricula("");
-        setData_nasc("");
-        setId_tipo("");
-        setSenha("");
-        setModalAberto(true);
+  const abrirModalNovo = () => {
+    setEditando(false);
+    setUsuarioSelecionado(null);
 
+    // limpa os campos
+    setNome("");
+    setCpf("");
+    setEmail("");
+    setTelefone("");
+    setMatricula("");
+    setData_nasc("");
+    setTipo("");
+    setSenha("");
+    setModalAberto(true);
+  };
+
+  const abrirModalEditar = (user) => {
+    setEditando(true);
+    setUsuarioSelecionado(user);
+
+    setTipo(user.tipo?.desc_tipo || "");
+    setNome(user.nome);
+    setCpf(user.cpf);
+    setEmail(user.usuario_cad?.email || "");
+    setTelefone(user.telefone);
+    setMatricula(user.usuario_cad?.matricula || "");
+    setData_nasc(user.data_nasc || "");
+    setSenha("");
+    setModalAberto(true);
+  };
+
+  const fetchUsuarios = () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    const params = {};
+    if (filtroNome) params.nome = filtroNome;
+    if (filtroTipo) params.tipo_desc = filtroTipo;
+
+    api
+      .get("/usuario", {
+        params,
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setUsuarios(res.data.data))
+      .catch((err) => console.error("Erro ao buscar usuários:", err));
+  };
+
+  const aplicarFiltros = () => {
+    fetchUsuarios();
+  };
+
+  const handleSalvar = (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      // alert("Você precisa estar logado!");
+      toast.error("Você precisa estar logado!", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      return;
     }
 
-    const abrirModalEditar = (user) => {
-        setEditando(true);
-        setUsuarioSelecionado(user);
+    let payload = {
+      tipo: tipo,
+      nome,
+      cpf,
+      data_nasc,
+      telefone,
+    };
 
-        setId_tipo(user.id_tipo);
-        setNome(user.nome);
-        setCpf(user.cpf);
-        setEmail(user.usuario_cad?.email || "");
-        setTelefone(user.telefone);
-        setMatricula(user.usuario_cad?.matricula || "");
-        setData_nasc(user.data_nasc || "");
-        setSenha("");
-        setModalAberto(true);
-
+    if (cadExtra) {
+      payload.email = email;
+      payload.matricula = matricula;
     }
 
-    const fetchUsuarios = () => {
-        const token = localStorage.getItem("token");
-        if (!token) return;
+    if (cadExtraSenha && senha) {
+      payload.senha = senha;
+    }
 
-        api.get("/usuario", { headers: { Authorization: `Bearer ${token}` } })
-            .then(res => setUsuarios(res.data))
-            .catch(err => console.error("Erro ao buscar usuários:", err));
-    };
-
-    const handleSalvar = (e) => {
-        e.preventDefault();
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            // alert("Você precisa estar logado!");
-            toast.error('Você precisa estar logado!', {
-                position: "top-right",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: 'light'
-            })
-            return;
-        }
-
-        let payload = {
-            id_tipo,
-            nome,
-            cpf,
-            data_nasc,
-            telefone,
-        };
-
-        if (id_tipo !== 3) {
-            payload.email = email;
-            payload.matricula = matricula;
-        }
-
-        if (id_tipo === 1 && senha) {
-            payload.senha = senha;
-        }
-
-        if (editando && usuarioSelecionado) {
-            api.put(`/usuario/${usuarioSelecionado.id}`, payload, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then((res) => {
-                    // alert("Usuário atualizado com sucesso!");
-                    toast.success('Usuário atualizado com sucesso!', {
-                        position: "top-right",
-                        autoClose: 2000,
-                        hideProgressBar: false,
-                        closeOnClick: false,
-                        pauseOnHover: true,
-                        draggable: true,
-                        progress: undefined,
-                        theme: 'light'
-                    })
-
-                    setUsuarios(prev => prev.map(u =>
-                        u.id === usuarioSelecionado.id
-                            ? { ...u, ...res.data }  // se res.data não vier completo, use { ...u, ...payload }
-                            : u
-                    ));
-
-                    fecharModal();
-                })
-                .catch((err) => {
-                    console.error("Erro ao editar:", err);
-                    // alert(err.response?.data?.error || "Erro ao editar usuário!");
-                    toast.error('Erro ao editar usuário!', {
-                        position: "top-right",
-                        autoClose: 2000,
-                        hideProgressBar: false,
-                        closeOnClick: false,
-                        pauseOnHover: true,
-                        draggable: true,
-                        progress: undefined,
-                        theme: 'light'
-                    })
-                });
-
-        } else {
-            api.post("/usuario", payload, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-                .then((res) => {
-                    // alert("Usuário cadastrado com sucesso!");
-                    toast.success('Dados editados com sucesso!', {
-                        position: "top-right",
-                        autoClose: 2000,
-                        hideProgressBar: false,
-                        closeOnClick: false,
-                        pauseOnHover: true,
-                        draggable: true,
-                        progress: undefined,
-                        theme: 'light'
-                    })
-                    fecharModal();
-                    // limpa os campos  
-                    setNome("");
-                    setCpf("");
-                    setEmail("");
-                    setTelefone("");
-                    setMatricula("");
-                    setData_nasc("");
-                    setId_tipo("");
-                    setSenha("");
-                    fetchUsuarios();
-                })
-                .catch((err) => {
-                    console.error("Erro ao cadastrar:", err);
-                    // alert(err.response?.data?.error || "Erro ao cadastrar usuário!");
-                    toast.error('Erro ao cadastrar usuário!', {
-                        position: "top-right",
-                        autoClose: 2000,
-                        hideProgressBar: false,
-                        closeOnClick: false,
-                        pauseOnHover: true,
-                        draggable: true,
-                        progress: undefined,
-                        theme: 'light'
-                    })
-
-                });
-        }
-
-    };
-
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
-        api.get("/usuario", {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
+    if (editando && usuarioSelecionado) {
+      api
+        .put(`/usuario/${usuarioSelecionado.id}`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
         })
-            .then(response => {
-                setUsuarios(response.data);
-            })
-            .catch(error => {
-                console.error("Erro ao buscar usuários:", error);
-            });
+        .then((res) => {
+          // alert("Usuário atualizado com sucesso!");
+          toast.success("Usuário atualizado com sucesso!", {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
 
-    }, [])
+          setUsuarios((prev) =>
+            prev.map((u) =>
+              u.id === usuarioSelecionado.id
+                ? { ...u, ...res.data } // se res.data não vier completo, use { ...u, ...payload }
+                : u
+            )
+          );
 
-    useEffect(() => {
+          fetchUsuarios();
+          fecharModal();
+        })
+        .catch((err) => {
+          console.error("Erro ao editar:", err);
+          // alert(err.response?.data?.error || "Erro ao editar usuário!");
+          toast.error("Erro ao editar usuário!", {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+        });
+    } else {
+      api
+        .post("/usuario", payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          // alert("Usuário cadastrado com sucesso!");
+          toast.success("Dados editados com sucesso!", {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+          fecharModal();
+          // limpa os campos
+          setNome("");
+          setCpf("");
+          setEmail("");
+          setTelefone("");
+          setMatricula("");
+          setData_nasc("");
+          setTipo("");
+          setSenha("");
+          fetchUsuarios();
+        })
+        .catch((err) => {
+          console.error("Erro ao cadastrar:", err);
+          // alert(err.response?.data?.error || "Erro ao cadastrar usuário!");
+          toast.error("Erro ao cadastrar usuário!", {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+        });
+    }
+  };
 
-        function handleClickFora(event) {
-            if (modalRef.current && !modalRef.current.contains(event.target)) {
-                fecharModal();
-            }
-        }
+  //Para fazer a busca inicial automática
+  useEffect(() => {
+    fetchUsuarios();
+  }, []);
 
-        function handleEsc(event) {
-            if (event.key == 'Escape') {
-                fecharModal();
-            }
-        }
+  useEffect(() => {
+    function handleClickFora(event) {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        fecharModal();
+      }
+    }
 
-        if (modalAberto) {
-            document.addEventListener('mousedown', handleClickFora);
-            document.addEventListener('keydown', handleEsc);
-        }
+    function handleEsc(event) {
+      if (event.key == "Escape") {
+        fecharModal();
+      }
+    }
 
-        return () => {
-            document.removeEventListener('mousedown', handleClickFora);
-            document.removeEventListener('keydown', handleEsc);
-        };
-    }, [modalAberto]);
+    if (modalAberto) {
+      document.addEventListener("mousedown", handleClickFora);
+      document.addEventListener("keydown", handleEsc);
+    }
 
+    return () => {
+      document.removeEventListener("mousedown", handleClickFora);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [modalAberto]);
 
-    return (
-        <div className="usuarios-container">
-            <header className="usuarios-header">
-                <h1>Usuários</h1>
-            </header>
+  return (
+    <div className="usuarios-container">
+      <header className="usuarios-header">
+        <h1>Usuários</h1>
+      </header>
 
-            <div className="usuarios-acoes">
-                <button type="button" onClick={abrirModalNovo}>Adicionar Usuário</button>
-            </div>
+      <div className="usuarios-acoes">
+        <button type="button" onClick={abrirModalNovo}>
+          Adicionar Usuário
+        </button>
+      </div>
 
-
-            <div className="usuarios-filtros">
-                <div>
-                    <h3>Nome completo</h3>
-                    <input type="text"
-                        placeholder="Nome completo"
-                        value={filtroNome}
-                        onChange={(e) => setFiltroNome(e.target.value)}
-                    />
-                </div>
-                <div>
-                    <h3>Selecione o tipo de usuário:</h3>
-                    <select defaultValue="">
-                        <option value="" disabled hidden>Selecione o tipo de usuário</option>
-                        <option value="Administrador">Administrador</option>
-                        <option value="Comum">Comum</option>
-                    </select>
-                </div>
-
-            </div>
-
-            <table className="usuarios-tabela">
-                <thead>
-                    <tr>
-                        <th>Código</th>
-                        <th>Nome</th>
-                        <th>Tp_usuário</th>
-                        <th>Telefone</th>
-                        <th>Editar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {usuarios && usuarios.map((user) => (
-                        <tr key={user.id}>
-                            <td>{user.id}</td>
-                            <td>{user.nome}</td>
-                            <td>{user.tipo?.nome || user.id_tipo}</td>
-                            <td>{user.telefone}</td>
-                            <button className="editar-btn" onClick={() => abrirModalEditar(user)}>✏️</button>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-
-            {/* Modal */}
-            {modalAberto && (
-                <div className="modal-fundo">
-                    <div className="modal-conteudo" ref={modalRef}>
-                        <form onSubmit={handleSalvar}>
-                            <h2>{editando ? "Editar Usuário" : "Adicionar Usuário"}</h2>
-
-                            <select
-                                value={id_tipo}
-                                onChange={(e) => setId_tipo(Number(e.target.value))}
-                                required
-                            >
-                                <option value="" disabled hidden>Selecione o tipo de usuário</option>
-                                <option value={1}>Administrador</option>
-                                <option value={2}>Comum</option>
-                                <option value={3}>Terceiro</option>
-                            </select>
-
-
-                            <input
-                                type="text"
-                                placeholder="Nome completo"
-                                value={nome}
-                                onChange={(e) => setNome(e.target.value)}
-                                required
-                            />
-
-                            <input
-                                type="text"
-                                placeholder="CPF"
-                                value={cpf}
-                                onChange={(e) => setCpf(e.target.value)}
-                                required
-                            />
-
-                            <input
-                                type="email"
-                                placeholder="Email Institucional"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                disabled={id_tipo === 3}
-                            />
-
-                            <input
-                                type="tel"
-                                placeholder="Telefone (celular)"
-                                value={telefone}
-                                onChange={(e) => setTelefone(e.target.value)}
-                                required
-                            />
-
-                            <input
-                                type="text"
-                                placeholder="Matrícula"
-                                value={matricula}
-                                onChange={(e) => setMatricula(e.target.value)}
-                                required
-                                disabled={id_tipo === 3}
-                            />
-
-                            <input
-                                type="date"
-                                placeholder="Data de Nascimento"
-                                value={data_nasc}
-                                onChange={(e) => setData_nasc(e.target.value)}
-                                required
-                            />
-
-                            <div className="senha-container">
-                                <input
-                                    type={mostrarSenha ? "text" : "password"}
-                                    placeholder={editando ? "Deixe em branco para manter a atual" : "Senha"}
-                                    value={senha}
-                                    onChange={(e) => setSenha(e.target.value)}
-                                    autoComplete="new-password"
-                                    disabled={id_tipo === 2 || id_tipo === 3}
-                                    required={!editando && id_tipo === 1}
-                                />
-                                <button
-                                    type="button"
-                                    className="toggle-senha"
-                                    onClick={() => setMostrarSenha(!mostrarSenha)}
-                                >
-                                    {mostrarSenha ? <FaEyeSlash /> : <FaEye />}
-                                </button>
-                            </div>
-
-
-                            <div className="modal-botoes">
-                                <button type="button" onClick={fecharModal}>Cancelar</button>
-                                <button type="submit">Salvar</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-            <BotaoSair />
+      <div className="usuarios-filtros">
+        <div>
+          <h3>Nome completo</h3>
+          <input
+            type="text"
+            placeholder="Nome completo"
+            value={filtroNome}
+            onChange={(e) => setFiltroNome(e.target.value)}
+          />
         </div>
-    );
+        <div>
+          <h3>Selecione o tipo de usuário:</h3>
+          <select
+            //Conecta o filtro do tipo com a sua seleção no front para poder dar o get
+            value={filtroTipo}
+            onChange={(e) => setFiltroTipo(e.target.value)}
+          >
+            <option value="" disabled hidden>
+              Selecione o tipo de usuário
+            </option>
+            <option value="">Todos</option>
+            <option value="Administrador">Administrador</option>
+            <option value="Comum">Comum</option>
+            <option value="Terceiro">Terceiro</option>
+          </select>
+        </div>
+        <button onClick={aplicarFiltros} className="botao-pesquisa">
+          <FaSearch /> Pesquisar
+        </button>
+      </div>
+
+      <table className="usuarios-tabela">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>Tipo de usuário</th>
+            <th>Telefone</th>
+            <th>Editar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {usuarios && usuarios.length > 0 ? (
+            usuarios.map((user) => (
+              <tr key={user.id}>
+                <td>{user.id}</td>
+                <td>{user.nome}</td>
+                <td>{user.tipo?.desc_tipo || user.id_tipo}</td>
+                <td>{user.telefone}</td>
+                <td>
+                  <button
+                    className="editar-btn"
+                    onClick={() => abrirModalEditar(user)}
+                  >
+                    ✏️
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="5" style={{ textAlign: "center" }}>
+                Nenhum usuário encontrado
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+      {/* Modal */}
+      {modalAberto && (
+        <div className="modal-fundo">
+          <div className="modal-conteudo" ref={modalRef}>
+            <form onSubmit={handleSalvar}>
+              <h2>{editando ? "Editar Usuário" : "Adicionar Usuário"}</h2>
+
+              <select
+                value={tipo}
+                onChange={(e) => setTipo(e.target.value)}
+                required
+              >
+                <option value="" disabled hidden>
+                  Selecione o tipo de usuário
+                </option>
+                <option value="Administrador">Administrador</option>
+                <option value="Comum">Comum</option>
+                <option value="Terceiro">Terceiro</option>
+              </select>
+
+              <input
+                type="text"
+                placeholder="Nome completo"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                required
+              />
+
+              <input
+                type="text"
+                placeholder="CPF"
+                value={cpf}
+                onChange={(e) => setCpf(e.target.value)}
+                required
+              />
+
+              <input
+                type="email"
+                placeholder="Email Institucional"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required={cadExtra}
+                disabled={tipo === "Terceiro"}
+              />
+
+              <input
+                type="tel"
+                placeholder="Telefone (celular)"
+                value={telefone}
+                onChange={(e) => setTelefone(e.target.value)}
+                required
+              />
+
+              <input
+                type="text"
+                placeholder="Matrícula"
+                value={matricula}
+                onChange={(e) => setMatricula(e.target.value)}
+                required={cadExtra}
+                disabled={tipo === "Terceiro"}
+              />
+
+              <input
+                type="date"
+                placeholder="Data de Nascimento"
+                value={data_nasc}
+                onChange={(e) => setData_nasc(e.target.value)}
+                required
+              />
+
+              <div className="senha-container">
+                <input
+                  type={mostrarSenha ? "text" : "password"}
+                  placeholder={
+                    editando ? "Deixe em branco para manter a atual" : "Senha"
+                  }
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  autoComplete="new-password"
+                  disabled={tipo !== "Administrador"}
+                  required={!editando && tipo === "Administrador"}
+                />
+                <button
+                  type="button"
+                  className="toggle-senha"
+                  onClick={() => setMostrarSenha(!mostrarSenha)}
+                >
+                  {mostrarSenha ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+
+              <div className="modal-botoes">
+                <button type="button" onClick={fecharModal}>
+                  Cancelar
+                </button>
+                <button type="submit">Salvar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      <BotaoSair />
+    </div>
+  );
 }
 
 export default User;

@@ -17,6 +17,7 @@ import DevolverChave from './usuarios/pages/Devolver/DevolverChave/devolverChave
 import DevolverEquipamento from './usuarios/pages/Devolver/DevolverEquipamento/devolverEquipamento';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ProtectedRouter from './helpers/protectedRouter';
 
 
 function App() {
@@ -39,12 +40,32 @@ function App() {
       {!hideNavbarPaths.includes(location.pathname) && <Navbar />}
       <div className='main-content'>
         <Routes>
-          <Route path="/Home" element={<Home />} />
-          <Route path="/User" element={<User />} />
-          <Route path="/Keys" element={<Keys />} />
-          <Route path="/Equipaments" element={<Equipaments />} />
-          <Route path="/Reservation" element={<Reservation />} />
           <Route path="/Login" element={<Login />} />
+          <Route path="/Home" element={
+            <ProtectedRouter>
+              <Home />
+            </ProtectedRouter>} 
+          />
+          <Route path="/User" element={
+            <ProtectedRouter>
+              <User />
+            </ProtectedRouter>} 
+          />
+          <Route path="/Keys" element={
+            <ProtectedRouter>
+              <Keys />
+            </ProtectedRouter>} 
+          />
+          <Route path="/Equipaments" element={
+            <ProtectedRouter roles={"Administrador"}>
+              <Equipaments />
+            </ProtectedRouter>} 
+          />
+          <Route path="/Reservation" element={
+            <ProtectedRouter>
+              <Reservation />
+            </ProtectedRouter>} 
+          />
           <Route path="/" element={<RetiradaDevolucao />} />
           <Route path="/Retirar" element={<Retirar />} />
           <Route path="/Devolver" element={<Devolver />} />

@@ -83,6 +83,8 @@ function Equipaments() {
         const token = localStorage.getItem("token");
         if (!token) return;
 
+        //if()
+
         api.get("/equipamento", {
             headers: {
                 Authorization: `Bearer ${token}`
