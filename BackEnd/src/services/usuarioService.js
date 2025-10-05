@@ -135,34 +135,11 @@ class UsuarioService {
 
     const currentUsuario = await usuarioRepository.findOne({
       where: { id, deletedAt: IsNull() },
-      relations: ["usuario_cad"],
+      relations: ["usuario_cad", "tipo"],
     });
 
     if (!currentUsuario) {
       throw new Error("Usuário não encontrado.");
-    }
-
-    await usuarioRepository.update(
-      { id },
-      {
-        id_tipo: Number(id_tipo),
-        nome: nome,
-        cpf: cpf,
-        data_nasc: data_nasc,
-        telefone: telefone,
-      }
-    );
-
-    if (currentUsuario.usuario_cad) {
-      const hashedPassword = senha
-        ? await bcrypt.hash(senha, 10)
-        : currentUsuario.usuario_cad.senha;
-
-      await usuarioCadRepository.update(currentUsuario.usuario_cad.id_usuario, {
-        matricula: matricula,
-        email: email,
-        senha: hashedPassword,
-      });
     }
 
     // Atualização dos dados básicos
@@ -178,22 +155,42 @@ class UsuarioService {
     }
 
     // Atualização do cadastro extra
-    if (requiresCadastroExtra && currentUsuario.usuario_cad) {
+    if (requiresCadastroExtra) {
       const updateCadData = {};
+
       if (matricula !== undefined) updateCadData.matricula = matricula;
       if (email !== undefined) updateCadData.email = email;
 
-      if (senha !== undefined) {
+      if (senha !== undefined && senha.trim() !== "") {
         updateCadData.senha = await bcrypt.hash(senha, 10);
       }
 
-      if (Object.keys(updateCadData).length > 0) {
-        await usuarioCadRepository.update(
-          { id_usuario: currentUsuario.usuario_cad.id_usuario },
-          updateCadData
-        );
+      //Se já existe usuarioCad, atualiza
+      if (currentUsuario.usuario_cad) {
+        if (Object.keys(updateCadData).length > 0) {
+          await usuarioCadRepository.update(
+            { id_usuario: currentUsuario.usuario_cad.id_usuario },
+            updateCadData
+          );
+        }
+        //Se não existe, mas precisa criar (mudou o tipo e agora precisa)
+      } else if (Object.keys(updateCadData).length > 0) {
+        const hashedPassword = senha ? await bcrypt.hash(senha, 10) : null;
+
+        await usuarioCadRepository.save({
+          id_usuario: id,
+          matricula: matricula || "",
+          email: email || "",
+          senha: hashedPassword,
+          createdAt: new Date(),
+        });
       }
     }
+    // Se não precisa mais de cadastro extra, mas tinha antes
+    else if (currentUsuario.usuario_cad) {
+      await usuarioCadRepository.delete({ id_usuario: id });
+    }
+
     return await this.getUsuarioById(id);
   }
 

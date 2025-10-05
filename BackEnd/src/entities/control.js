@@ -40,7 +40,7 @@ const control = new EntitySchema({
             enum: ["aberto", "fechado", "pendente"],
             default: "aberto"
         },
-        aberto: {
+        ciente: {
             type: "boolean",
             nullable: true
         },

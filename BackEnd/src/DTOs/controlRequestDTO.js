@@ -24,19 +24,22 @@ class ControlRequestDTO extends BaseDTO {
       nome_lab,
       desc_equip,
       status,
-      aberto,
+      ciente,
       data_inicio,
       data_fim,
-      page = 1,
-      limit = 10,
+      page,
+      limit,
     } = this.data;
 
-    if (page !== undefined) {
+    this.validatedData.page = 1;
+    this.validatedData.limit = 10;
+
+    if (page !== undefined && page !== null && page !== '') {
       if (!this.validateParamsId("page", "Página", 1, 1000)) return false;
       this.validatedData.page = Math.max(1, Number(page));
     }
 
-    if (limit !== undefined) {
+    if (limit !== undefined && limit !== null && limit !== '') {
       if (!this.validateParamsId("limit", "Limite", 1, 100)) return false;
       this.validatedData.limit = Math.min(Math.max(1, Number(limit)), 100);
     }
@@ -50,17 +53,17 @@ class ControlRequestDTO extends BaseDTO {
       this.validatedData.status = status;
     }
 
-    if (aberto !== undefined) {
+    if (ciente !== undefined) {
       if (
-        aberto !== "true" &&
-        aberto !== "false" &&
-        aberto !== true &&
-        aberto !== false
+        ciente !== "true" &&
+        ciente !== "false" &&
+        ciente !== true &&
+        ciente !== false
       ) {
-        this.addError("aberto", "Campo aberto deve ser true ou false");
+        this.addError("ciente", "Campo ciente deve ser true ou false");
         return false;
       }
-      this.validatedData.aberto = aberto === "true" || aberto === true;
+      this.validatedData.ciente = ciente === "true" || ciente === true;
     }
 
     //Validação com prioridade - Usuario
@@ -260,14 +263,14 @@ class ControlRequestDTO extends BaseDTO {
             id_usuario: this.validatedData.id_usuario,
             id_labs: IsNull(),
             status: "aberto",
-            aberto: false,
+            ciente: false,
             deletedAt: IsNull(),
           },
         });
         //Marcar o aberto como true (usuario ciente)
         if (outroLabAberto.length > 0) {
           for (const control of outroLabAberto) {
-            await controlRepository.update(control.id, { aberto: true });
+            await controlRepository.update(control.id, { ciente: true });
           }
         }
       } catch (error) {
@@ -277,7 +280,7 @@ class ControlRequestDTO extends BaseDTO {
     }
 
     this.validatedData.status = "aberto";
-    this.validatedData.aberto = false;
+    this.validatedData.ciente = false;
     this.validatedData.data_inicio = new Date();
 
     return this.isValid();
@@ -388,7 +391,7 @@ class ControlRequestDTO extends BaseDTO {
       }
 
       //Marca como ciente
-      this.validatedData.aberto = true;
+      this.validatedData.ciente = true;
     } catch (error) {
       this.addError("id", "Erro ao validar controle");
       return false;

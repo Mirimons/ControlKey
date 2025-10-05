@@ -5,6 +5,7 @@ import express from "express";
 import cors from 'cors';
 import routes from "./routes.js";
 import { AppDataSource } from "./database/data-source.js";
+import { initJobs } from './jobs/index.js';
 
 const server = express();
 
@@ -28,13 +29,18 @@ const corsOptions = {
 };
 
 server.use(cors(corsOptions));
-
 server.use(express.json());
-
 server.use("/", routes);
 
 AppDataSource.initialize().then( async() => {
     console.log ("Banco de dados conectado!✨");
+
+    try {
+        initJobs();
+        console.log("Jobs agendados inicializados!")
+    }catch(jobError) {
+        console.error("Erro ao inicializar jobs: ", jobError)
+    }
 
     server.listen(3333, () => {
         console.log ("O servidor está funcionando!✨");

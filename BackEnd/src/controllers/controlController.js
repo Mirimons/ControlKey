@@ -1,8 +1,12 @@
-import express, { response } from "express";
+import express from "express";
 import controlService from "../services/controlService.js";
 import { ControlRequestDTO } from "../DTOs/index.js";
 import { getErrorMessage } from "../helpers/errorHandler.js";
-import validationMiddleware from "../middleware/validationMiddleware.js";
+import {
+  validationMiddleware,
+  isAdmin,
+  authenticateToken,
+} from "../middleware/index.js";
 
 const route = express.Router();
 
@@ -44,23 +48,23 @@ function handleControlError(response, error) {
 }
 
 route.get("/:id", async (request, response) => {
-    try {
-        const { id } = request.params;
-        const control = await controlService.getControlById(id);
-    
-        if (!control) {
-          return response.status(404).json({ response: "Control não encontrada." });
-        }
-    
-        return response.status(200).json(control);
-      } catch (error) {
-        console.error("Erro ao buscar control: ", error);
-        return response.status(500).json({
-          response: "Erro interno no servidor.",
-          error: getErrorMessage(error),
-        });
-      }
-})
+  try {
+    const { id } = request.params;
+    const control = await controlService.getControlById(id);
+
+    if (!control) {
+      return response.status(404).json({ response: "Control não encontrada." });
+    }
+
+    return response.status(200).json(control);
+  } catch (error) {
+    console.error("Erro ao buscar control: ", error);
+    return response.status(500).json({
+      response: "Erro interno no servidor.",
+      error: getErrorMessage(error),
+    });
+  }
+});
 
 route.get("/", validateGetControls, async (request, response) => {
   try {
@@ -88,6 +92,36 @@ route.post("/retirada", validateOpen, async (request, response) => {
     return handleControlError(response, error);
   }
 });
+
+//Rota protegida para admin: Rota de teste do job implementado
+route.post(
+  "/fechamento-automatico",
+  authenticateToken,
+  isAdmin,
+  async (request, response) => {
+    if (process.env.NODE_ENV === "production") {
+      return response.status(403).json({
+        response:
+          "Esta rota está disponível apenas em ambiente de desenvolvimento",
+      });
+    }
+    console.log("Ambiente atual: ", process.env.NODE_ENV);
+    
+    try {
+      const result = await controlService.autoCloseControl();
+      return response.status(200).json({
+        response: "Fechamento automático executado com sucesso!",
+        data: result,
+      });
+    } catch (error) {
+      console.error("Erro no fechamento automático: ", error);
+      return response.status(500).json({
+        response: "Erro ao executar fechamento automático",
+        error: getErrorMessage(error),
+      });
+    }
+  }
+);
 
 //Devolução
 route.put("/devolucao", validateClose, async (request, response) => {

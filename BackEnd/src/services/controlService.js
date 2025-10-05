@@ -23,7 +23,7 @@ class ControlService {
         data_fim,
         page = 1,
         limit = 10,
-      } = filtros;
+      } = this.data;
 
       const query = controlRepository
         .createQueryBuilder("control")
@@ -66,7 +66,7 @@ class ControlService {
       }
 
       if (data_inicio && data_fim) {
-        query.andWhere("control.data_inicio BETWEEN : start AND :end", {
+        query.andWhere("control.data_inicio BETWEEN :start AND :end", {
           start: data_inicio,
           end: data_fim,
         });
@@ -96,7 +96,7 @@ class ControlService {
   }
 
   async openControl(controlData) {
-    const { id_usuario, id_equip, id_labs, status, aberto, data_inicio } =
+    const { id_usuario, id_equip, id_labs, status, ciente, data_inicio } =
       controlData;
 
     const newControl = controlRepository.create({
@@ -104,7 +104,7 @@ class ControlService {
       id_equip: id_equip || null,
       id_labs: id_labs || null,
       status,
-      aberto,
+      ciente,
       data_inicio,
       createdAt: new Date(),
     });
@@ -135,13 +135,14 @@ class ControlService {
     });
   }
 
+  //Ciente 
   async confirmAwareness(controlData) {
-    const { id, aberto } = controlData;
+    const { id, ciente } = controlData;
 
     await controlRepository.update(
       { id },
       {
-        aberto,
+        ciente,
         updatedAt: new Date(),
       }
     );
@@ -150,6 +151,60 @@ class ControlService {
       where: { id },
       relations: ["usuario", "laboratorio", "equipamento"],
     });
+  }
+
+  //Status: pendente
+  async autoCloseControl() {
+    try {
+      console.log ("🕐 Executando fechamento automático diário...")
+
+      const hoje = new Date()
+      const inicioDia = new Date(hoje)
+      inicioDia.setHours(0,0,0,0)
+
+      const fimDia = new Date(hoje)
+      fimDia.setHours(23,59,59,999)
+
+      //Busca dos controles em aberto
+      const controlsToClose = await controlRepository
+      .createQueryBuilder("control")
+      .where("control.status = :status", {status: "aberto"})
+      .andWhere("control.data_inicio BETWEEN :inicio AND :fim", {
+        inicio: inicioDia,
+        fim: fimDia
+      })
+      .andWhere("control.deletedAt IS NULL")
+      .getMany();
+
+      console.log(`Encontrados ${controlsToClose.length} controles para marcas como pendente`);
+
+      if(controlsToClose.length === 0) {
+        return {update: 0, message: "Nenhum controle para atualizar"}
+      }
+
+      //Atualiza todos para pendente
+      const ids = controlsToClose.map(control => control.id)
+
+      await controlRepository
+      .createQueryBuilder()
+      .update(Control)
+      .set({
+        status: "pendente",
+        updatedAt: new Date()
+      })
+      .where("id IN (:...ids)", {ids})
+      .execute();
+
+      console.log(`${controlsToClose.length} controles atualizados para 'pendente'`)
+
+      return {
+        updated: controlsToClose.length,
+        message: `${controlsToClose.length} controles marcados como pendente`
+      };
+    }catch(error) {
+      console.error("Erro no fechamento automático: ", error)
+      throw new Error(`Erro no fechamento automático: ${error.message}`)
+    }
   }
 
   async deleteControl(id) {
