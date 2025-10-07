@@ -42,6 +42,7 @@ class LoginService {
     const tokenPayload = {
       id: usuario.id_usuario,
       email: usuario.email,
+      tipo: usuario.usuario.tipo.desc_tipo,
       id_tipo: usuario.usuario.tipo.id
     };
 
@@ -55,6 +56,7 @@ class LoginService {
       usuario: {
         id: usuario.id_usuario,
         email: usuario.email,
+        tipo: usuario.usuario.tipo.desc_tipo,
         id_tipo: usuario.usuario.tipo.id
       },
     };

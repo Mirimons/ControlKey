@@ -71,6 +71,7 @@ class UsuarioRequestDTO extends BaseDTO {
     if (id_tipo !== undefined && id_tipo !== null && id_tipo !== "") {
       if (!this.validateForeignKeyId("id_tipo", "Tipo de Usuário", false))
         return false;
+      this.validatedData.filtro_tipo_tipo = "id";
     } else if (
       tipo_desc !== undefined &&
       tipo_desc !== null &&

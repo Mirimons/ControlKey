@@ -6,12 +6,13 @@ import { EquipRequestDTO } from "../DTOs/index.js";
 const validateCreate = validationMiddleware(EquipRequestDTO, "validateCreate");
 const validateUpdate = validationMiddleware(EquipRequestDTO, "validateUpdate");
 const validateDelete = validationMiddleware(EquipRequestDTO, "validateDelete");
+const validateGetEquips = validationMiddleware(EquipRequestDTO, "validateGetEquips");
 
 const route = express.Router();
 
-route.get("/", async (request, response) => {
+route.get("/", validateGetEquips, async (request, response) => {
     try {
-        const equips = await EquipService.getEquip();
+        const equips = await EquipService.getEquip(request.validatedData);
         return response.status(200).json(equips);
     } catch (error) {
         console.error("Erro ao listar os equipamentos: ", error);
@@ -21,14 +22,24 @@ route.get("/", async (request, response) => {
     }
 });
 
-route.get("/:nome", async (request, response) => {
+route.get("/:id", async (request, response) => {
     try {
-        const { nameFound } = request.params;
-        const equips = await EquipService.getByDesc(nameFound);
-        return response.status(200).json(equips)
+        const { id } = request.params;
+        
+        const equip = await EquipService.getEquipById(id);
+        
+        if (!equip) {
+            return response.status(404).json({
+                error: "Equipamento não encontrado."
+            });
+        }
+        
+        return response.status(200).json(equip);
     } catch (error) {
-        console.error("Erro ao buscar equipamento por descrição: ", error);
-        return response.status(500).json ({error: error.message});
+        console.error("Erro ao buscar equipamento por ID: ", error);
+        return response.status(500).json({
+            error: "Erro interno ao buscar equipamento."
+        });
     }
 });
 
@@ -38,14 +49,14 @@ route.post("/", validateCreate, async (request, response) => {
         return response.status(201).json({
             response: "Equipamento cadastrado com sucesso!",
             data: newEquip
-        })
+        });
     } catch (error) {
         console.error("Erro ao criar equipamento: ", error);
-        if (error.message.includes("Já existe um equipamento com esta descrição.")) {
-            return response.status(409).json({error: error.message});
+        if (error.message.includes("Já existe um equipamento com esta descrição")) {
+            return response.status(409).json({ error: error.message });
         }
+        return response.status(400).json({ error: "Erro interno ao criar equipamento." });
     }
-        return response.status(400).json({error: "Erro interno ao criar equipamento."});
 });
 
 route.put("/:id", validateUpdate, async (request, response) => {
@@ -56,11 +67,11 @@ route.put("/:id", validateUpdate, async (request, response) => {
         );
         return response.status(200).json({
             response: "Equipamento atualizado com sucesso!",
-            data:updateEquip
+            data: updateEquip
         });
     } catch (error) {
         console.error("Erro ao atualizar equipamento: ", error);
-        return response.status(400).json({error: error.message})
+        return response.status(400).json({ error: error.message });
     }
 });
 
@@ -70,9 +81,9 @@ route.delete("/:id", validateDelete, async (request, response) => {
         return response.status(200).json({
             response: "Equipamento excluído com sucesso!"
         });
-    } catch(error){
+    } catch (error) {
         console.error("Erro ao excluir equipamento: ", error);
-        return response.status(400).json({error: error.message});
+        return response.status(400).json({ error: error.message });
     }
 });
 

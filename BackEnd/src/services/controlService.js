@@ -1,8 +1,12 @@
 import Control from "../entities/control.js";
+import Labs from "../entities/labs.js"
+import Equipamento from "../entities/equipamento.js"
 import { AppDataSource } from "../database/data-source.js";
 import { IsNull } from "typeorm";
 
 const controlRepository = AppDataSource.getRepository(Control);
+const labsRepository = AppDataSource.getRepository(Labs)
+const equipamentoRepository = AppDataSource.getRepository(Equipamento)
 
 class ControlService {
   async getControlById(id) {
@@ -12,7 +16,7 @@ class ControlService {
     });
   }
 
-  async getControls() {
+  async getControls(filtros = {}) {
     try {
       const {
         id_usuario,
@@ -23,20 +27,22 @@ class ControlService {
         data_fim,
         page = 1,
         limit = 10,
-      } = this.data;
+      } = filtros;
 
       const query = controlRepository
         .createQueryBuilder("control")
         .leftJoinAndSelect("control.usuario", "usuario")
         .leftJoinAndSelect("control.equipamento", "equipamento")
         .leftJoinAndSelect("control.laboratorio", "laboratorio")
-        .select([
-          "control.id",
-          "control.status",
-          "control.data_inicio",
-          "control.data_fim",
-          "usuario.nome",
-        ])
+        // .select([
+        //   "control.id",
+        //   "control.status",
+        //   "control.data_inicio",
+        //   "control.data_fim",
+        //   "usuario.nome",
+        //   "equipamento.desc_equip",
+        //   "laboratorio.nome_lab"
+        // ])
         .where("control.deletedAt IS NULL")
         .orderBy("control.data_inicio", "DESC");
 
@@ -111,6 +117,24 @@ class ControlService {
 
     await controlRepository.save(newControl);
 
+    //Status do laboratório mudar para ocupado
+    if(id_labs){
+      await labsRepository.update(
+        {id: id_labs},
+        {status:"ocupado", updatedAt: new Date() }
+      );
+      console.log(`Laboratório ${id_labs} marcado como OCUPADO`)
+    }
+
+    //Status do equipamento mudar para ocupado
+    if(id_equip) {
+      await equipamentoRepository.update(
+        {id: id_equip},
+        {status: "ocupado", updatedAt: new Date()}
+      )
+      console.log(`Equipamento ${id_equip} marcado como OCUPADO`)
+    }
+
     return await controlRepository.findOne({
       where: { id: newControl.id },
       relations: ["usuario", "laboratorio", "equipamento"],
@@ -120,6 +144,20 @@ class ControlService {
   async closeControl(controlData) {
     const { id, data_fim, status } = controlData;
 
+    //Busca o controle atual para pegar o id_labs antes de atualizar
+    const currentControl = await controlRepository.findOne({
+      where: {id},
+      relations: ["laboratorio", "equipamento"]
+    });
+
+    if(!currentControl) {
+      throw new Error("Controle não encontrado")
+    }
+
+    const id_labs = currentControl.id_labs
+    const id_equip = currentControl.id_equip
+
+    //Atualiza a control
     await controlRepository.update(
       { id },
       {
@@ -128,6 +166,24 @@ class ControlService {
         updatedAt: new Date(),
       }
     );
+
+    //Atualiza status do lab
+    if(id_labs) {
+      await labsRepository.update(
+        {id: id_labs},
+        {status: "livre", updatedAt: new Date()}
+      )
+      console.log(`Laboratório ${id_labs} marcado como LIVRE`)
+    }
+
+    //Atualiza status do equipamento
+    if(id_equip) {
+      await equipamentoRepository.update(
+        {id: id_equip},
+        {status: "livre", updatedAt: new Date()}
+      )
+      console.log(`Equipamento ${id_equip} marcado como LIVRE`)
+    }
 
     return await controlRepository.findOne({
       where: { id },
@@ -180,6 +236,38 @@ class ControlService {
 
       if(controlsToClose.length === 0) {
         return {update: 0, message: "Nenhum controle para atualizar"}
+      }
+
+      //Atualiza os labs para "livre" antes de mudar os controles
+      const labsIdsToFree = controlsToClose
+      .map(control => control.id_labs)
+      .filter(id => id !== null)
+
+      if (labsIdsToFree.length > 0) {
+        await labsRepository
+        .createQueryBuilder()
+        .update(Labs)
+        .set({status: "livre", updatedAt: new Date()})
+        .where("id IN (:...ids)", {ids: labsIdsToFree})
+        .execute()
+
+        console.log(`${labsIdsToFree.length} laboratórios marcados como LIVRE`)
+      }
+
+      //Atualiza os equipamentos para "livre" antes de mudar os controles
+      const equipIdsToFree = controlsToClose
+      .map(control => control.id_equip)
+      .filter(id => id !== null)
+
+      if (equipIdsToFree.length > 0) {
+        await equipamentoRepository
+        .createQueryBuilder()
+        .update(Equipamento)
+        .set({status: "livre", updatedAt: new Date()})
+        .where("id IN (:...ids)", {ids: equipIdsToFree})
+        .execute()
+
+        console.log(`${equipIdsToFree.length} equipamentos marcados como LIVRE`)
       }
 
       //Atualiza todos para pendente
