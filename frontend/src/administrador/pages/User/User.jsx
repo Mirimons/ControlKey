@@ -216,32 +216,31 @@ function User() {
 
   //Para fazer a busca inicial automática
   useEffect(() => {
-    fetchUsuarios();
-  }, []);
+    if (!modalAberto) return;
 
-  useEffect(() => {
-    function handleClickFora(event) {
+    const handleClickFora = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
         fecharModal();
       }
-    }
+    };
 
-    function handleEsc(event) {
-      if (event.key == "Escape") {
+    const handleEsc = (event) => {
+      if (event.key === "Escape") {
         fecharModal();
       }
-    }
+    };
 
-    if (modalAberto) {
-      document.addEventListener("mousedown", handleClickFora);
-      document.addEventListener("keydown", handleEsc);
-    }
+    // Adiciona os ouvintes
+    document.addEventListener("mousedown", handleClickFora);
+    document.addEventListener("keydown", handleEsc);
 
+    // Remove os ouvintes ao desmontar
     return () => {
       document.removeEventListener("mousedown", handleClickFora);
       document.removeEventListener("keydown", handleEsc);
     };
   }, [modalAberto]);
+
 
   return (
     <div className="usuarios-container">
@@ -331,6 +330,7 @@ function User() {
             <form onSubmit={handleSalvar}>
               <h2>{editando ? "Editar Usuário" : "Adicionar Usuário"}</h2>
 
+              <label>Tipo de usuário:</label>
               <select
                 value={tipo}
                 onChange={(e) => setTipo(e.target.value)}
@@ -344,6 +344,7 @@ function User() {
                 <option value="Terceiro">Terceiro</option>
               </select>
 
+              <label>Nome completo:</label>
               <input
                 type="text"
                 placeholder="Nome completo"
@@ -352,6 +353,7 @@ function User() {
                 required
               />
 
+              <label>CPF:</label>
               <input
                 type="text"
                 placeholder="CPF"
@@ -360,6 +362,7 @@ function User() {
                 required
               />
 
+              <label>E-mail institucional:</label>
               <input
                 type="email"
                 placeholder="Email Institucional"
@@ -369,6 +372,7 @@ function User() {
                 disabled={tipo === "Terceiro"}
               />
 
+              <label>Telefone (celular):</label>
               <input
                 type="tel"
                 placeholder="Telefone (celular)"
@@ -377,6 +381,7 @@ function User() {
                 required
               />
 
+              <label>Matrícula:</label>
               <input
                 type="text"
                 placeholder="Matrícula"
@@ -386,6 +391,7 @@ function User() {
                 disabled={tipo === "Terceiro"}
               />
 
+              <label>Data de nascimento:</label>
               <input
                 type="date"
                 placeholder="Data de Nascimento"
@@ -394,6 +400,7 @@ function User() {
                 required
               />
 
+              <label>Senha:</label>
               <div className="senha-container">
                 <input
                   type={mostrarSenha ? "text" : "password"}

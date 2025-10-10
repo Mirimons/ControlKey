@@ -122,7 +122,7 @@ function Reservation() {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(response => {
-                setSolicitante(response.data); // agora é array de professores
+                setSolicitante([response.data]); // agora é array de professores
             })
             .catch(error => {
                 console.error("Erro ao buscar professores:", error);

@@ -83,46 +83,60 @@ function Equipaments() {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        //if()
-
         api.get("/equipamento", {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         })
             .then(response => {
-                setEquipamentos(response.data);
+                console.log("Resposta do backend:", response.data);
+
+                // Garante que sempre vai ser um array
+                if (Array.isArray(response.data)) {
+                    setEquipamentos(response.data);
+                }
+                else if (Array.isArray(response.data.equipamentos)) {
+                    setEquipamentos(response.data.equipamentos);
+                }
+                else if (Array.isArray(response.data.data)) {
+                    setEquipamentos(response.data.data);
+                }
+                else {
+                    console.warn("Formato inesperado da resposta:", response.data);
+                    setEquipamentos([]);
+                }
             })
             .catch(error => {
                 console.error("Erro ao buscar equipamento:", error);
+                setEquipamentos([]); // Evita quebra da página
             });
-
-    }, [])
+    }, []);
 
     useEffect(() => {
-        function handleClickFora(event) {
+        if (!modalAberto) return;
+
+        const handleClickFora = (event) => {
             if (modalRef.current && !modalRef.current.contains(event.target)) {
                 fecharModal();
             }
-        }
+        };
 
-        function handleEsc(event) {
-            if (event.key == 'Escape') {
+        const handleEsc = (event) => {
+            if (event.key === "Escape") {
                 fecharModal();
             }
-        }
+        };
 
-        if (modalAberto) {
-            document.addEventListener('mousedown', handleClickFora);
-            document.addEventListener('keydown', handleEsc);
-        }
+        // Adiciona os ouvintes
+        document.addEventListener("mousedown", handleClickFora);
+        document.addEventListener("keydown", handleEsc);
 
+        // Remove os ouvintes ao desmontar
         return () => {
-            document.removeEventListener('mousedown', handleClickFora);
-            document.removeEventListener('keydown', handleEsc);
+            document.removeEventListener("mousedown", handleClickFora);
+            document.removeEventListener("keydown", handleEsc);
         };
     }, [modalAberto]);
-
 
 
     return (

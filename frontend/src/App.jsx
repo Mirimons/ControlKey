@@ -56,11 +56,12 @@ function App() {
               <Keys />
             </ProtectedRouter>} 
           />
-          <Route path="/Equipaments" element={
-            <ProtectedRouter roles={"Administrador"}>
-              <Equipaments />
-            </ProtectedRouter>} 
-          />
+            <Route path="/Equipaments" element={
+              <ProtectedRouter >
+                <Equipaments />
+              </ProtectedRouter>
+              } 
+            />
           <Route path="/Reservation" element={
             <ProtectedRouter>
               <Reservation />
