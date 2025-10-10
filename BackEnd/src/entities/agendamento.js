@@ -45,8 +45,8 @@ const agendamento = new EntitySchema ({
         },
         status: {
             type: "enum",
-            enum: ["pendente", "confirmado", "cancelado"],
-            default: "pendente"
+            enum: ["agendado", "finalizado", "cancelado"],
+            default: "agendado"
         },
         createdAt: {
             type: "timestamp", 

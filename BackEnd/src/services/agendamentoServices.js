@@ -70,14 +70,8 @@ class AgendamentoService {
 
       const [agendamentos, total] = await query.getManyAndCount();
 
-      const agendamentoDTO = new AgendamentoRequestDTO();
-      const agendamentosAtualizados = await Promise.all(
-        agendamentos.map((agendamento) =>
-          agendamentoDTO.verificarAtualizarStatus(agendamento)
-        )
-      );
       return {
-        agendamentos: agendamentosAtualizados,
+        agendamentos: agendamentos,
         paginacao: {
           page: parseInt(page),
           limit: parseInt(limit),
@@ -101,8 +95,8 @@ class AgendamentoService {
         throw new Error("Agendamento não encontrado");
       }
 
-      const agendamentoDTO = new AgendamentoRequestDTO();
-      return await agendamentoDTO.verificarAtualizarStatus(agendamento);
+      
+      return agendamento;
     } catch (error) {
       throw new Error(`Erro ao buscar agendamento: ${error.message}`);
     }
@@ -130,7 +124,7 @@ class AgendamentoService {
         hora_inicio,
         hora_fim,
         finalidade: finalidade,
-        status: "pendente",
+        status: "agendado",
         createdAt: new Date(),
       });
 
@@ -165,6 +159,51 @@ class AgendamentoService {
       return await this.getAgendamentoById(id);
     } catch (error) {
       throw new Error(`Erro ao atualizar agendamento: ${error.message}`);
+    }
+  }
+
+  //Para mudar status dos agendamentos:
+  async putStatusAuto() {
+    try {
+      const agora = new Date()
+      const dataAtual = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate())
+
+      console.log(`Verificando agendamentos com data anterior a: ${dataAtual.toISOString().split('T')[0]}`)
+
+      //Busca agendamentos que precisam da atualização
+      const agendamentosToPut = await agendamentoRepository
+      .createQueryBuilder('agendamento')
+      .where('agendamento.data_utilizacao < :dataAtual', {dataAtual})
+      .andWhere('agendamento.status = :status', {status: 'agendado'})
+      .andWhere('agendamento.deletedAt IS NULL')
+      .getMany();
+
+      console.log(`${agendamentosToPut.length} agendamentos encontrados para atualização`)
+
+      if(agendamentosToPut.length === 0) {
+        return 0
+      }
+
+      const resultado = await agendamentoRepository
+      .createQueryBuilder()
+      .update(Agendamento)
+      .set({
+        status: 'finalizado',
+        updatedAt: new Date()
+      })
+      .where('id IN (:...ids)', {
+        ids: agendamentosToPut.map(a => a.id)
+      })
+      .execute()
+
+      agendamentosToPut.forEach(agendamento => {
+        console.log(`Agendamento ${agendamento.id} (${agendamento.data_utilizacao}): agendado -> finalizado`)
+      });
+
+      return resultado.affected || 0
+    }catch(error) {
+      console.error('Erro ao atualizar status dos agendamentos: ', error)
+      throw new Error(`Erro ao atualizar status automático: ${error.message}`)
     }
   }
 

@@ -17,9 +17,9 @@ const tipo_usuario = new EntitySchema({
             nullable: false
         },
         createdAt: {
-            type: "datetime", 
+            type: "timestamp", 
+            createDate: true,
             nullable: false, 
-            default: () => "CURRENT_TIMESTAMP"
         },
         updatedAt: {
             type: "timestamp",
@@ -27,7 +27,8 @@ const tipo_usuario = new EntitySchema({
             nullable: true
         },
         deletedAt: {
-            type: "datetime", 
+            type: "timestamp", 
+            deleteDate: true,
             nullable: true
         }
     },

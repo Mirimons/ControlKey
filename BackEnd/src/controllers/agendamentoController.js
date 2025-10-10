@@ -37,7 +37,14 @@ route.get("/", validateGetAgendamentos, async (request, response) => {
 
 route.get("/:id", async (request, response) => {
   try {
-    const agendamento = await agendamentoService.getAgendamentoById(request.validatedData.id);
+    const {id} = request.params
+
+     if (!id && isNaN(Number(id))) {
+      return response.status(400).json({ 
+        response: "ID do agendamento é obrigatório e deve ser numérico" 
+      });
+    }
+    const agendamento = await agendamentoService.getAgendamentoById(Number(id));
     return response.status(200).json(agendamento);
   } catch (error) {
     console.error("Erro ao buscar agendamento:", error);
