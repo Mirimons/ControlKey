@@ -94,35 +94,51 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   z-index: 1000;
+  overflow: hidden;
 }
 
 /* Caixa do modal */
 .modal-conteudo {
-  background-color: white;
+  background-color: #fff;
   padding: 30px;
-  border-radius: 8px;
-  width: 400px;
+  border-radius: 20px; /* Arredonda o modal */
+  width: 90%;
+  max-width: 500px;
+  max-height: 85vh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 50px;
+  gap: 20px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+  background-clip: padding-box;
 }
 
-/* Inputs e select */
+/* Inputs, selects e textareas */
 .modal-conteudo input,
-.modal-conteudo select {
+.modal-conteudo select,
+.modal-conteudo textarea {
   padding: 10px;
-  border-radius: 6px;
+  border-radius: 12px; /* Borda arredondada */
+  border: none; 
   border: 1px solid #ccc;
   width: 100%;
   box-sizing: border-box;
   margin-bottom: 12px;
+  transition: border-color 0.3s ease;
+}
+
+.modal-conteudo input:focus,
+.modal-conteudo select:focus,
+.modal-conteudo textarea:focus {
+  border-color: #7BBDE8;
+  outline: none;
 }
 
 /* Botoes do modal */
@@ -133,14 +149,20 @@
 }
 
 .modal-botoes button {
-  padding: 8px 12px;
+  padding: 10px 16px;
   border: none;
-  border-radius: 6px;
+  border-radius: 12px; /* Botões arredondados */
   cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
 }
 
 .modal-botoes button:first-child {
   background-color: #ccc;
+}
+
+.modal-botoes button:first-child:hover {
+  background-color: #b3b3b3;
 }
 
 .modal-botoes button:last-child {
@@ -148,23 +170,44 @@
   color: white;
 }
 
-.placeholder-option {
-  color: #999;
+.modal-botoes button:last-child:hover {
+  background-color: #1e90ff;
 }
 
-.placeholder-option select:invalid {
-  color: #999;
+/* Campo de senha e ícone */
+.senha-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 15px;
 }
 
-.modal-conteudo input[type="date"] {
-  font-family: inherit;
-  color: #333;
-  font-size: 13px;
+.senha-container input {
+  width: 100%;
+  padding: 12px 40px 12px 12px;
+  border: 1px solid #ccc;
+  border-radius: 12px; /* Input de senha arredondado */
 }
 
-.modal-conteudo input[type="date"]::placeholder {
-  color: #999;
+.toggle-senha {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  font-size: 18px;
 }
+
+/* Inputs desabilitados */
+input:disabled,
+select:disabled {
+  background-color: #c9c9c9;
+  color: #888;
+  cursor: not-allowed;
+}
+
 
 /* Estilo geral para inputs desabilitados */
 input:disabled,
@@ -199,4 +242,29 @@ select:disabled {
   color: #888;
   font-size: 18px;
   padding: 0;
+}
+
+/* Scrollbar “flutuante” */
+.modal-conteudo::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-conteudo::-webkit-scrollbar-track {
+  background: transparent; /* fundo invisível */
+}
+
+
+.modal-conteudo::-webkit-scrollbar-thumb {
+  background-color: #7BBDE8; /* cor da barra */
+  border-radius: 10px;
+  border: 5px solid transparent; /* cria o “espaço” visual */
+  background-clip: content-box;  /* barra parece flutuar */
+}
+
+.modal-conteudo::-webkit-scrollbar-thumb:hover {
+  background-color: #5ca9da;
+}
+
+.modal-conteudo::-webkit-scrollbar {
+  width: 15px;
 }

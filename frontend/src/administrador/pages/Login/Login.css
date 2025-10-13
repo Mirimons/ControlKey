@@ -127,3 +127,21 @@
   }
 } */
 
+.esqueceu-senha {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.esqueceu-senha a {
+  color: #49769F;
+  text-decoration: none;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.esqueceu-senha a:hover {
+  text-decoration: underline;
+  color: #001D39;
+}
+
+

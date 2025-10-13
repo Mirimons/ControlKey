@@ -178,6 +178,7 @@ function Keys() {
                     <div className="modal-conteudo" ref={modalRef}>
                         <h2>Adicionar Laboratório</h2>
                         <form onSubmit={handleSalvar}>
+                        <label>Chave do laboratório:</label>
                             <input
                                 type="text"
                                 placeholder="Nome do laboratório"
@@ -185,6 +186,7 @@ function Keys() {
                                 onChange={(e) => setNome_lab(e.target.value)}
                                 required
                             />
+                            <label>Descrição:</label>
                             <input
                                 type="text"
                                 placeholder="Descrição (Opcional)"

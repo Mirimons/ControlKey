@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import api from "../../../services/api";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function Login() {
 
@@ -32,7 +33,7 @@ export default function Login() {
           theme: 'light'
         }),
           sessionStorage.setItem('token', response.data.token);
-          sessionStorage.setItem('usuario', JSON.stringify({
+        sessionStorage.setItem('usuario', JSON.stringify({
           id: response.data.usuario.usuarioId,
           email: response.data.usuario.email
 
@@ -89,7 +90,11 @@ export default function Login() {
             </span>
           </div>
 
-          <a href="#">Esqueceu a senha?</a>
+          <div className="esqueceu-senha">
+            {/* <a href="#">Esqueceu a senha?</a> */}
+            <Link to="/EsqueceuSenha">Esqueceu a senha?</Link>
+          </div>
+
           <button type="submit">Entrar</button>
         </form>
       </div>

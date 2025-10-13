@@ -188,6 +188,7 @@ function Equipaments() {
                         <form onSubmit={handleSalvar}>
                             <h2>Adicionar Equipamento</h2>
 
+                            <label>Código do equipamento:</label>
                             <input
                                 type="text"
                                 placeholder="Digite o código do equipamento"
@@ -195,6 +196,7 @@ function Equipaments() {
                                 onChange={(e) => setTipoEquip(e.target.value)}
                             />
 
+                            <label>Desrição:</label>
                             <input
                                 type="text"
                                 placeholder="Descrição (Opcional)"

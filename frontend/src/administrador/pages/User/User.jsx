@@ -241,6 +241,14 @@ function User() {
     };
   }, [modalAberto]);
 
+  // Atualiza a lista automaticamente quando o nome ou tipo mudarem
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    // Só faz a busca se o componente já foi montado
+    fetchUsuarios();
+  }, [filtroNome, filtroTipo]);
 
   return (
     <div className="usuarios-container">
@@ -280,9 +288,9 @@ function User() {
             <option value="Terceiro">Terceiro</option>
           </select>
         </div>
-        <button onClick={aplicarFiltros} className="botao-pesquisa">
+        {/* <button onClick={aplicarFiltros} className="botao-pesquisa">
           <FaSearch /> Pesquisar
-        </button>
+        </button> */}
       </div>
 
       <table className="usuarios-tabela">

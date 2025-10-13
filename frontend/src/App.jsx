@@ -18,6 +18,7 @@ import DevolverEquipamento from './usuarios/pages/Devolver/DevolverEquipamento/d
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ProtectedRouter from './helpers/protectedRouter';
+import EsqueceuSenha from "./administrador/pages/esqueceuSenha/esqueceuSenha";
 
 
 function App() {
@@ -31,7 +32,8 @@ function App() {
   const hideNavbarPaths = [
     '/', '/retiradaDevolucao', '/Retirar', '/Devolver',
     '/Retirar/RetirarChave', '/Retirar/RetirarEquipamento',
-    '/Devolver/DevolverChave', '/Devolver/DevolverEquipamento', '/login'
+    '/Devolver/DevolverChave', '/Devolver/DevolverEquipamento', '/login',
+    '/EsqueceuSenha'
   ];
   
   return (
@@ -74,6 +76,7 @@ function App() {
           <Route path="/Retirar/RetirarEquipamento" element={<RetirarEquipamento />} />
           <Route path="/Devolver/DevolverChave" element={<DevolverChave />} />
           <Route path="/Devolver/DevolverEquipamento" element={<DevolverEquipamento />} />
+          <Route path="/EsqueceuSenha" element={<EsqueceuSenha />} />
         </Routes>
       </div>
     </div>
