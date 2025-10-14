@@ -175,7 +175,7 @@ function User() {
         })
         .then((res) => {
           // alert("Usuário cadastrado com sucesso!");
-          toast.success("Dados editados com sucesso!", {
+          toast.success("Usuário cadastrado com sucesso!", {
             position: "top-right",
             autoClose: 2000,
             hideProgressBar: false,
@@ -251,196 +251,201 @@ function User() {
   }, [filtroNome, filtroTipo]);
 
   return (
-    <div className="usuarios-container">
-      <header className="usuarios-header">
-        <h1>Usuários</h1>
-      </header>
+    <div className="usuarios-page">
+      <div className="usuarios-container">
+        <header className="usuarios-header">
+          <h1>Usuários</h1>
+        </header>
 
-      <div className="usuarios-acoes">
-        <button type="button" onClick={abrirModalNovo}>
-          Adicionar Usuário
-        </button>
-      </div>
+        <div className="usuarios-acoes">
+          <button type="button" onClick={abrirModalNovo}>
+            Adicionar Usuário
+          </button>
+        </div>
 
-      <div className="usuarios-filtros">
-        <div>
-          <h3>Nome completo</h3>
-          <input
-            type="text"
-            placeholder="Nome completo"
-            value={filtroNome}
-            onChange={(e) => setFiltroNome(e.target.value)}
-          />
-        </div>
-        <div>
-          <h3>Selecione o tipo de usuário:</h3>
-          <select
-            //Conecta o filtro do tipo com a sua seleção no front para poder dar o get
-            value={filtroTipo}
-            onChange={(e) => setFiltroTipo(e.target.value)}
-          >
-            <option value="" disabled hidden>
-              Selecione o tipo de usuário
-            </option>
-            <option value="">Todos</option>
-            <option value="Administrador">Administrador</option>
-            <option value="Comum">Comum</option>
-            <option value="Terceiro">Terceiro</option>
-          </select>
-        </div>
-        {/* <button onClick={aplicarFiltros} className="botao-pesquisa">
+        <div className="usuarios-filtros">
+          <div>
+            <h3>Nome completo</h3>
+            <input
+              type="text"
+              placeholder="Nome completo"
+              value={filtroNome}
+              onChange={(e) => setFiltroNome(e.target.value)}
+            />
+          </div>
+          <div>
+            <h3>Selecione o tipo de usuário:</h3>
+            <select
+              //Conecta o filtro do tipo com a sua seleção no front para poder dar o get
+              value={filtroTipo}
+              onChange={(e) => setFiltroTipo(e.target.value)}
+            >
+              <option value="" disabled hidden>
+                Selecione o tipo de usuário
+              </option>
+              <option value="">Todos</option>
+              <option value="Administrador">Administrador</option>
+              <option value="Comum">Comum</option>
+              <option value="Terceiro">Terceiro</option>
+            </select>
+          </div>
+          {/* <button onClick={aplicarFiltros} className="botao-pesquisa">
           <FaSearch /> Pesquisar
         </button> */}
-      </div>
+        </div>
 
-      <table className="usuarios-tabela">
-        <thead>
-          <tr>
-            <th>Código</th>
-            <th>Nome</th>
-            <th>Tipo de usuário</th>
-            <th>Telefone</th>
-            <th>Editar</th>
-          </tr>
-        </thead>
-        <tbody>
-          {usuarios && usuarios.length > 0 ? (
-            usuarios.map((user) => (
-              <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>{user.nome}</td>
-                <td>{user.tipo?.desc_tipo || user.id_tipo}</td>
-                <td>{user.telefone}</td>
-                <td>
-                  <button
-                    className="editar-btn"
-                    onClick={() => abrirModalEditar(user)}
-                  >
-                    ✏️
-                  </button>
+        <table className="usuarios-tabela">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Nome</th>
+              <th>Tipo de usuário</th>
+              <th>Telefone</th>
+              <th>Editar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {usuarios && usuarios.length > 0 ? (
+              usuarios.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.id}</td>
+                  <td>{user.nome}</td>
+                  <td>{user.tipo?.desc_tipo || user.id_tipo}</td>
+                  <td>{user.telefone}</td>
+                  <td>
+                    <button
+                      className="editar-btn"
+                      onClick={() => abrirModalEditar(user)}
+                    >
+                      ✏️
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" style={{ textAlign: "center" }}>
+                  Nenhum usuário encontrado
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="5" style={{ textAlign: "center" }}>
-                Nenhum usuário encontrado
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
 
-      {/* Modal */}
-      {modalAberto && (
-        <div className="modal-fundo">
-          <div className="modal-conteudo" ref={modalRef}>
-            <form onSubmit={handleSalvar}>
-              <h2>{editando ? "Editar Usuário" : "Adicionar Usuário"}</h2>
+        {/* Modal */}
+        {modalAberto && (
+          <div className="modal-fundo">
+            <div className="modal-conteudo" ref={modalRef}>
+              <form onSubmit={handleSalvar}>
+                <h2>{editando ? "Editar Usuário" : "Adicionar Usuário"}</h2>
 
-              <label>Tipo de usuário:</label>
-              <select
-                value={tipo}
-                onChange={(e) => setTipo(e.target.value)}
-                required
-              >
-                <option value="" disabled hidden>
-                  Selecione o tipo de usuário
-                </option>
-                <option value="Administrador">Administrador</option>
-                <option value="Comum">Comum</option>
-                <option value="Terceiro">Terceiro</option>
-              </select>
-
-              <label>Nome completo:</label>
-              <input
-                type="text"
-                placeholder="Nome completo"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                required
-              />
-
-              <label>CPF:</label>
-              <input
-                type="text"
-                placeholder="CPF"
-                value={cpf}
-                onChange={(e) => setCpf(e.target.value)}
-                required
-              />
-
-              <label>E-mail institucional:</label>
-              <input
-                type="email"
-                placeholder="Email Institucional"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required={cadExtra}
-                disabled={tipo === "Terceiro"}
-              />
-
-              <label>Telefone (celular):</label>
-              <input
-                type="tel"
-                placeholder="Telefone (celular)"
-                value={telefone}
-                onChange={(e) => setTelefone(e.target.value)}
-                required
-              />
-
-              <label>Matrícula:</label>
-              <input
-                type="text"
-                placeholder="Matrícula"
-                value={matricula}
-                onChange={(e) => setMatricula(e.target.value)}
-                required={cadExtra}
-                disabled={tipo === "Terceiro"}
-              />
-
-              <label>Data de nascimento:</label>
-              <input
-                type="date"
-                placeholder="Data de Nascimento"
-                value={data_nasc}
-                onChange={(e) => setData_nasc(e.target.value)}
-                required
-              />
-
-              <label>Senha:</label>
-              <div className="senha-container">
-                <input
-                  type={mostrarSenha ? "text" : "password"}
-                  placeholder={
-                    editando ? "Deixe em branco para manter a atual" : "Senha"
-                  }
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                  autoComplete="new-password"
-                  disabled={tipo !== "Administrador"}
-                  required={!editando && tipo === "Administrador"}
-                />
-                <button
-                  type="button"
-                  className="toggle-senha"
-                  onClick={() => setMostrarSenha(!mostrarSenha)}
+                <label>Tipo de usuário:</label>
+                <select
+                  value={tipo}
+                  onChange={(e) => setTipo(e.target.value)}
+                  required
                 >
-                  {mostrarSenha ? <FaEyeSlash /> : <FaEye />}
-                </button>
-              </div>
+                  <option value="" disabled hidden>
+                    Selecione o tipo de usuário
+                  </option>
+                  <option value="Administrador">Administrador</option>
+                  <option value="Comum">Comum</option>
+                  <option value="Terceiro">Terceiro</option>
+                </select>
 
-              <div className="modal-botoes">
-                <button type="button" onClick={fecharModal}>
-                  Cancelar
-                </button>
-                <button type="submit">Salvar</button>
-              </div>
-            </form>
+                <label>Nome completo:</label>
+                <input
+                  type="text"
+                  placeholder="Nome completo"
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  required
+                />
+
+                <label>CPF:</label>
+                <input
+                  type="text"
+                  placeholder="CPF"
+                  value={cpf}
+                  onChange={(e) => setCpf(e.target.value)}
+                  required
+                />
+
+                <label>E-mail institucional:</label>
+                <input
+                  type="email"
+                  placeholder="Email Institucional"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required={cadExtra}
+                  disabled={tipo === "Terceiro"}
+                />
+
+                <label>Telefone (celular):</label>
+                <input
+                  type="tel"
+                  placeholder="Telefone (celular)"
+                  value={telefone}
+                  onChange={(e) => setTelefone(e.target.value)}
+                  required
+                />
+
+                <label>Matrícula:</label>
+                <input
+                  type="text"
+                  placeholder="Matrícula"
+                  value={matricula}
+                  onChange={(e) => setMatricula(e.target.value)}
+                  required={cadExtra}
+                  disabled={tipo === "Terceiro"}
+                />
+
+                <label>Data de nascimento:</label>
+                <input
+                  type="date"
+                  placeholder="Data de Nascimento"
+                  value={data_nasc}
+                  onChange={(e) => setData_nasc(e.target.value)}
+                  required
+                />
+
+                <label>Senha:</label>
+                <div className="senha-container">
+                  <input
+                    type={mostrarSenha ? "text" : "password"}
+                    placeholder={
+                      editando ? "Deixe em branco para manter a atual" : "Senha"
+                    }
+                    value={senha}
+                    onChange={(e) => setSenha(e.target.value)}
+                    autoComplete="new-password"
+                    disabled={tipo !== "Administrador"}
+                    required={!editando && tipo === "Administrador"}
+                  />
+                  <button
+                    type="button"
+                    className="toggle-senha"
+                    onClick={() => setMostrarSenha(!mostrarSenha)}
+                  >
+                    {mostrarSenha ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+
+                <div className="modal-botoes">
+                  <button type="button" onClick={fecharModal}>
+                    Cancelar
+                  </button>
+                  <button type="submit">Salvar</button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
-      <BotaoSair />
+        )}
+        {/* <BotaoSair /> */}
+      </div>
+      <footer className="footer">
+        <p>© 2025 - Sistema de Monitoramento de Laboratórios</p>
+      </footer>
     </div>
   );
 }

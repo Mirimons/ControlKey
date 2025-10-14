@@ -9,6 +9,7 @@ body {
   padding-top: 90px;
   padding-right: 90px;
   background: transparent;
+  flex: 1;
   /* height: 100vh;
   overflow-y: auto; */
 }
@@ -195,4 +196,20 @@ body {
 
 .modal-botoes button[type="submit"]:hover {
   background: #6e96b1;
+}
+
+.reservation-page {
+  min-height: 100vh;        /* Garante altura total da tela */
+  display: flex;
+  flex-direction: column;   /* Faz o footer ficar abaixo do conteúdo */
+}
+
+.footer {
+  background-color: #7BBDE8;
+  color: white;
+  text-align: center;
+  padding: 3px 0;
+  font-size: 13px;
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+  margin-top: 20px;
 }
