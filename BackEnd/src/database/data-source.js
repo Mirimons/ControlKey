@@ -6,11 +6,11 @@ dotenv.config();
 
 const AppDataSource = new DataSource({
     type: "mysql",
-    host: process.env.DB_HOST || "localhost",
-    username: process.env.DB_USER || "root",
-    port: Number(process.env.DB_PORT) || 3306,
-    password: process.env.DB_PASSWORD || "1804",
-    database: process.env.DB_NAME || "control_key",
+    host: process.env.DB_HOST,
+    username: process.env.DB_USER,
+    port: Number(process.env.DB_PORT),
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
     entities: ["src/entities/*.js"],
     migrations: ["src/database/migrations/*.cjs"],
     synchronize: true
