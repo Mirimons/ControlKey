@@ -1,7 +1,6 @@
 import Agendamento from "../entities/agendamento.js";
 import { AppDataSource } from "../database/data-source.js";
-import { Like, IsNull } from "typeorm";
-import AgendamentoRequestDTO from "../DTOs/agendamentoRequestDTO.js";
+import { IsNull } from "typeorm";
 
 const agendamentoRepository = AppDataSource.getRepository(Agendamento);
 
