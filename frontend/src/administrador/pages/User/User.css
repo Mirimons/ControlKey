@@ -11,6 +11,7 @@
   padding-top: 90px;
   padding-right: 90px;
   background: transparent;
+  flex: 1;
 }
 
 .usuarios-header {
@@ -108,7 +109,8 @@
 .modal-conteudo {
   background-color: #fff;
   padding: 30px;
-  border-radius: 20px; /* Arredonda o modal */
+  border-radius: 20px;
+  /* Arredonda o modal */
   width: 90%;
   max-width: 500px;
   max-height: 85vh;
@@ -125,8 +127,9 @@
 .modal-conteudo select,
 .modal-conteudo textarea {
   padding: 10px;
-  border-radius: 12px; /* Borda arredondada */
-  border: none; 
+  border-radius: 12px;
+  /* Borda arredondada */
+  border: none;
   border: 1px solid #ccc;
   width: 100%;
   box-sizing: border-box;
@@ -151,7 +154,8 @@
 .modal-botoes button {
   padding: 10px 16px;
   border: none;
-  border-radius: 12px; /* Botões arredondados */
+  border-radius: 12px;
+  /* Botões arredondados */
   cursor: pointer;
   font-weight: bold;
   transition: all 0.3s ease;
@@ -185,7 +189,8 @@
   width: 100%;
   padding: 12px 40px 12px 12px;
   border: 1px solid #ccc;
-  border-radius: 12px; /* Input de senha arredondado */
+  border-radius: 12px;
+  /* Input de senha arredondado */
 }
 
 .toggle-senha {
@@ -250,15 +255,19 @@ select:disabled {
 }
 
 .modal-conteudo::-webkit-scrollbar-track {
-  background: transparent; /* fundo invisível */
+  background: transparent;
+  /* fundo invisível */
 }
 
 
 .modal-conteudo::-webkit-scrollbar-thumb {
-  background-color: #7BBDE8; /* cor da barra */
+  background-color: #7BBDE8;
+  /* cor da barra */
   border-radius: 10px;
-  border: 5px solid transparent; /* cria o “espaço” visual */
-  background-clip: content-box;  /* barra parece flutuar */
+  border: 5px solid transparent;
+  /* cria o “espaço” visual */
+  background-clip: content-box;
+  /* barra parece flutuar */
 }
 
 .modal-conteudo::-webkit-scrollbar-thumb:hover {
@@ -267,4 +276,20 @@ select:disabled {
 
 .modal-conteudo::-webkit-scrollbar {
   width: 15px;
+}
+
+.usuarios-page {
+  min-height: 100vh;
+  display: flex; /* Garante altura total da tela */
+  flex-direction: column;
+}
+
+.footer {
+  background-color: #7BBDE8;
+  color: white;
+  text-align: center;
+  padding: 3px 0;
+  font-size: 13px;
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+  margin-top: 20px;
 }

@@ -64,6 +64,7 @@
 .login-box button:hover {
   background-color: #08324c;
   color: #fff;
+  transform: scale(1.02);
 }
 
 .login-box a {

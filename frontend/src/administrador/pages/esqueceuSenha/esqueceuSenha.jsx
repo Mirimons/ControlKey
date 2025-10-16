@@ -34,7 +34,7 @@ function EsqueceuSenha() {
         <form onSubmit={handleSubmit}>
           <input
             type="email"
-            placeholder="E-mail institucional"
+            placeholder="seuemail@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
