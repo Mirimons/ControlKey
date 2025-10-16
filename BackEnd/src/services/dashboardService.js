@@ -1,102 +1,161 @@
 import { AppDataSource } from "../database/data-source.js";
-import Equipamento from "../entities/equipamento.js";
 import Laboratorio from "../entities/labs.js";
 import Agendamento from "../entities/agendamento.js";
 import Control from "../entities/control.js";
-import { IsNull, LessThan, MoreThan, Between, Not } from "typeorm";
+import { IsNull, MoreThan, Between } from "typeorm";
 
-const equipamentoRepository = AppDataSource.getRepository(Equipamento);
-const labRepository = AppDataSource.getRepository(Laboratorio);
+const labsRepository = AppDataSource.getRepository(Laboratorio);
 const agendamentoRepository = AppDataSource.getRepository(Agendamento);
 const controlRepository = AppDataSource.getRepository(Control);
 
 class DashboardService {
   async getHomeStats() {
-    //Quantidades::
-    const agora = new Date();
-    const todayStart = new Date(
-      agora.getFullYear(),
-      agora.getMonth(),
-      agora.getDate()
-    );
-    const todayEnd = new Date(
-      agora.getFullYear(),
-      agora.getMonth(),
-      agora.getDate() + 1
-    );
-
     try {
-        //Total de chaves
-        const totalLabs = await labRepository.count({
-            where: {deletedAt: IsNull()}
-        })
+      //TOTAL DE CHAVES (Total de laboratórios cadastrados)
+      const totalLabs = await labsRepository.count({
+        where: { deletedAt: IsNull() },
+      });
 
-        //Chaves ocupadas
-        const labsOcupados = await labRepository.count({
-            where: {
-                status: "ocupado",
-                deletedAt: IsNull()
-            }
-        });
+      //CHAVES OCUPADAS (Laboratórios ocupados no momento)
+      const labsOcupados = await labsRepository.count({
+        where: {
+          status: "ocupado",
+          deletedAt: IsNull(),
+        },
+      });
 
-        //Reservas pendentes
-        const reservasPendentes = await agendamentoRepository.count({
-            where: {
-                status: "agendado",
-                data_utilizacao: MoreThan(agora),
-                hora_inicio: MoreThan(agora),
-                deletedAt: IsNull()
-            }
-        });
+      //Reservas pendentes (agendamentos com status: agendado)
+      const agora = new Date();
+      const hoje = new Date(
+        agora.getFullYear(),
+        agora.getMonth(),
+        agora.getDate()
+      );
 
-        //Chaves atrasadas
-        const chavesAtrasadas = await controlRepository.count({
-            where: {
-                status: "pendente",
-                deletedAt: IsNull()
-            }
-        });
+      const reservasAgendadas = await agendamentoRepository.count({
+        where: {
+          status: "agendado",
+          data_utilizacao: MoreThan(hoje),
+          deletedAt: IsNull(),
+        },
+      });
 
-        return {
-            totalChaves: totalLabs,
-            chavesEmprestadas: labsOcupados,
-            reservasPendentes: reservasPendentes,
-            chavesAtrasadas: chavesAtrasadas
-        };
-    }catch(error){
-        throw new Error(`Erro ao buscar status do dashboard: ${error.message}`)
+      //Chaves atrasadas (controls com status: pendente)
+      const chavesAtrasadas = await controlRepository.count({
+        where: {
+          status: "pendente",
+          deletedAt: IsNull(),
+        },
+      });
+
+      return {
+        totalChaves: totalLabs,
+        chavesEmprestadas: labsOcupados,
+        reservasAgendadas: reservasAgendadas,
+        chavesAtrasadas: chavesAtrasadas,
+      };
+    } catch (error) {
+      console.error("Erro ao buscar stats do dashboard: ", error);
+      throw new Error(`Erro ao buscar stats do dashboard: ${error.message}`);
     }
   }
 
   async getDashboardDetails() {
     //Detalhes mais importantes
     const agora = new Date();
+    const amanha = new Date(agora);
+    amanha.setDate(amanha.getDate() + 1);
 
     try {
-        // Controls que fecharam automaticamente
-        const controlAutoClose = await controlRepository.find({
-            where: {
-                status: "pendente",
-                data_fim: LessThan(agora),
-                deletedAt: IsNull()
-            },
-            relations: ["usuario", "laboratorio", "equipamento"],
-            order: {data_inicio: 'ASC'}
-        })
+      // Controls que estão atrasadas (pendentes)
+      const controlsAtrasadas = await controlRepository.find({
+        where: {
+          status: "pendente",
+          deletedAt: IsNull(),
+        },
+        relations: ["usuario", "laboratorio", "equipamento"],
+        order: { data_inicio: "DESC" },
+        take: 20,
+      });
 
-        // Reservas das próximas 24h
-        const reservasProximas = await agendamentoRepository.find({
-            where:{
-                status: "agendado",
-                data_utilizacao: MoreThan(agora),
-                hora_inicio: MoreThan(agora),
-                deletedAt: IsNull()
-            },
-            relations: ["usuario", "laboratorio"],
-            order: {hora_inicio: 'ASC'}
-        });
+      // Reservas das próximas 24h
+      const reservasProximas = await agendamentoRepository.find({
+        where: {
+          status: "agendado",
+          data_utilizacao: Between(agora, amanha),
+          deletedAt: IsNull(),
+        },
+        relations: ["usuario", "laboratorio"],
+        order: { data_utilizacao: "ASC", hora_inicio: "ASC" },
+        take: 15,
+      });
 
-        
+      return {
+        controlsAtrasadas: controlsAtrasadas.map((control) => ({
+          id: control.id,
+          tipo: 'atraso',
+          laboratorio:
+            control.laboratorio?.nome_lab || "Laboratório não encontrado",
+          equipamento:
+            control.equipamento?.desc_equip || "Equipamento não encontrado",
+          usuario: control.usuario?.nome || "Usuário não encontrado",
+          data_inicio: control.data_inicio,
+          data_fim: control.data_fim,
+          status: control.status,
+          timestamp: new Date(control.data_inicio).getTime(),
+        })),
+        reservasProximas: reservasProximas.map((agendamento) => ({
+          id: agendamento.id,
+          tipo: 'reserva',
+          laboratorio:
+            agendamento.laboratorio?.nome_lab || "Laboratório não encontrado",
+          usuario: agendamento.usuario?.nome || "Usuário não encontrado",
+          data_utilizacao: agendamento.data_utilizacao,
+          hora_inicio: agendamento.hora_inicio,
+          hora_fim: agendamento.hora_fim,
+          finalidade: agendamento.finalidade,
+          status: agendamento.status,
+          timestamp: new Date(
+            agendamento.data_utilizacao + "T" + agendamento.hora_inicio
+          ).getTime(),
+        })),
+      };
+    } catch (error) {
+      console.error("Erro ao buscar detalhes do dashboard: ", error);
+      throw new Error(`Erro ao buscar detalhes do dashboard: ${error.message}`);
+    }
+  }
+
+  async getLastUpdateTimestamps() {
+    try {
+      // Pega o último update de cada tabela
+      const lastControl = await controlRepository.findOne({
+        where: { deletedAt: IsNull() },
+        order: { updatedAt: 'DESC' },
+        select: ['updatedAt']
+      });
+
+      const lastAgendamento = await agendamentoRepository.findOne({
+        where: { deletedAt: IsNull() },
+        order: { updatedAt: 'DESC' },
+        select: ['updatedAt']
+      });
+
+      const lastLaboratorio = await labsRepository.findOne({
+        where: { deletedAt: IsNull() },
+        order: { updatedAt: 'DESC' },
+        select: ['updatedAt']
+      });
+      return {
+        lastControlUpdate: lastControl?.updatedAt?.getTime() || 0,
+        lastAgendamentoUpdate: lastAgendamento?.updatedAt?.getTime() || 0,
+        lastLaboratorioUpdate: lastLaboratorio?.updatedAt?.getTime() || 0,
+        serverTimestamp: Date.now()
+      };
+    } catch (error) {
+      throw new Error(`Erro ao buscar timestamps: ${error.message}`);
     }
   }
 }
+
+export default new DashboardService();
