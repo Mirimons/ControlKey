@@ -63,26 +63,29 @@ class DashboardService {
   async getDashboardDetails() {
     //Detalhes mais importantes
     const agora = new Date();
-    const amanha = new Date(agora);
+    const hoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate())
+    const amanha = new Date(hoje);
     amanha.setDate(amanha.getDate() + 1);
+    const ontem = new Date(hoje)
+    ontem.setDate(ontem.getDate() - 1)
 
     try {
-      // Controls que estão atrasadas (pendentes)
+      // Controls que estão atrasadas (pendentes) dia anterior
       const controlsAtrasadas = await controlRepository.find({
         where: {
           status: "pendente",
+          data_inicio: Between(ontem, hoje),
           deletedAt: IsNull(),
         },
         relations: ["usuario", "laboratorio", "equipamento"],
         order: { data_inicio: "DESC" },
-        take: 20,
       });
 
       // Reservas das próximas 24h
       const reservasProximas = await agendamentoRepository.find({
         where: {
           status: "agendado",
-          data_utilizacao: Between(agora, amanha),
+          data_utilizacao: Between(hoje, amanha),
           deletedAt: IsNull(),
         },
         relations: ["usuario", "laboratorio"],
@@ -126,36 +129,36 @@ class DashboardService {
     }
   }
 
-  async getLastUpdateTimestamps() {
-    try {
-      // Pega o último update de cada tabela
-      const lastControl = await controlRepository.findOne({
-        where: { deletedAt: IsNull() },
-        order: { updatedAt: 'DESC' },
-        select: ['updatedAt']
-      });
+  // async getLastUpdateTimestamps() {
+  //   try {
+  //     // Pega o último update de cada tabela
+  //     const lastControl = await controlRepository.findOne({
+  //       where: { deletedAt: IsNull() },
+  //       order: { updatedAt: 'DESC' },
+  //       select: ['updatedAt']
+  //     });
 
-      const lastAgendamento = await agendamentoRepository.findOne({
-        where: { deletedAt: IsNull() },
-        order: { updatedAt: 'DESC' },
-        select: ['updatedAt']
-      });
+  //     const lastAgendamento = await agendamentoRepository.findOne({
+  //       where: { deletedAt: IsNull() },
+  //       order: { updatedAt: 'DESC' },
+  //       select: ['updatedAt']
+  //     });
 
-      const lastLaboratorio = await labsRepository.findOne({
-        where: { deletedAt: IsNull() },
-        order: { updatedAt: 'DESC' },
-        select: ['updatedAt']
-      });
-      return {
-        lastControlUpdate: lastControl?.updatedAt?.getTime() || 0,
-        lastAgendamentoUpdate: lastAgendamento?.updatedAt?.getTime() || 0,
-        lastLaboratorioUpdate: lastLaboratorio?.updatedAt?.getTime() || 0,
-        serverTimestamp: Date.now()
-      };
-    } catch (error) {
-      throw new Error(`Erro ao buscar timestamps: ${error.message}`);
-    }
-  }
+  //     const lastLaboratorio = await labsRepository.findOne({
+  //       where: { deletedAt: IsNull() },
+  //       order: { updatedAt: 'DESC' },
+  //       select: ['updatedAt']
+  //     });
+  //     return {
+  //       lastControlUpdate: lastControl?.updatedAt?.getTime() || 0,
+  //       lastAgendamentoUpdate: lastAgendamento?.updatedAt?.getTime() || 0,
+  //       lastLaboratorioUpdate: lastLaboratorio?.updatedAt?.getTime() || 0,
+  //       serverTimestamp: Date.now()
+  //     };
+  //   } catch (error) {
+  //     throw new Error(`Erro ao buscar timestamps: ${error.message}`);
+  //   }
+  // }
 }
 
 export default new DashboardService();
