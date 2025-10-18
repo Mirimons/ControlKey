@@ -9,6 +9,7 @@ body {
   padding-right: 90px;
   /* height: 100vh;
   overflow-y: auto; */
+  flex: 1;
 }
 
 .chaves-header {
@@ -107,4 +108,20 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 1000;
+}
+
+.chaves-page {
+  min-height: 100vh;
+  display: flex; /* Garante altura total da tela */
+  flex-direction: column;
+}
+
+.footer {
+  background-color: #7BBDE8;
+  color: white;
+  text-align: center;
+  padding: 3px 0;
+  font-size: 13px;
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+  margin-top: 20px;
 }

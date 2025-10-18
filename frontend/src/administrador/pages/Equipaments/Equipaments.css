@@ -11,6 +11,7 @@ body {
   background: transparent;
   /* height: 100vh;
   overflow-y: auto; */
+  flex: 1;
 }
 
 .equipamentos-header {
@@ -87,4 +88,20 @@ body {
   border: none;
   cursor: pointer;
   font-size: 18px;
+}
+
+.equipamentos-page {
+  min-height: 100vh;
+  display: flex; /* Garante altura total da tela */
+  flex-direction: column;
+}
+
+.footer {
+  background-color: #7BBDE8;
+  color: white;
+  text-align: center;
+  padding: 3px 0;
+  font-size: 13px;
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+  margin-top: 20px;
 }
