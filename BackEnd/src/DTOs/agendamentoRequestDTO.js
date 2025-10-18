@@ -92,13 +92,6 @@ class AgendamentoRequestDTO extends BaseDTO {
       finalidade,
     } = this.data;
 
-    this.data.id_labs = id_labs;
-    this.data.id_usuario = id_usuario;
-    this.data.data_utilizacao = data_utilizacao;
-    this.data.hora_inicio = hora_inicio;
-    this.data.hora_fim = hora_fim;
-    this.data.finalidade = finalidade;
-
     if (!this.validateForeignKeyId("id_labs", "ID do Laboratório", true))
       return false;
 
@@ -110,6 +103,20 @@ class AgendamentoRequestDTO extends BaseDTO {
       return false;
     if (!this.validateTime("hora_inicio", "Hora do início")) return false;
     if (!this.validateTime("hora_fim", "Hora do fim")) return false;
+
+    //Formata as horas para incluir os segundos
+    if (
+      this.validatedData.hora_inicio &&
+      this.validatedData.hora_inicio.length === 5
+    ) {
+      this.validatedData.hora_inicio += ":00";
+    }
+    if (
+      this.validatedData.hora_fim &&
+      this.validatedData.hora_fim.length === 5
+    ) {
+      this.validatedData.hora_fim += ":00";
+    }
 
     if (
       validationUtils.compareTimes(
@@ -238,22 +245,30 @@ class AgendamentoRequestDTO extends BaseDTO {
         return false;
     }
 
-    if (data_utilizacao !== undefined)
-      this.data.data_utilizacao = data_utilizacao;
-    if (hora_inicio !== undefined) this.data.hora_inicio = hora_inicio;
-    if (hora_fim !== undefined) this.data.hora_fim = hora_fim;
-    if (finalidade !== undefined) this.data.finalidade = finalidade;
-
     if (finalidade !== undefined) {
       if (!this.validateString("finalidade", "Finalidade", 5)) return false;
     }
 
     if (hora_inicio !== undefined) {
-      if (!this.validateString("hora_inicio", "Hora do início")) return false;
+      if (!this.validateTime("hora_inicio", "Hora do início")) return false;
+      // Formata hora
+      if (
+        this.validatedData.hora_inicio &&
+        this.validatedData.hora_inicio.length === 5
+      ) {
+        this.validatedData.hora_inicio += ":00";
+      }
     }
 
     if (hora_fim !== undefined) {
-      if (!this.validateString("hora_fim", "Hora do fim")) return false;
+      if (!this.validateTime("hora_fim", "Hora do fim")) return false;
+      // Formata hora
+      if (
+        this.validatedData.hora_fim &&
+        this.validatedData.hora_fim.length === 5
+      ) {
+        this.validatedData.hora_fim += ":00";
+      }
     }
 
     if (hora_inicio !== undefined && hora_fim !== undefined) {
