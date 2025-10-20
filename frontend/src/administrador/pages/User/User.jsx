@@ -131,7 +131,6 @@ function User() {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
-          // alert("Usuário atualizado com sucesso!");
           toast.success("Usuário atualizado com sucesso!", {
             position: "top-right",
             autoClose: 2000,
@@ -174,7 +173,6 @@ function User() {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
-          // alert("Usuário cadastrado com sucesso!");
           toast.success("Usuário cadastrado com sucesso!", {
             position: "top-right",
             autoClose: 2000,

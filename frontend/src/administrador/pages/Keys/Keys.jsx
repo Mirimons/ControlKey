@@ -3,6 +3,7 @@ import "./Keys.css";
 import Navbar from "../../../components/navbar";
 import BotaoSair from "../../../components/botaoSair/sair";
 import api from "../../../services/api";
+import { toast } from "react-toastify";
 
 function Keys() {
   const [modalAberto, setModalAberto] = useState(false);
@@ -11,82 +12,31 @@ function Keys() {
 
   const [chaves, setChaves] = useState([]);
 
+  const [editando, setEditando] = useState(false);
+  const [chaveSelecionada, setChaveSelecionada] = useState(null);
+
   const modalRef = useRef();
 
   const abrirModal = () => setModalAberto(true);
   const fecharModal = () => setModalAberto(false);
 
-  const handleSalvar = (e) => {
-    e.preventDefault();
-
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      // alert('Você precisa estar logado para cadastrar chave!');
-      toast.error("Você precisa estar logado para cadastrar uma chave!", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-      return;
-    }
-    // const novoLab = { nome_lab, desc_lab };
-    // setLabs([...labs, novoLab]);
-
-    api
-      .post(
-        "/labs",
-        {
-          nome_lab,
-          desc_lab,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-      .then((response) => {
-        console.log("Chave cadastrada:", response.data);
-        // alert("Chave cadastrada com sucesso!");
-        toast.success("Chave cadastrada com sucesso!", {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        fecharModal();
-
-        // limpa os campos
-        setNome_lab("");
-        setDesc_lab("");
-      })
-      .catch((error) => {
-        console.error("Erro ao cadastrar:", error);
-        // alert(error.response?.data?.error || "Erro ao cadastrar chave!");
-        toast.error("Erro ao cadastrar chave!", {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-      });
+  const abrirModalNovo = () => {
+    setEditando(false);
+    setChaveSelecionada(null);
+    setNome_lab("");
+    setDesc_lab("");
+    setModalAberto(true);
   };
 
-  useEffect(() => {
+  const abrirModalEditar = (chave) => {
+    setEditando(true);
+    setChaveSelecionada(chave);
+    setNome_lab(chave.nome_lab);
+    setDesc_lab(chave.desc_lab || "");
+    setModalAberto(true);
+  };
+
+  const fetchChaves = () => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
@@ -96,13 +46,89 @@ function Keys() {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((response) => {
-        setChaves(response.data);
-      })
+      .then((response) => setChaves(response.data))
       .catch((error) => {
-        console.error("Erro ao buscar chave:", error);
+        console.error("Erro ao buscar chaves:", error);
       });
-  }, [chaves]);
+  };
+
+  const handleSalvar = (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("Você precisa estar logado para cadastrar uma chave!", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+      });
+      return;
+    }
+
+    const payload = { nome_lab, desc_lab };
+
+    if (editando && chaveSelecionada) {
+      // Edição de chave existente
+      api
+        .put(`/labs/${chaveSelecionada.id}`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          toast.success("Chave atualizada com sucesso!", {
+            position: "top-right",
+            autoClose: 2000,
+            theme: "light",
+          });
+
+          // Atualiza a lista local
+          setChaves((prev) =>
+            prev.map((c) =>
+              c.id === chaveSelecionada.id ? { ...c, ...response.data } : c
+            )
+          );
+
+          fecharModal();
+          fetchChaves();
+        })
+        .catch((error) => {
+          console.error("Erro ao editar chave:", error);
+          toast.error("Erro ao editar chave!", {
+            position: "top-right",
+            autoClose: 2000,
+            theme: "light",
+          });
+        });
+    } else {
+      // Cadastro de nova chave
+      api
+        .post("/labs", payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          toast.success("Chave cadastrada com sucesso!", {
+            position: "top-right",
+            autoClose: 2000,
+            theme: "light",
+          });
+          fecharModal();
+          setNome_lab("");
+          setDesc_lab("");
+          fetchChaves();
+        })
+        .catch((error) => {
+          console.error("Erro ao cadastrar chave:", error);
+          toast.error("Erro ao cadastrar chave!", {
+            position: "top-right",
+            autoClose: 2000,
+            theme: "light",
+          });
+        });
+    }
+  };
+
+  useEffect(() => {
+    fetchChaves();
+  }, []);
 
   useEffect(() => {
     if (!modalAberto) return;
@@ -119,11 +145,9 @@ function Keys() {
       }
     };
 
-    // Adiciona os ouvintes
     document.addEventListener("mousedown", handleClickFora);
     document.addEventListener("keydown", handleEsc);
 
-    // Remove os ouvintes ao desmontar
     return () => {
       document.removeEventListener("mousedown", handleClickFora);
       document.removeEventListener("keydown", handleEsc);
@@ -138,18 +162,7 @@ function Keys() {
         </header>
 
         <div className="chaves-acoes">
-          <button onClick={abrirModal}>Adicionar Chave</button>
-        </div>
-
-        <div className="chaves-filtros">
-          <div>
-            <h3>Ambiente:</h3>
-            <input type="text" placeholder="Ambiente" />
-          </div>
-          <div>
-            <h3>Descrição:</h3>
-            <input type="text" placeholder="Descrição" />
-          </div>
+          <button onClick={abrirModalNovo}>Adicionar Chave</button>
         </div>
 
         <table className="chaves-tabela">
@@ -162,17 +175,29 @@ function Keys() {
             </tr>
           </thead>
           <tbody>
-            {chaves &&
-              chaves.map((keys) => (
-                <tr key={keys.id}>
-                  <td>{keys.id}</td>
-                  <td>{keys.nome_lab}</td>
-                  <td>{keys.desc_lab}</td>
+            {chaves.length > 0 ? (
+              chaves.map((chave) => (
+                <tr key={chave.id}>
+                  <td>{chave.id}</td>
+                  <td>{chave.nome_lab}</td>
+                  <td>{chave.desc_lab}</td>
                   <td>
-                    <button className="editar-btn">✏️</button>
+                    <button
+                      className="editar-btn"
+                      onClick={() => abrirModalEditar(chave)}
+                    >
+                      ✏️
+                    </button>
                   </td>
                 </tr>
-              ))}
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" style={{ textAlign: "center" }}>
+                  Nenhuma chave cadastrada
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
 
@@ -180,7 +205,7 @@ function Keys() {
         {modalAberto && (
           <div className="modal-fundo">
             <div className="modal-conteudo" ref={modalRef}>
-              <h2>Adicionar Laboratório</h2>
+              <h2>{editando ? "Editar Chave" : "Adicionar Chave"}</h2>
               <form onSubmit={handleSalvar}>
                 <label>Chave do laboratório:</label>
                 <input
@@ -208,8 +233,8 @@ function Keys() {
             </div>
           </div>
         )}
-        {/* <BotaoSair /> */}
       </div>
+
       <footer className="footer">
         <p>© 2025 - Sistema de Monitoramento de Laboratórios</p>
       </footer>

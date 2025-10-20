@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, use } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./Equipaments.css";
 import Navbar from "../../../components/navbar";
 import BotaoSair from "../../../components/botaoSair/sair";
@@ -9,83 +9,25 @@ function Equipaments() {
   const [modalAberto, setModalAberto] = useState(false);
   const [tipoEquip, setTipoEquip] = useState("");
   const [descEquip, setDescEquip] = useState("");
-
   const [equipamentos, setEquipamentos] = useState([]);
+
+  // 👇 controle de edição
+  const [editando, setEditando] = useState(false);
+  const [equipamentoId, setEquipamentoId] = useState(null);
 
   const modalRef = useRef();
 
   const abrirModal = () => setModalAberto(true);
-  const fecharModal = () => setModalAberto(false);
-
-  const handleSalvar = (e) => {
-    e.preventDefault();
-
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      // alert('Você precisa estar logado para cadastrar equipamentos!');
-      toast.error("Você precisa estar logado para cadastrar um equipamento!", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-      return;
-    }
-
-    api
-      .post(
-        "/equipamento",
-        {
-          tipo: tipoEquip,
-          desc_equip: descEquip,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-      .then((response) => {
-        console.log("Equipamento cadastrado:", response.data);
-        // alert("Equipamento cadastrado com sucesso!");
-        toast.success("Equipamento cadastrado com sucesso!", {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        fecharModal();
-
-        // limpa os campos
-        setTipoEquip("");
-        setDescEquip("");
-      })
-      .catch((error) => {
-        console.error("Erro ao cadastrar:", error);
-        // alert(error.response?.data?.error || "Erro ao cadastrar Equipamento!");
-        toast.error("Erro ao cadastrar equipamento!", {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-      });
+  const fecharModal = () => {
+    setModalAberto(false);
+    setEditando(false);
+    setEquipamentoId(null);
+    setTipoEquip("");
+    setDescEquip("");
   };
 
-  useEffect(() => {
+  // 🔄 Buscar equipamentos
+  const fetchEquipamentos = () => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
@@ -96,9 +38,6 @@ function Equipaments() {
         },
       })
       .then((response) => {
-        console.log("Resposta do backend:", response.data);
-
-        // Garante que sempre vai ser um array
         if (Array.isArray(response.data)) {
           setEquipamentos(response.data);
         } else if (Array.isArray(response.data.equipamentos)) {
@@ -106,16 +45,92 @@ function Equipaments() {
         } else if (Array.isArray(response.data.data)) {
           setEquipamentos(response.data.data);
         } else {
-          console.warn("Formato inesperado da resposta:", response.data);
           setEquipamentos([]);
         }
       })
       .catch((error) => {
-        console.error("Erro ao buscar equipamento:", error);
-        setEquipamentos([]); // Evita quebra da página
+        console.error("Erro ao buscar equipamentos:", error);
+        setEquipamentos([]);
       });
+  };
+
+  useEffect(() => {
+    fetchEquipamentos();
   }, []);
 
+  // 💾 Salvar (criar ou atualizar)
+  const handleSalvar = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("Você precisa estar logado!", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+      });
+      return;
+    }
+
+    // corpo da requisição corrigido
+    const data = editando
+      ? {
+          id: equipamentoId, // necessário pelo DTO de atualização
+          desc_equip: descEquip,
+        }
+      : {
+          tipo: tipoEquip,
+          desc_equip: descEquip,
+        };
+
+    try {
+      if (editando) {
+        await api.put(`/equipamento/${equipamentoId}`, data, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success("Equipamento atualizado com sucesso!", {
+          position: "top-right",
+          autoClose: 2000,
+          theme: "light",
+        });
+      } else {
+        await api.post("/equipamento", data, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success("Equipamento cadastrado com sucesso!", {
+          position: "top-right",
+          autoClose: 2000,
+          theme: "light",
+        });
+      }
+
+      fecharModal();
+      fetchEquipamentos();
+    } catch (error) {
+      console.error("Erro ao salvar equipamento:", error);
+      toast.error(
+        editando
+          ? "Erro ao atualizar equipamento!"
+          : "Erro ao cadastrar equipamento!",
+        {
+          position: "top-right",
+          autoClose: 2000,
+          theme: "light",
+        }
+      );
+    }
+  };
+
+  // ✏️ Editar equipamento
+  const handleEditar = (equip) => {
+    setEditando(true);
+    setEquipamentoId(equip.id);
+    setTipoEquip(equip.tipo?.desc_tipo || "");
+    setDescEquip(equip.desc_equip || "");
+    abrirModal();
+  };
+
+  // Fecha modal ao clicar fora ou apertar ESC
   useEffect(() => {
     if (!modalAberto) return;
 
@@ -131,11 +146,9 @@ function Equipaments() {
       }
     };
 
-    // Adiciona os ouvintes
     document.addEventListener("mousedown", handleClickFora);
     document.addEventListener("keydown", handleEsc);
 
-    // Remove os ouvintes ao desmontar
     return () => {
       document.removeEventListener("mousedown", handleClickFora);
       document.removeEventListener("keydown", handleEsc);
@@ -176,39 +189,58 @@ function Equipaments() {
             </tr>
           </thead>
           <tbody>
-            {equipamentos &&
-              equipamentos.map((equipaments) => (
-                <tr key={equipaments.id}>
-                  <td>{equipaments.id}</td>
-                  {/* <td>{equipaments.tipo}</td> */}
-                  <td>{equipaments.tipo?.desc_tipo || "Sem tipo"}</td>
-                  <td>{equipaments.desc_equip}</td>
+            {equipamentos.length > 0 ? (
+              equipamentos.map((equip) => (
+                <tr key={equip.id}>
+                  <td>{equip.id}</td>
+                  <td>{equip.tipo?.desc_tipo || "Sem tipo"}</td>
+                  <td>{equip.desc_equip}</td>
                   <td>
-                    <button className="editar-btn">✏️</button>
+                    <button
+                      className="editar-btn"
+                      onClick={() => handleEditar(equip)}
+                    >
+                      ✏️
+                    </button>
                   </td>
                 </tr>
-              ))}
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" style={{ textAlign: "center" }}>
+                  Nenhum equipamento cadastrado
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
 
+        {/* Modal */}
         {modalAberto && (
           <div className="modal-fundo">
             <div className="modal-conteudo" ref={modalRef}>
               <form onSubmit={handleSalvar}>
-                <h2>Adicionar Equipamento</h2>
+                <h2>
+                  {editando ? "Editar Equipamento" : "Adicionar Equipamento"}
+                </h2>
 
-                <label>Tipo equipamento:</label>
+                {!editando && (
+                  <>
+                    <label>Tipo equipamento:</label>
+                    <input
+                      type="text"
+                      placeholder="Digite o tipo do equipamento"
+                      value={tipoEquip}
+                      onChange={(e) => setTipoEquip(e.target.value)}
+                      required
+                    />
+                  </>
+                )}
+
+                <label>Descrição:</label>
                 <input
                   type="text"
-                  placeholder="Digite o tipo do equipamento"
-                  value={tipoEquip}
-                  onChange={(e) => setTipoEquip(e.target.value)}
-                />
-
-                <label>Desrição:</label>
-                <input
-                  type="text"
-                  placeholder="Descrição (Opcional)"
+                  placeholder="Descrição"
                   value={descEquip}
                   onChange={(e) => setDescEquip(e.target.value)}
                 />
@@ -217,14 +249,16 @@ function Equipaments() {
                   <button type="button" onClick={fecharModal}>
                     Cancelar
                   </button>
-                  <button type="submit">Salvar</button>
+                  <button type="submit">
+                    {editando ? "Atualizar" : "Salvar"}
+                  </button>
                 </div>
               </form>
             </div>
           </div>
         )}
-        {/* <BotaoSair /> */}
       </div>
+
       <footer className="footer">
         <p>© 2025 - Sistema de Monitoramento de Laboratórios</p>
       </footer>
