@@ -1,7 +1,6 @@
 import React, { Component, useEffect, useState, useRef } from "react";
 import "./Home.css";
 import Navbar from "../../../components/navbar";
-import BotaoSair from "../../../components/botaoSair/sair";
 import api from "../../../services/api.js";
 import { FaBell } from "react-icons/fa";
 
@@ -172,7 +171,6 @@ function Home() {
           <h1>Página Inicial</h1>
           <div className="loading">Carregando dados...</div>
         </div>
-        <BotaoSair />
       </div>
     );
   }
@@ -236,7 +234,6 @@ function Home() {
           </div>
         </div>
       </div>
-      {/* <BotaoSair /> */}
       {/* <footer className="footer">
         <p>© 2025 - Sistema de Monitoramento de Laboratórios</p>
       </footer> */}

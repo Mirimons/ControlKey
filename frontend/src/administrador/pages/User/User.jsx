@@ -3,7 +3,6 @@ import { FaEye, FaEyeSlash, FaSearch, FaTrash } from "react-icons/fa";
 import "./User.css";
 import Navbar from "../../../components/navbar";
 import api from "../../../services/api";
-import BotaoSair from "../../../components/botaoSair/sair";
 import { toast } from "react-toastify";
 
 function User() {
@@ -516,7 +515,6 @@ const deleteUsuario = async () => {
             </div>
           </div>
         )}
-        {/* <BotaoSair /> */}
       </div>
       <footer className="footer">
         <p>© 2025 - Sistema de Monitoramento de Laboratórios</p>

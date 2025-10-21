@@ -17,7 +17,7 @@ function EsqueceuSenha() {
     }
 
     try {
-      await api.post("/usuarios/esqueci-senha", { email });
+      await api.put("/login/reset", { email });
       toast.success("Uma nova senha foi enviada para seu e-mail!");
       navigate("/login");
     } catch (error) {

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./Equipaments.css";
 import Navbar from "../../../components/navbar";
-import BotaoSair from "../../../components/botaoSair/sair";
 import api from "../../../services/api";
 import { toast } from "react-toastify";
 

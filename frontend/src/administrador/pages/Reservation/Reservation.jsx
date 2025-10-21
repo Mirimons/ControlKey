@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import "./Reservation.css";
 import Navbar from "../../../components/navbar";
 import api from "../../../services/api";
-import BotaoSair from "../../../components/botaoSair/sair";
 import { toast } from "react-toastify";
 
 // Select pesquisável
@@ -351,7 +350,6 @@ function Reservation() {
         <p>© 2025 - Sistema de Monitoramento de Laboratórios</p>
       </footer>
       <Navbar />
-      {/* <BotaoSair /> */}
     </div>
   );
 }
