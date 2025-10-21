@@ -3,9 +3,9 @@ import agendamentoService from "../services/agendamentoServices.js";
 
 class AutoStatusJob {
   init() {
-    //Todo dia às 6h, pega agendamentos do dia anterior para mudar o status para confirmado
+    //A cada minuto, pega agendamentos que passaram para mudar o status para finalizado
     cron.schedule(
-      "0 6 * * *",
+      "* * * * *",
       async () => {
         try {
           console.log(
