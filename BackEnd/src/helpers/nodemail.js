@@ -28,7 +28,7 @@ function sendEmail(newPassword, userEmail) {
   };
 
   return new Promise((resolve, reject) => {
-    transporter.sendEmail(mailOptions, (error, info) => {
+    transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.log("Erro ao enviar e-mail: ", error);
         reject(new Error("Falha ao enviar e-mail."));
@@ -41,7 +41,7 @@ function sendEmail(newPassword, userEmail) {
 }
 
 const getEmailTemplate = (newPassword) => {
-  const templatePath = path.join(__dirname, "../templetes/changePassword.html");
+  const templatePath = path.join(__dirname, "../templates/changePassword.html");
   const htmlTemplate = fs.readFileSync(templatePath, "utf-8");
   return htmlTemplate.replace("{{newPassword}}", newPassword);
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaEye, FaEyeSlash, FaSearch } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaSearch, FaTrash } from "react-icons/fa";
 import "./User.css";
 import Navbar from "../../../components/navbar";
 import api from "../../../services/api";
@@ -36,6 +36,78 @@ function User() {
 
   const abrirModal = () => setModalAberto(true);
   const fecharModal = () => setModalAberto(false);
+const deleteUsuario = async () => {
+  if (!editando || !usuarioSelecionado) {
+    toast.warning("Selecione um usuário para excluir!", {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+    });
+    return;
+  }
+
+  const confirmar = window.confirm(
+    `Tem certeza que deseja excluir o usuário "${usuarioSelecionado.nome}"?`
+  );
+
+  if (!confirmar) return;
+
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Você precisa estar logado!", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      return;
+    }
+
+    await api.delete(`/usuario/${usuarioSelecionado.id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    toast.success("Usuário excluído com sucesso!", {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+    });
+
+    // Atualiza a lista de usuários
+    setUsuarios((prev) =>
+      prev.filter((u) => u.id !== usuarioSelecionado.id)
+    );
+
+    fecharModal();
+  } catch (err) {
+    console.error("Erro ao excluir usuário:", err);
+    toast.error("Erro ao excluir usuário!", {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+    });
+  }
+};
 
   const abrirModalNovo = () => {
     setEditando(false);
@@ -131,6 +203,7 @@ function User() {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
+          // alert("Usuário atualizado com sucesso!");
           toast.success("Usuário atualizado com sucesso!", {
             position: "top-right",
             autoClose: 2000,
@@ -173,6 +246,7 @@ function User() {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
+          // alert("Usuário cadastrado com sucesso!");
           toast.success("Usuário cadastrado com sucesso!", {
             position: "top-right",
             autoClose: 2000,
@@ -430,6 +504,9 @@ function User() {
                 </div>
 
                 <div className="modal-botoes">
+                  <button type ="button" onClick={deleteUsuario}>
+                    <FaTrash /> 
+                  </button>
                   <button type="button" onClick={fecharModal}>
                     Cancelar
                   </button>

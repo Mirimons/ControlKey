@@ -1,13 +1,6 @@
 import React from "react";
 import "./navbar.css";
-import {
-  FaHome,
-  FaUser,
-  FaKey,
-  FaTools,
-  FaClipboardList,
-  FaChartBar,
-} from "react-icons/fa";
+import { FaDoorOpen } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import logo from "../assets/LOGOCERTO.png";
 
@@ -19,33 +12,26 @@ const navbar = () => {
       <div className="navbar-menu">
         <ul>
           <li>
-            <Link to="/home">
-              Página Inicial
-            </Link>
+            <Link to="/home">Página Inicial</Link>
           </li>
           <li>
-            <Link to="/user">
-              Usuários
-            </Link>
+            <Link to="/user">Usuários</Link>
           </li>
           <li>
-            <Link to="/keys">
-              Chaves
-            </Link>
+            <Link to="/keys">Chaves</Link>
           </li>
           <li>
-            <Link to="/equipaments">
-              Equipamentos
-            </Link>
+            <Link to="/equipaments">Equipamentos</Link>
           </li>
           <li>
-            <Link to="/reservation">
-              Reservas
-            </Link>
+            <Link to="/reservation">Reservas</Link>
           </li>
           <li>
-            <Link to="/relatorio">
-              Relatório
+            <Link to="/relatorio">Relatório</Link>
+          </li>
+          <li>
+            <Link to="/login">
+              <FaDoorOpen className="logout"/>
             </Link>
           </li>
         </ul>

@@ -30,7 +30,6 @@ function Equipaments() {
   const fetchEquipamentos = () => {
     const token = localStorage.getItem("token");
     if (!token) return;
-
     api
       .get("/equipamento", {
         headers: {
@@ -38,12 +37,8 @@ function Equipaments() {
         },
       })
       .then((response) => {
-        if (Array.isArray(response.data)) {
-          setEquipamentos(response.data);
-        } else if (Array.isArray(response.data.equipamentos)) {
-          setEquipamentos(response.data.equipamentos);
-        } else if (Array.isArray(response.data.data)) {
-          setEquipamentos(response.data.data);
+        if (response.data && response.data.data) {
+          setEquipamentos(response.data.data)
         } else {
           setEquipamentos([]);
         }

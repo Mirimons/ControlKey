@@ -54,3 +54,9 @@
 .navbar-menu ul li a:hover {
   color: #57606f;
 }
+
+.logout {
+  height: 40px;
+  width: auto;
+  margin-left: 50px;
+}
