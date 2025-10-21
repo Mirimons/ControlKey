@@ -102,7 +102,7 @@ class EquipService {
       await equipamentoRepository.update({ id }, updateData);
     }
 
-    return await equipamentoRepository.findOneBy({
+    return await equipamentoRepository.findOne({
       where: { id },
       relations: ["tipo"],
     });
