@@ -1,18 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "./retiradaDevolucao.css";
-// import { useNavigate } from "react-router-dom";
-// import logoetec from '../../assets/logoetec.png';
 import api from "../../services/api";
 
 function RetiradaDevolucao() {
     const [identificacao, setIdentificacao] = useState("");
     const [tipo, setTipo] = useState("");
+    const [codigo, setCodigo] = useState("");
 
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log("Identificação:", identificacao);
         console.log("Tipo escolhido:", tipo);
-        // Aqui você chamaria sua API ou salvaria no banco
+        console.log("Código:", codigo);
     };
 
     return (
@@ -20,7 +19,11 @@ function RetiradaDevolucao() {
             <div className="container-pagprofs">
                 <h2>Retirada e Devolução</h2>
                 <form onSubmit={handleSubmit}>
+
+                    {/* Label e input de identificação */}
+                    <label htmlFor="identificacao" className="form-label">RM ou CPF:</label>
                     <input
+                        id="identificacao"
                         type="text"
                         placeholder="Digite seu RM ou CPF"
                         value={identificacao}
@@ -28,6 +31,7 @@ function RetiradaDevolucao() {
                         className="input-identificacao"
                     />
 
+                    {/* Opções de tipo */}
                     <div className="opcoes">
                         <label className="radio-label">
                             <input
@@ -54,17 +58,34 @@ function RetiradaDevolucao() {
                         </label>
                     </div>
 
+                    {/* Label e input do código */}
+                    {tipo && (
+                        <>
+                            <label htmlFor="codigo" className="form-label">
+                                Código da chave ou equipamento:
+                            </label>
+                            <input
+                                id="codigo"
+                                type="text"
+                                placeholder={`Digite o código`}
+                                value={codigo}
+                                onChange={(e) => setCodigo(e.target.value)}
+                                className="input-codigo"
+                            />
+                        </>
+                    )}
+
+                    {/* Botões */}
                     <div className="buttons">
                         <button type="submit" className="btn-retirar">
                             Retirar
                         </button>
-
                         <button type="submit" className="btn-devolver">
                             Devolver
                         </button>
                     </div>
                 </form>
-            </div >
+            </div>
         </div>
     );
 }
