@@ -63,11 +63,9 @@
 }
 
 .usuarios-tabela {
-  width: 80%;
+  width: 100%;
   border-collapse: collapse;
   background-color: #e6e6ff;
-  border-radius: 8px;
-  overflow: hidden;
 }
 
 .usuarios-tabela th,
@@ -81,6 +79,25 @@
   color: #072355;
   background-color: #7BBDE8;
   font-weight: bold;
+  position: sticky;
+  /* Gruda o cabeçalho */
+  top: 0;
+  /* No topo do .tabela-container */
+  z-index: 1;
+}
+
+.usuarios-tabela tbody tr:nth-child(even) {
+  background-color: #d8d8d8;
+  /* Cinza/lilás claro (para linhas pares) */
+}
+
+.usuarios-tabela tbody tr:nth-child(odd) {
+  background-color: #c7c7c7;
+  /* Branco (para linhas ímpares) */
+}
+
+.usuarios-tabela tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .editar-btn {
@@ -88,7 +105,18 @@
   border: none;
   cursor: pointer;
   font-size: 18px;
+  transition: all 0.2s ease;
+  transform: translateZ(0);
+  /* melhora a performance da animação */
 }
+
+.editar-btn:hover {
+  transform: scale(1.2);
+  color: #1e90ff;
+  /* muda levemente a cor, opcional */
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
 
 /* Fundo escuro do modal */
 .modal-fundo {
@@ -280,7 +308,8 @@ select:disabled {
 
 .usuarios-page {
   min-height: 100vh;
-  display: flex; /* Garante altura total da tela */
+  display: flex;
+  /* Garante altura total da tela */
   flex-direction: column;
 }
 
@@ -290,6 +319,36 @@ select:disabled {
   text-align: center;
   padding: 3px 0;
   font-size: 13px;
-  box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
   margin-top: 20px;
+}
+
+.tabela-container {
+  width: 80%;
+  /* <-- A LARGURA DE 80% FICA AQUI */
+  max-height: 500px;
+  /* <-- A ALTURA MÁXIMA FICA AQUI */
+  overflow-y: auto;
+  /* <-- A ROLAGEM FICA AQUI */
+
+  /* Estilos para ficar bonito */
+  border-radius: 8px;
+  /* IMPORTANTE: A borda externa do container */
+  border: 1px solid #E5ECFE;
+  overflow-x: hidden;
+}
+
+.tabela-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 8px;
+}
+
+.tabela-container::-webkit-scrollbar-thumb {
+  background-color: #7BBDE8;
+  border-radius: 8px;
+  border: 2px solid #f1f1f1;
+}
+
+.tabela-container::-webkit-scrollbar-thumb:hover {
+  background-color: #5ca9da;
 }

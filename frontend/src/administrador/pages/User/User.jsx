@@ -35,31 +35,9 @@ function User() {
 
   const abrirModal = () => setModalAberto(true);
   const fecharModal = () => setModalAberto(false);
-const deleteUsuario = async () => {
-  if (!editando || !usuarioSelecionado) {
-    toast.warning("Selecione um usuário para excluir!", {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
-    });
-    return;
-  }
-
-  const confirmar = window.confirm(
-    `Tem certeza que deseja excluir o usuário "${usuarioSelecionado.nome}"?`
-  );
-
-  if (!confirmar) return;
-
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("Você precisa estar logado!", {
+  const deleteUsuario = async () => {
+    if (!editando || !usuarioSelecionado) {
+      toast.warning("Selecione um usuário para excluir!", {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -72,41 +50,63 @@ const deleteUsuario = async () => {
       return;
     }
 
-    await api.delete(`/usuario/${usuarioSelecionado.id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    toast.success("Usuário excluído com sucesso!", {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
-    });
-
-    // Atualiza a lista de usuários
-    setUsuarios((prev) =>
-      prev.filter((u) => u.id !== usuarioSelecionado.id)
+    const confirmar = window.confirm(
+      `Tem certeza que deseja excluir o usuário "${usuarioSelecionado.nome}"?`
     );
 
-    fecharModal();
-  } catch (err) {
-    console.error("Erro ao excluir usuário:", err);
-    toast.error("Erro ao excluir usuário!", {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
-    });
-  }
-};
+    if (!confirmar) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Você precisa estar logado!", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        return;
+      }
+
+      await api.delete(`/usuario/${usuarioSelecionado.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      toast.success("Usuário excluído com sucesso!", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+
+      // Atualiza a lista de usuários
+      setUsuarios((prev) =>
+        prev.filter((u) => u.id !== usuarioSelecionado.id)
+      );
+
+      fecharModal();
+    } catch (err) {
+      console.error("Erro ao excluir usuário:", err);
+      toast.error("Erro ao excluir usuário!", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    }
+  };
 
   const abrirModalNovo = () => {
     setEditando(false);
@@ -365,43 +365,45 @@ const deleteUsuario = async () => {
         </button> */}
         </div>
 
-        <table className="usuarios-tabela">
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Nome</th>
-              <th>Tipo de usuário</th>
-              <th>Telefone</th>
-              <th>Editar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {usuarios && usuarios.length > 0 ? (
-              usuarios.map((user) => (
-                <tr key={user.id}>
-                  <td>{user.id}</td>
-                  <td>{user.nome}</td>
-                  <td>{user.tipo?.desc_tipo || user.id_tipo}</td>
-                  <td>{user.telefone}</td>
-                  <td>
-                    <button
-                      className="editar-btn"
-                      onClick={() => abrirModalEditar(user)}
-                    >
-                      ✏️
-                    </button>
+        <div className="tabela-container">
+          <table className="usuarios-tabela">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Nome</th>
+                <th>Tipo de usuário</th>
+                <th>Telefone</th>
+                <th>Editar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {usuarios && usuarios.length > 0 ? (
+                usuarios.map((user) => (
+                  <tr key={user.id}>
+                    <td>{user.id}</td>
+                    <td>{user.nome}</td>
+                    <td>{user.tipo?.desc_tipo || user.id_tipo}</td>
+                    <td>{user.telefone}</td>
+                    <td>
+                      <button
+                        className="editar-btn"
+                        onClick={() => abrirModalEditar(user)}
+                      >
+                        ✏️
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: "center" }}>
+                    Nenhum usuário encontrado
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" style={{ textAlign: "center" }}>
-                  Nenhum usuário encontrado
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
 
         {/* Modal */}
         {modalAberto && (
@@ -503,8 +505,8 @@ const deleteUsuario = async () => {
                 </div>
 
                 <div className="modal-botoes">
-                  <button type ="button" onClick={deleteUsuario}>
-                    <FaTrash /> 
+                  <button type="button" onClick={deleteUsuario}>
+                    <FaTrash />
                   </button>
                   <button type="button" onClick={fecharModal}>
                     Cancelar
