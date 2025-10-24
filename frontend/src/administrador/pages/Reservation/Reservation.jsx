@@ -332,7 +332,6 @@ function Reservation() {
                 <label>Status:</label>
                 <select value={status} onChange={(e) => setStatus(e.target.value)} required>
                   <option value="agendado">Agendado</option>
-                  <option value="em andamento">Em andamento</option>
                   <option value="concluído">Concluído</option>
                   <option value="cancelado">Cancelado</option>
                 </select>

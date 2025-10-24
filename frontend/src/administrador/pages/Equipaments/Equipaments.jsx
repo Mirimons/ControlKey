@@ -69,13 +69,13 @@ function Equipaments() {
     // corpo da requisição corrigido
     const data = editando
       ? {
-          id: equipamentoId, // necessário pelo DTO de atualização
-          desc_equip: descEquip,
-        }
+        id: equipamentoId, // necessário pelo DTO de atualização
+        desc_equip: descEquip,
+      }
       : {
-          tipo: tipoEquip,
-          desc_equip: descEquip,
-        };
+        tipo: tipoEquip,
+        desc_equip: descEquip,
+      };
 
     try {
       if (editando) {
@@ -173,41 +173,43 @@ function Equipaments() {
           </div>
         </div>
 
-        <table className="equipamentos-tabela">
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Equipamento</th>
-              <th>Descrição</th>
-              <th>Editar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {equipamentos.length > 0 ? (
-              equipamentos.map((equip) => (
-                <tr key={equip.id}>
-                  <td>{equip.id}</td>
-                  <td>{equip.tipo?.desc_tipo || "Sem tipo"}</td>
-                  <td>{equip.desc_equip}</td>
-                  <td>
-                    <button
-                      className="editar-btn"
-                      onClick={() => handleEditar(equip)}
-                    >
-                      ✏️
-                    </button>
+        <div className="tabela-container">
+          <table className="equipamentos-tabela">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Equipamento</th>
+                <th>Descrição</th>
+                <th>Editar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {equipamentos.length > 0 ? (
+                equipamentos.map((equip) => (
+                  <tr key={equip.id}>
+                    <td>{equip.id}</td>
+                    <td>{equip.tipo?.desc_tipo || "Sem tipo"}</td>
+                    <td>{equip.desc_equip}</td>
+                    <td>
+                      <button
+                        className="editar-btn"
+                        onClick={() => handleEditar(equip)}
+                      >
+                        ✏️
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" style={{ textAlign: "center" }}>
+                    Nenhum equipamento cadastrado
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="4" style={{ textAlign: "center" }}>
-                  Nenhum equipamento cadastrado
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
 
         {/* Modal */}
         {modalAberto && (

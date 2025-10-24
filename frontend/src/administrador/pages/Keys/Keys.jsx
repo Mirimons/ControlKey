@@ -164,41 +164,54 @@ function Keys() {
           <button onClick={abrirModalNovo}>Adicionar Chave</button>
         </div>
 
-        <table className="chaves-tabela">
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Ambiente</th>
-              <th>Descrição</th>
-              <th>Editar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {chaves.length > 0 ? (
-              chaves.map((chave) => (
-                <tr key={chave.id}>
-                  <td>{chave.id}</td>
-                  <td>{chave.nome_lab}</td>
-                  <td>{chave.desc_lab}</td>
-                  <td>
-                    <button
-                      className="editar-btn"
-                      onClick={() => abrirModalEditar(chave)}
-                    >
-                      ✏️
-                    </button>
+        <div className="chaves-filtros">
+          <div>
+            <h3>Ambiente:</h3>
+            <input type="text" placeholder="Ambiente" />
+          </div>
+          <div>
+            <h3>Descrição:</h3>
+            <input type="text" placeholder="Descrição" />
+          </div>
+        </div>
+
+        <div className="tabela-container">
+          <table className="chaves-tabela">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Ambiente</th>
+                <th>Descrição</th>
+                <th>Editar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {chaves.length > 0 ? (
+                chaves.map((chave) => (
+                  <tr key={chave.id}>
+                    <td>{chave.id}</td>
+                    <td>{chave.nome_lab}</td>
+                    <td>{chave.desc_lab}</td>
+                    <td>
+                      <button
+                        className="editar-btn"
+                        onClick={() => abrirModalEditar(chave)}
+                      >
+                        ✏️
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" style={{ textAlign: "center" }}>
+                    Nenhuma chave cadastrada
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="4" style={{ textAlign: "center" }}>
-                  Nenhuma chave cadastrada
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
 
         {/* Modal */}
         {modalAberto && (
