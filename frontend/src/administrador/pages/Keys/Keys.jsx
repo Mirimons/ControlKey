@@ -8,6 +8,7 @@ function Keys() {
   const [modalAberto, setModalAberto] = useState(false);
   const [nome_lab, setNome_lab] = useState("");
   const [desc_lab, setDesc_lab] = useState("");
+  const [status, setStatus] = useState("livre");
 
   const [chaves, setChaves] = useState([]);
 
@@ -24,6 +25,7 @@ function Keys() {
     setChaveSelecionada(null);
     setNome_lab("");
     setDesc_lab("");
+    setStatus("livre");
     setModalAberto(true);
   };
 
@@ -32,6 +34,7 @@ function Keys() {
     setChaveSelecionada(chave);
     setNome_lab(chave.nome_lab);
     setDesc_lab(chave.desc_lab || "");
+    setStatus(chave.status || "livre");
     setModalAberto(true);
   };
 
@@ -45,7 +48,15 @@ function Keys() {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((response) => setChaves(response.data))
+      .then((response) => {
+        if (response.data && response.data.data) {
+        setChaves(response.data.data);
+      } else if (Array.isArray(response.data)) {
+        setChaves(response.data);
+        } else {
+          setChaves([]);
+        }
+      })
       .catch((error) => {
         console.error("Erro ao buscar chaves:", error);
       });
@@ -64,7 +75,7 @@ function Keys() {
       return;
     }
 
-    const payload = { nome_lab, desc_lab };
+    const payload = { nome_lab, desc_lab, status };
 
     if (editando && chaveSelecionada) {
       // Edição de chave existente
@@ -112,6 +123,7 @@ function Keys() {
           fecharModal();
           setNome_lab("");
           setDesc_lab("");
+          setStatus("livre");
           fetchChaves();
         })
         .catch((error) => {
@@ -173,6 +185,17 @@ function Keys() {
             <h3>Descrição:</h3>
             <input type="text" placeholder="Descrição" />
           </div>
+          <div>
+            <h3>Status:</h3>
+            <select value={status} onChange={(e) => setStatus(e.target.value)}>
+              <option value="" disabled hidden>
+                Selecione o status
+              </option>
+              <option value="">Todos</option>
+              <option value="livre">Livre</option>
+              <option value="ocupado">Ocupado</option>
+            </select>
+          </div>
         </div>
 
         <div className="tabela-container">
@@ -182,6 +205,7 @@ function Keys() {
                 <th>Código</th>
                 <th>Ambiente</th>
                 <th>Descrição</th>
+                <th>Status</th>
                 <th>Editar</th>
               </tr>
             </thead>
@@ -192,6 +216,11 @@ function Keys() {
                     <td>{chave.id}</td>
                     <td>{chave.nome_lab}</td>
                     <td>{chave.desc_lab}</td>
+                    <td>
+                      <span className={`status-${chave.status?.toLowerCase()}`}>
+                        {chave.status}
+                      </span>
+                    </td>
                     <td>
                       <button
                         className="editar-btn"
@@ -219,7 +248,7 @@ function Keys() {
             <div className="modal-conteudo" ref={modalRef}>
               <h2>{editando ? "Editar Chave" : "Adicionar Chave"}</h2>
               <form onSubmit={handleSalvar}>
-                <label>Chave do laboratório:</label>
+                <label>Nome:</label>
                 <input
                   type="text"
                   placeholder="Nome do laboratório"
@@ -234,6 +263,15 @@ function Keys() {
                   value={desc_lab}
                   onChange={(e) => setDesc_lab(e.target.value)}
                 />
+                <label>Status:</label>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  required
+                >
+                  <option value="livre">Livre</option>
+                  <option value="ocupado">Ocupado</option>
+                </select>
 
                 <div className="modal-botoes">
                   <button type="button" onClick={fecharModal}>

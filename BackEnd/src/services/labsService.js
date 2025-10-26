@@ -5,9 +5,51 @@ import { Like, IsNull } from "typeorm";
 const labsRepository = AppDataSource.getRepository(Labs);
 
 class LabsService {
-  async getLabs() {
-    return await labsRepository.findBy({ deletedAt: IsNull() });
+  async getLabById(id) {
+    return await labsRepository.findOne({
+      where: { id, deletedAt: IsNull() },
+    });
   }
+
+  async getLabs(filtros = {}) {
+    try {
+      const { nome_lab, desc_lab, status, page = 1, limit = 10 } = filtros;
+
+      const query = labsRepository
+        .createQueryBuilder("labs")
+        .where("labs.deletedAt IS NULL");
+
+      if (nome_lab) {
+        query.andWhere("labs.nome_lab = :nome_lab", { nome_lab });
+      }
+
+      if (desc_lab) {
+        query.andWhere("labs.desc_lab = :desc_lab", { desc_lab });
+      }
+
+      if (status) {
+        query.andWhere("labs.status = :status", { status });
+      }
+
+      const skip = (page - 1) * limit;
+      query.skip(skip).take(limit);
+
+      const [labs, total] = await query.getManyAndCount();
+
+      return {
+        data: labs,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
+    } catch (error) {
+      throw new Error(`Erro ao bucar laboratórios: ${error.message}`);
+    }
+  }
+
   async getByNome(nome) {
     return await labsRepository.findBy({
       nome: Like(`%${nome}%`),

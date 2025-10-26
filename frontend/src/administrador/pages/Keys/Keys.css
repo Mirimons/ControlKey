@@ -61,7 +61,7 @@ body {
 }
 
 .chaves-tabela {
-  width: 80%;
+  width: 100%;
   border-collapse: collapse;
   background-color: #e6e6ff;
   border-radius: 8px;

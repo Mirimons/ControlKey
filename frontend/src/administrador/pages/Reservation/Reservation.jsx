@@ -5,13 +5,21 @@ import api from "../../../services/api";
 import { toast } from "react-toastify";
 
 // Select pesquisável
-const SelectPesquisavel = ({ options, value, onChange, placeholder, required }) => {
+const SelectPesquisavel = ({
+  options,
+  value,
+  onChange,
+  placeholder,
+  required,
+}) => {
   const [inputValue, setInputValue] = useState("");
   const [mostrarOpcoes, setMostrarOpcoes] = useState(false);
   const containerRef = useRef(null);
 
   // Encontrar a opção selecionada usando comparação de strings
-  const selectedOption = options.find((opt) => String(opt.value) === String(value));
+  const selectedOption = options.find(
+    (opt) => String(opt.value) === String(value)
+  );
 
   useEffect(() => {
     if (selectedOption) setInputValue(selectedOption.label);
@@ -30,7 +38,10 @@ const SelectPesquisavel = ({ options, value, onChange, placeholder, required }) 
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
         setMostrarOpcoes(false);
       }
     };
@@ -58,7 +69,7 @@ const SelectPesquisavel = ({ options, value, onChange, placeholder, required }) 
               <div
                 key={option.value}
                 className="opcao"
-                onMouseDown={() => handleSelect(option)}
+                onClick={() => handleSelect(option)}
               >
                 {option.label}
               </div>
@@ -113,7 +124,9 @@ function Reservation() {
     setEditando(true);
     setReservaSelecionada(reserva);
 
-    setNomeProfessor(String(reserva.id_usuario || reserva.nomeProfessorId || ""));
+    setNomeProfessor(
+      String(reserva.id_usuario || reserva.nomeProfessorId || "")
+    );
     setLaboratorio(String(reserva.id_labs || reserva.laboratorioId || ""));
     setHoraInicio(reserva.horaInicio || reserva.hora_inicio || "");
     setHoraFim(reserva.horaFim || reserva.hora_fim || "");
@@ -129,26 +142,35 @@ function Reservation() {
     if (!token) return;
     setLoading(true);
 
-    api.get("/agendamento", { headers: { Authorization: `Bearer ${token}` } })
+    api
+      .get("/agendamento", { headers: { Authorization: `Bearer ${token}` } })
       .then((response) => {
         let reservasData = [];
-        if (response.data && Array.isArray(response.data.agendamentos)) reservasData = response.data.agendamentos;
+        if (response.data && Array.isArray(response.data.agendamentos))
+          reservasData = response.data.agendamentos;
         else if (Array.isArray(response.data)) reservasData = response.data;
-        else if (response.data && Array.isArray(response.data.reservas)) reservasData = response.data.reservas;
-        else if (response.data && Array.isArray(response.data.data)) reservasData = response.data.data;
-        else if (response.data && typeof response.data === "object") reservasData = [response.data];
+        else if (response.data && Array.isArray(response.data.reservas))
+          reservasData = response.data.reservas;
+        else if (response.data && Array.isArray(response.data.data))
+          reservasData = response.data.data;
+        else if (response.data && typeof response.data === "object")
+          reservasData = [response.data];
 
         const reservasMapeadas = reservasData.map((reserva, index) => {
           let nomeLab = "N/A";
-          if (typeof reserva.laboratorio === "string") nomeLab = reserva.laboratorio;
-          else if (reserva.laboratorio?.nome_lab) nomeLab = reserva.laboratorio.nome_lab;
+          if (typeof reserva.laboratorio === "string")
+            nomeLab = reserva.laboratorio;
+          else if (reserva.laboratorio?.nome_lab)
+            nomeLab = reserva.laboratorio.nome_lab;
           else if (reserva.labs?.nome_lab) nomeLab = reserva.labs.nome_lab;
           else if (reserva.id_labs) nomeLab = `Lab ${reserva.id_labs}`;
 
           let nomeProf = "N/A";
-          if (typeof reserva.nomeProfessor === "string") nomeProf = reserva.nomeProfessor;
+          if (typeof reserva.nomeProfessor === "string")
+            nomeProf = reserva.nomeProfessor;
           else if (reserva.usuario?.nome) nomeProf = reserva.usuario.nome;
-          else if (reserva.id_usuario) nomeProf = `Usuário ${reserva.id_usuario}`;
+          else if (reserva.id_usuario)
+            nomeProf = `Usuário ${reserva.id_usuario}`;
 
           return {
             id: reserva.id || `reserva-${index}`,
@@ -176,7 +198,8 @@ function Reservation() {
   const carregarChaves = () => {
     const token = localStorage.getItem("token");
     if (!token) return;
-    api.get("/labs", { headers: { Authorization: `Bearer ${token}` } })
+    api
+      .get("/labs", { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => setChaves(res.data))
       .catch((err) => console.error("Erro ao buscar chaves:", err));
   };
@@ -184,12 +207,14 @@ function Reservation() {
   const carregarSolicitantes = () => {
     const token = localStorage.getItem("token");
     if (!token) return;
-    api.get("/usuario", { headers: { Authorization: `Bearer ${token}` } })
+    api
+      .get("/usuario", { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => {
         let data = [];
         if (Array.isArray(res.data)) data = res.data;
         else if (res.data && Array.isArray(res.data.data)) data = res.data.data;
-        else if (res.data && Array.isArray(res.data.usuarios)) data = res.data.usuarios;
+        else if (res.data && Array.isArray(res.data.usuarios))
+          data = res.data.usuarios;
         else if (res.data) data = [res.data];
         setSolicitantes(data);
       })
@@ -221,7 +246,10 @@ function Reservation() {
     };
 
     if (editando && reservaSelecionada) {
-      api.put(`/agendamento/${reservaSelecionada.id}`, payload, { headers: { Authorization: `Bearer ${token}` } })
+      api
+        .put(`/agendamento/${reservaSelecionada.id}`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
         .then(() => {
           toast.success("Reserva atualizada com sucesso!");
           setModalAberto(false);
@@ -232,7 +260,10 @@ function Reservation() {
           toast.error("Erro ao atualizar reserva!");
         });
     } else {
-      api.post("/agendamento", payload, { headers: { Authorization: `Bearer ${token}` } })
+      api
+        .post("/agendamento", payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
         .then(() => {
           toast.success("Reserva criada com sucesso!");
           setModalAberto(false);
@@ -245,20 +276,34 @@ function Reservation() {
     }
   };
 
-  const opcoesSolicitantes = solicitantes.map((s) => ({ value: s.id, label: s.nome || s.email || `Usuário ${s.id}` }));
-  const opcoesLaboratorios = chaves.map((c) => ({ value: c.id, label: c.nome_lab || `Lab ${c.id}` }));
+  const opcoesSolicitantes = solicitantes.map((s) => ({
+    value: s.id,
+    label: s.nome || s.email || `Usuário ${s.id}`,
+  }));
+  const opcoesLaboratorios = Array.isArray(chaves)
+    ? chaves.map((c) => ({ value: c.id, label: c.nome_lab || `Labs ${c.id}` }))
+    : [];
 
-  const reservasFiltradas = reservas.filter((r) =>
-    (!filtroFinalidade || r.finalidade.toLowerCase().includes(filtroFinalidade.toLowerCase())) &&
-    (!filtroSolicitante || r.nomeProfessor.toLowerCase().includes(filtroSolicitante.toLowerCase())) &&
-    (!filtroAmbiente || r.laboratorio.toLowerCase().includes(filtroAmbiente.toLowerCase()))
+  const reservasFiltradas = reservas.filter(
+    (r) =>
+      (!filtroFinalidade ||
+        r.finalidade.toLowerCase().includes(filtroFinalidade.toLowerCase())) &&
+      (!filtroSolicitante ||
+        r.nomeProfessor
+          .toLowerCase()
+          .includes(filtroSolicitante.toLowerCase())) &&
+      (!filtroAmbiente ||
+        r.laboratorio.toLowerCase().includes(filtroAmbiente.toLowerCase()))
   );
 
   useEffect(() => {
     const handleClickFora = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) setModalAberto(false);
+      if (modalRef.current && !modalRef.current.contains(event.target))
+        setModalAberto(false);
     };
-    const handleEsc = (event) => { if (event.key === "Escape") setModalAberto(false); };
+    const handleEsc = (event) => {
+      if (event.key === "Escape") setModalAberto(false);
+    };
     if (modalAberto) {
       document.addEventListener("mousedown", handleClickFora);
       document.addEventListener("keydown", handleEsc);
@@ -272,36 +317,78 @@ function Reservation() {
   return (
     <div className="reservation-page">
       <div className="reservas-container">
-        <header><h1>Reservas</h1></header>
+        <header>
+          <h1>Reservas</h1>
+        </header>
         <div className="reservas-acoes">
           <button onClick={abrirModalNovo}>Reservar</button>
         </div>
 
         <div className="reservas-filtros">
-          <input placeholder="Finalidade" value={filtroFinalidade} onChange={(e) => setFiltroFinalidade(e.target.value)} />
-          <input placeholder="Solicitante" value={filtroSolicitante} onChange={(e) => setFiltroSolicitante(e.target.value)} />
-          <input placeholder="Ambiente" value={filtroAmbiente} onChange={(e) => setFiltroAmbiente(e.target.value)} />
+          <input
+            placeholder="Finalidade"
+            value={filtroFinalidade}
+            onChange={(e) => setFiltroFinalidade(e.target.value)}
+          />
+          <input
+            placeholder="Solicitante"
+            value={filtroSolicitante}
+            onChange={(e) => setFiltroSolicitante(e.target.value)}
+          />
+          <input
+            placeholder="Ambiente"
+            value={filtroAmbiente}
+            onChange={(e) => setFiltroAmbiente(e.target.value)}
+          />
         </div>
 
         <table className="reservas-tabela">
           <thead>
             <tr>
-              <th>Solicitante</th><th>Ambiente</th><th>Data</th><th>Início</th><th>Fim</th><th>Finalidade</th><th>Status</th><th>Editar</th>
+              <th>Solicitante</th>
+              <th>Ambiente</th>
+              <th>Data</th>
+              <th>Início</th>
+              <th>Fim</th>
+              <th>Finalidade</th>
+              <th>Status</th>
+              <th>Editar</th>
             </tr>
           </thead>
           <tbody>
-            {reservasFiltradas.length > 0 ? reservasFiltradas.map((r) => (
-              <tr key={r.id}>
-                <td>{r.nomeProfessor}</td>
-                <td>{r.laboratorio}</td>
-                <td>{new Date(r.dataUtilizacao).toLocaleDateString("pt-BR")}</td>
-                <td>{r.horaInicio}</td>
-                <td>{r.horaFim}</td>
-                <td>{r.finalidade}</td>
-                <td><span className={`status-${r.status?.toLowerCase()}`}>{r.status}</span></td>
-                <td><button className="editar-btn" onClick={() => abrirModalEditar(r)}>✏️</button></td>
+            {reservasFiltradas.length > 0 ? (
+              reservasFiltradas.map((r) => (
+                <tr key={r.id}>
+                  <td>{r.nomeProfessor}</td>
+                  <td>{r.laboratorio}</td>
+                  <td>
+                    {new Date(r.dataUtilizacao).toLocaleDateString("pt-BR")}
+                  </td>
+                  <td>{r.horaInicio}</td>
+                  <td>{r.horaFim}</td>
+                  <td>{r.finalidade}</td>
+                  <td>
+                    <span className={`status-${r.status?.toLowerCase()}`}>
+                      {r.status}
+                    </span>
+                  </td>
+                  <td>
+                    <button
+                      className="editar-btn"
+                      onClick={() => abrirModalEditar(r)}
+                    >
+                      ✏️
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="8" style={{ textAlign: "center" }}>
+                  Nenhuma reserva encontrada
+                </td>
               </tr>
-            )) : <tr><td colSpan="8" style={{ textAlign: "center" }}>Nenhuma reserva encontrada</td></tr>}
+            )}
           </tbody>
         </table>
 
@@ -312,33 +399,74 @@ function Reservation() {
                 <h2>{editando ? "Editar Reserva" : "Nova Reserva"}</h2>
 
                 <label>Solicitante:</label>
-                <SelectPesquisavel options={opcoesSolicitantes} value={nomeProfessor} onChange={setNomeProfessor} placeholder="Selecione o solicitante" required />
+                <SelectPesquisavel
+                  options={opcoesSolicitantes}
+                  value={nomeProfessor}
+                  onChange={setNomeProfessor}
+                  placeholder="Selecione o solicitante"
+                  required
+                />
 
                 <label>Ambiente:</label>
-                <SelectPesquisavel options={opcoesLaboratorios} value={laboratorio} onChange={setLaboratorio} placeholder="Selecione o laboratório" required />
+                <SelectPesquisavel
+                  options={opcoesLaboratorios}
+                  value={laboratorio}
+                  onChange={setLaboratorio}
+                  placeholder="Selecione o laboratório"
+                  required
+                />
 
                 <label>Data de utilização:</label>
-                <input type="date" value={dataUtilizacao} onChange={(e) => setDataUtilizacao(e.target.value)} required min={new Date().toISOString().split("T")[0]} />
+                <input
+                  type="date"
+                  value={dataUtilizacao}
+                  onChange={(e) => setDataUtilizacao(e.target.value)}
+                  required
+                  min={new Date().toISOString().split("T")[0]}
+                />
 
                 <label>Horário início:</label>
-                <input type="time" value={horaInicio} onChange={(e) => setHoraInicio(e.target.value)} required />
+                <input
+                  type="time"
+                  value={horaInicio}
+                  onChange={(e) => setHoraInicio(e.target.value)}
+                  required
+                />
 
                 <label>Horário fim:</label>
-                <input type="time" value={horaFim} onChange={(e) => setHoraFim(e.target.value)} required />
+                <input
+                  type="time"
+                  value={horaFim}
+                  onChange={(e) => setHoraFim(e.target.value)}
+                  required
+                />
 
                 <label>Finalidade:</label>
-                <input type="text" value={finalidade} onChange={(e) => setFinalidade(e.target.value)} required />
+                <input
+                  type="text"
+                  value={finalidade}
+                  onChange={(e) => setFinalidade(e.target.value)}
+                  required
+                />
 
                 <label>Status:</label>
-                <select value={status} onChange={(e) => setStatus(e.target.value)} required>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  required
+                >
                   <option value="agendado">Agendado</option>
                   <option value="concluído">Concluído</option>
                   <option value="cancelado">Cancelado</option>
                 </select>
 
                 <div className="modal-botoes">
-                  <button type="submit">{editando ? "Salvar alterações" : "Criar reserva"}</button>
-                  <button type="button" onClick={() => setModalAberto(false)}>Cancelar</button>
+                  <button type="button" onClick={() => setModalAberto(false)}>
+                    Cancelar
+                  </button>
+                  <button type="submit">
+                    {editando ? "Salvar alterações" : "Criar reserva"}
+                  </button>
                 </div>
               </form>
             </div>
