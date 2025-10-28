@@ -138,7 +138,7 @@ function Reservation() {
   };
 
   const carregarReservas = () => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) return;
     setLoading(true);
 
@@ -196,7 +196,7 @@ function Reservation() {
   };
 
   const carregarChaves = () => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) return;
     api
       .get("/labs", { headers: { Authorization: `Bearer ${token}` } })
@@ -205,7 +205,7 @@ function Reservation() {
   };
 
   const carregarSolicitantes = () => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) return;
     api
       .get("/usuario", { headers: { Authorization: `Bearer ${token}` } })
@@ -229,7 +229,7 @@ function Reservation() {
 
   const handleSalvar = (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) {
       toast.error("Você precisa estar logado para reservar!");
       return;

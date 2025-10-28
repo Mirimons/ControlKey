@@ -39,7 +39,7 @@ function Keys() {
   };
 
   const fetchChaves = () => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) return;
 
     api
@@ -64,7 +64,7 @@ function Keys() {
 
   const handleSalvar = (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
 
     if (!token) {
       toast.error("Você precisa estar logado para cadastrar uma chave!", {
