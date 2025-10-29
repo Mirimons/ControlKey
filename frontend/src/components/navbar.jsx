@@ -4,6 +4,11 @@ import { FaDoorOpen } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import logo from "../assets/LOGOCERTO.png";
 
+function handleLogout() {
+  sessionStorage.clear()
+  console.log("Usuário deslogado");
+}
+
 const navbar = () => {
   return (
     <div className="navbar">
@@ -31,7 +36,7 @@ const navbar = () => {
           </li>
           <li>
             <Link to="/login">
-              <FaDoorOpen className="logout"/>
+              <FaDoorOpen className="logout" onClick={handleLogout}/>
             </Link>
           </li>
         </ul>

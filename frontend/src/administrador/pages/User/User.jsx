@@ -59,7 +59,7 @@ function User() {
     if (!confirmar) return;
 
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) {
         toast.error("Você precisa estar logado!", {
           position: "top-right",
@@ -142,7 +142,7 @@ function User() {
   };
 
   const fetchUsuarios = () => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) return;
 
     const params = {};
@@ -164,10 +164,8 @@ function User() {
 
   const handleSalvar = (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("token");
-    
-    
-    
+    const token = sessionStorage.getItem("token");
+
     if (!token) {
       // alert("Você precisa estar logado!");
       toast.error("Você precisa estar logado!", {
@@ -318,7 +316,7 @@ function User() {
 
   // Atualiza a lista automaticamente quando o nome ou tipo mudarem
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) return;
 
     // Só faz a busca se o componente já foi montado

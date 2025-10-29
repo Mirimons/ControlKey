@@ -27,7 +27,7 @@ function Equipaments() {
 
   // 🔄 Buscar equipamentos
   const fetchEquipamentos = () => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) return;
     api
       .get("/equipamento", {
@@ -55,7 +55,7 @@ function Equipaments() {
   // 💾 Salvar (criar ou atualizar)
   const handleSalvar = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
 
     if (!token) {
       toast.error("Você precisa estar logado!", {
