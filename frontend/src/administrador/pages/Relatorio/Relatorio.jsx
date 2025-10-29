@@ -7,7 +7,7 @@ function Relatorio() {
   const [relatorios, setRelatorios] = useState([]);
   const [filtros, setFiltros] = useState({
     nomeUsuario: "",
-    ambiente: "",
+    laboratorio: "",
     equipamento: "",
     status: "",
     dataInicio: "",
@@ -20,24 +20,38 @@ function Relatorio() {
 
   const carregarRelatorios = () => {
     const token = localStorage.getItem("token");
-    if (!token) return;
+    if (!token) {
+      console.error("Token não encontrado");
+      return;
+    }
     setLoading(true);
 
     api
-      .get("/agendamento", { headers: { Authorization: `Bearer ${token}` } })
+      .get("/control", { headers: { Authorization: `Bearer ${token}` } })
       .then((response) => {
-        const dados = response.data.agendamentos || response.data || [];
+        let dados = [];
+
+        if (response.data && response.data.controls) {
+          dados = response.data.controls;
+        } else if (Array.isArray(response.data)) {
+          dados = response.data;
+        } else if (response.data && response.data.data) {
+          dados = response.data.data;
+        } else {
+          console.error("Estrutura de dados não reconhecida:", response.data);
+          dados = [];
+        }
+
         const lista = Array.isArray(dados)
           ? dados.map((item, i) => ({
               id: item.id || i,
-              solicitante: item.usuario?.nome || "N/A",
-              ambiente: item.laboratorio?.nome_lab || "N/A",
-              equipamento: item.equipamento?.nome || "N/A",
-              data: item.data_utilizacao,
-              horaInicio: item.hora_inicio,
-              horaFim: item.hora_fim,
-              finalidade: item.finalidade || "N/A",
-              status: item.status || "N/A",
+              usuario: item.usuario?.nome || "--",
+              laboratorio: item.laboratorio?.nome_lab || "--",
+              equipamento: item.equipamento?.desc_equip || "--",
+              dataInicio: item.data_inicio || item.dataInicio,
+              dataFim: item.data_fim || item.dataFim,
+              status: item.status || "--",
+              ciente: item.ciente ? "Sim" : "Não",
             }))
           : [];
 
@@ -55,17 +69,48 @@ function Relatorio() {
     setFiltros({ ...filtros, [name]: value });
   };
 
+  // //Função para formatar data
+  // const formatarData = (dataString) => {
+  //   if(!dataString) return "--";
+  //   try {
+  //     const data = new Dtae(dataString)
+  //     return data.toLocaleDateString("pt-BR")
+  //   }catch(error) {
+  //     return "Data inválida";
+  //   }
+  // }
+
+  //Função para formatarhora
+  const formatarHora = (dataString) => {
+    if(!dataString) return "--";
+    try {
+      const data = new Date(dataString)
+      return data.toLocaleTimeString("pt-BR", {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+    }catch(error) {
+      return "Hora inválida";
+    }
+  }
+
   // Filtra os relatórios com base nos inputs
   const relatoriosFiltrados = relatorios.filter((r) => {
     return (
       (!filtros.nomeUsuario ||
-        r.solicitante.toLowerCase().includes(filtros.nomeUsuario.toLowerCase())) &&
-      (!filtros.ambiente ||
-        r.ambiente.toLowerCase().includes(filtros.ambiente.toLowerCase())) &&
+        r.usuario.toLowerCase().includes(filtros.nomeUsuario.toLowerCase())) &&
+      (!filtros.laboratorio ||
+        r.laboratorio
+          .toLowerCase()
+          .includes(filtros.laboratorio.toLowerCase())) &&
       (!filtros.equipamento ||
-        r.equipamento.toLowerCase().includes(filtros.equipamento.toLowerCase())) &&
-      (!filtros.status || r.status.toLowerCase() === filtros.status.toLowerCase()) &&
-      (!filtros.dataInicio || (r.data && r.data.includes(filtros.dataInicio)))
+        r.equipamento
+          .toLowerCase()
+          .includes(filtros.equipamento.toLowerCase())) &&
+      (!filtros.status ||
+        r.status.toLowerCase() === filtros.status.toLowerCase()) &&
+      (!filtros.dataInicio || (r.dataInicio && r.dataInicio.includes(filtros.dataInicio)))
     );
   });
 
@@ -89,13 +134,13 @@ function Relatorio() {
           </div>
 
           <div className="campo">
-            <label>Ambiente:</label>
+            <label>Laboratório:</label>
             <input
               type="text"
-              name="ambiente"
-              value={filtros.ambiente}
+              name="laboratorio"
+              value={filtros.laboratorio}
               onChange={handleChange}
-              placeholder="Digite o ambiente"
+              placeholder="Digite o laboratorio"
             />
           </div>
 
@@ -112,10 +157,14 @@ function Relatorio() {
 
           <div className="campo">
             <label>Status:</label>
-            <select name="status" value={filtros.status} onChange={handleChange}>
-              <option value="">Selecione</option>
-              <option value="retirada">Retirada</option>
-              <option value="devolvido">Devolvido</option>
+            <select
+              name="status"
+              value={filtros.status}
+              onChange={handleChange}
+            >
+              <option value="">Todos</option>
+              <option value="retirada">Aberto</option>
+              <option value="devolvido">Fechado</option>
               <option value="pendente">Pendente</option>
             </select>
           </div>
@@ -135,14 +184,14 @@ function Relatorio() {
           <table className="relatorio-tabela">
             <thead>
               <tr>
-                <th>Nome do Usuário</th>
-                <th>Ambiente</th>
+                <th>Usuário</th>
+                <th>Laboratório</th>
                 <th>Equipamento</th>
+                <th>Data</th>
+                <th>Hora Início</th>
+                <th>Hora Fim</th>
                 <th>Status</th>
-                <th>Data de Início</th>
-                <th>Início</th>
-                <th>Fim</th>
-                <th>Finalidade</th>
+                <th>Ciente</th>
               </tr>
             </thead>
             <tbody>
@@ -155,24 +204,34 @@ function Relatorio() {
               ) : relatoriosFiltrados.length > 0 ? (
                 relatoriosFiltrados.map((r) => (
                   <tr key={r.id}>
-                    <td>{r.solicitante}</td>
-                    <td>{r.ambiente}</td>
+                    <td>{r.usuario}</td>
+                    <td>{r.laboratorio}</td>
                     <td>{r.equipamento}</td>
+                    <td>
+                      {r.dataInicio
+                        ? new Date(r.dataInicio).toLocaleDateString("pt-BR")
+                        : "--"}
+                    </td>
+                    <td>
+                      {formatarHora(r.dataInicio)}
+                    </td>
+                    <td>
+                      {formatarHora(r.dataFim)}
+                    </td>
                     <td>
                       <span className={`status-${r.status?.toLowerCase()}`}>
                         {r.status}
                       </span>
                     </td>
-                    <td>{new Date(r.data).toLocaleDateString("pt-BR")}</td>
-                    <td>{r.horaInicio}</td>
-                    <td>{r.horaFim}</td>
-                    <td>{r.finalidade}</td>
+                    <td>{r.ciente}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td colSpan="8" style={{ textAlign: "center" }}>
-                    Nenhum relatório encontrado
+                    {relatorios.length === 0
+                      ? "Nenhum relatório encontrado"
+                      : "Nenhum resultado para os filtros aplicados"}
                   </td>
                 </tr>
               )}

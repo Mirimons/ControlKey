@@ -9,9 +9,16 @@ function Equipaments() {
   const [modalAberto, setModalAberto] = useState(false);
   const [tipoEquip, setTipoEquip] = useState("");
   const [descEquip, setDescEquip] = useState("");
+  const [status, setStatus] = useState("livre");
   const [equipamentos, setEquipamentos] = useState([]);
 
-  // 👇 controle de edição
+  const [filtros, setFiltros] = useState({
+    equipamento: "",
+    descricao: "",
+    status: "",
+  });
+
+  // Controle de edição
   const [editando, setEditando] = useState(false);
   const [equipamentoId, setEquipamentoId] = useState(null);
 
@@ -24,55 +31,57 @@ function Equipaments() {
     setEquipamentoId(null);
     setTipoEquip("");
     setDescEquip("");
+    setStatus("livre");
   };
-const deleteEquipamento = async () => {
-  if (!equipamentoId) {
-    toast.error("Nenhum equipamento selecionado para exclusão!", {
-      position: "top-right",
-      autoClose: 2000,
-      theme: "light",
-    });
-    return;
-  }
+  const deleteEquipamento = async () => {
+    if (!equipamentoId) {
+      toast.error("Nenhum equipamento selecionado para exclusão!", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+      });
+      return;
+    }
 
-  const confirmar = window.confirm("Deseja realmente excluir este equipamento?");
-  if (!confirmar) return;
+    const confirmar = window.confirm(
+      "Deseja realmente excluir este equipamento?"
+    );
+    if (!confirmar) return;
 
-  const token = sessionStorage.getItem("token");
-  if (!token) {
-    toast.error("Você precisa estar logado!", {
-      position: "top-right",
-      autoClose: 2000,
-      theme: "light",
-    });
-    return;
-  }
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+      toast.error("Você precisa estar logado!", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+      });
+      return;
+    }
 
-  try {
-    await api.delete(`/equipamento/${equipamentoId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    try {
+      await api.delete(`/equipamento/${equipamentoId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    toast.success("Equipamento excluído com sucesso!", {
-      position: "top-right",
-      autoClose: 2000,
-      theme: "light",
-    });
+      toast.success("Equipamento excluído com sucesso!", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+      });
 
-    fecharModal();
-    fetchEquipamentos(); // atualiza a lista
-  } catch (error) {
-    console.error("Erro ao excluir equipamento:", error);
-    toast.error("Erro ao excluir equipamento!", {
-      position: "top-right",
-      autoClose: 2000,
-      theme: "light",
-    });
-  }
-};
-  // 🔄 Buscar equipamentos
+      fecharModal();
+      fetchEquipamentos(); // atualiza a lista
+    } catch (error) {
+      console.error("Erro ao excluir equipamento:", error);
+      toast.error("Erro ao excluir equipamento!", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+      });
+    }
+  };
   const fetchEquipamentos = () => {
     const token = sessionStorage.getItem("token");
     if (!token) return;
@@ -84,7 +93,9 @@ const deleteEquipamento = async () => {
       })
       .then((response) => {
         if (response.data && response.data.data) {
-          setEquipamentos(response.data.data)
+          setEquipamentos(response.data.data);
+        } else if (Array.isArray(response.data)) {
+          setEquipamentos(response.data);
         } else {
           setEquipamentos([]);
         }
@@ -99,7 +110,31 @@ const deleteEquipamento = async () => {
     fetchEquipamentos();
   }, []);
 
-  // 💾 Salvar (criar ou atualizar)
+  //Mudança nos filtros
+  const handleFiltroChange = (e) => {
+    const { name, value } = e.target;
+    setFiltros((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  //Filtrar equipamentos
+  const equipamentosFiltrados = equipamentos.filter((equip) => {
+    const tipo = equip.tipo?.desc_tipo || "Sem tipo";
+    const descricao = equip.desc_equip || "";
+
+    return (
+      (!filtros.equipamento ||
+        tipo.toLowerCase().includes(filtros.equipamento.toLowerCase())) &&
+      (!filtros.descricao ||
+        descricao.toLowerCase().includes(filtros.descricao.toLowerCase())) &&
+      (!filtros.status ||
+        equip.status?.toLowerCase() === filtros.status.toLowerCase())
+    );
+  });
+
+  // Salvar (criar ou atualizar)
   const handleSalvar = async (e) => {
     e.preventDefault();
     const token = sessionStorage.getItem("token");
@@ -114,19 +149,21 @@ const deleteEquipamento = async () => {
     }
 
     // corpo da requisição corrigido
-    const data = editando
+    const payload = editando
       ? {
-        id: equipamentoId, // necessário pelo DTO de atualização
-        desc_equip: descEquip,
-      }
+          id: equipamentoId, // necessário pelo DTO de atualização
+          desc_equip: descEquip,
+          status:status,
+        }
       : {
-        tipo: tipoEquip,
-        desc_equip: descEquip,
-      };
+          tipo: tipoEquip,
+          desc_equip: descEquip,
+          status: status,
+        };
 
     try {
       if (editando) {
-        await api.put(`/equipamento/${equipamentoId}`, data, {
+        await api.put(`/equipamento/${equipamentoId}`, payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
         toast.success("Equipamento atualizado com sucesso!", {
@@ -135,7 +172,7 @@ const deleteEquipamento = async () => {
           theme: "light",
         });
       } else {
-        await api.post("/equipamento", data, {
+        await api.post("/equipamento", payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
         toast.success("Equipamento cadastrado com sucesso!", {
@@ -162,12 +199,13 @@ const deleteEquipamento = async () => {
     }
   };
 
-  // ✏️ Editar equipamento
+  //  Editar equipamento
   const handleEditar = (equip) => {
     setEditando(true);
     setEquipamentoId(equip.id);
     setTipoEquip(equip.tipo?.desc_tipo || "");
     setDescEquip(equip.desc_equip || "");
+    setStatus(equip.status || "livre");
     abrirModal();
   };
 
@@ -212,12 +250,40 @@ const deleteEquipamento = async () => {
         <div className="equipamentos-filtros">
           <div>
             <h3>Equipamento:</h3>
-            <input type="text" placeholder="Equipamento" />
+            <input 
+            type="text" 
+            placeholder="Equipamento"
+            name="equipamento"
+            value={filtros.equipamento}
+            onChange={handleFiltroChange}
+             />
           </div>
           <div>
             <h3>Descrição:</h3>
-            <input type="text" placeholder="Descrição" />
+            <input 
+            type="text" 
+            placeholder="Descrição"
+            name="descricao"
+            value={filtros.descricao}
+            onChange={handleFiltroChange}
+             />
           </div>
+          <div>
+            <h3>Status:</h3>
+            <select 
+            name="status"
+            value={filtros.status}
+            onChange={handleFiltroChange}
+             >
+               <option value="" disabled hidden>
+                Selecione o status
+              </option>
+              <option value="">Todos</option>
+              <option value="livre">Livre</option>
+              <option value="ocupado">Ocupado</option>
+              </select>
+          </div>
+
         </div>
 
         <div className="tabela-container">
@@ -227,16 +293,22 @@ const deleteEquipamento = async () => {
                 <th>Código</th>
                 <th>Equipamento</th>
                 <th>Descrição</th>
+                <th>Status</th>
                 <th>Editar</th>
               </tr>
             </thead>
             <tbody>
-              {equipamentos.length > 0 ? (
-                equipamentos.map((equip) => (
+              {equipamentosFiltrados.length > 0 ? (
+                equipamentosFiltrados.map((equip) => (
                   <tr key={equip.id}>
                     <td>{equip.id}</td>
                     <td>{equip.tipo?.desc_tipo || "Sem tipo"}</td>
                     <td>{equip.desc_equip}</td>
+                    <td>
+                      <span className={`status-${equip.status?.toLowerCase()}`}>
+                        {equip.status || "livre"}
+                      </span>
+                    </td>
                     <td>
                       <button
                         className="editar-btn"
@@ -249,8 +321,11 @@ const deleteEquipamento = async () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="4" style={{ textAlign: "center" }}>
-                    Nenhum equipamento cadastrado
+                  <td colSpan="5" style={{ textAlign: "center" }}>
+                    {equipamentos.length === 0 
+                      ? "Nenhum equipamento cadastrado" 
+                      : "Nenhum equipamento encontrado para os filtros aplicados"
+                    }
                   </td>
                 </tr>
               )}
@@ -269,7 +344,7 @@ const deleteEquipamento = async () => {
 
                 {!editando && (
                   <>
-                    <label>Tipo equipamento:</label>
+                    <label>Tipo de equipamento:</label>
                     <input
                       type="text"
                       placeholder="Digite o tipo do equipamento"
@@ -286,7 +361,17 @@ const deleteEquipamento = async () => {
                   placeholder="Descrição"
                   value={descEquip}
                   onChange={(e) => setDescEquip(e.target.value)}
+                  required
                 />
+
+                <label>Status:</label>
+                <select value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                required
+                >
+                  <option value="livre">Livre</option>
+                  <option value="ocupado">Ocupado</option>
+                </select>
 
                 <div className="modal-botoes">
                   <button type="button" onClick={deleteEquipamento}>

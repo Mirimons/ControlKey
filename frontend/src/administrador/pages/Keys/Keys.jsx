@@ -11,8 +11,13 @@ function Keys() {
   const [desc_lab, setDesc_lab] = useState("");
   const [status, setStatus] = useState("livre");
 
-  const [chaves, setChaves] = useState([]);
+  const [filtros, setFiltros] = useState({
+    ambiente: "",
+    descricao: "",
+    status: "",
+  });
 
+  const [chaves, setChaves] = useState([]);
   const [editando, setEditando] = useState(false);
   const [chaveSelecionada, setChaveSelecionada] = useState(null);
 
@@ -21,52 +26,52 @@ function Keys() {
   const abrirModal = () => setModalAberto(true);
   const fecharModal = () => setModalAberto(false);
   const deleteLabs = async () => {
-  if (!editando || !chaveSelecionada) {
-    toast.error("Nenhuma chave selecionada para exclusão!", {
-      position: "top-right",
-      autoClose: 2000,
-      theme: "light",
-    });
-    return;
-  }
+    if (!editando || !chaveSelecionada) {
+      toast.error("Nenhuma chave selecionada para exclusão!", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+      });
+      return;
+    }
 
-  const confirmar = window.confirm(
-    `Deseja realmente excluir a chave "${chaveSelecionada.nome_lab}"?`
-  );
-  if (!confirmar) return;
+    const confirmar = window.confirm(
+      `Deseja realmente excluir a chave "${chaveSelecionada.nome_lab}"?`
+    );
+    if (!confirmar) return;
 
-  const token = sessionStorage.getItem("token");
-  if (!token) {
-    toast.error("Você precisa estar logado para excluir uma chave!", {
-      position: "top-right",
-      autoClose: 2000,
-      theme: "light",
-    });
-    return;
-  }
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+      toast.error("Você precisa estar logado para excluir uma chave!", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+      });
+      return;
+    }
 
-  try {
-    await api.delete(`/labs/${chaveSelecionada.id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    try {
+      await api.delete(`/labs/${chaveSelecionada.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    toast.success("Chave excluída com sucesso!", {
-      position: "top-right",
-      autoClose: 2000,
-      theme: "light",
-    });
+      toast.success("Chave excluída com sucesso!", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+      });
 
-    fecharModal();
-    fetchChaves(); // Atualiza a tabela
-  } catch (error) {
-    console.error("Erro ao excluir chave:", error);
-    toast.error("Erro ao excluir chave!", {
-      position: "top-right",
-      autoClose: 2000,
-      theme: "light",
-    });
-  }
-};
+      fecharModal();
+      fetchChaves(); // Atualiza a tabela
+    } catch (error) {
+      console.error("Erro ao excluir chave:", error);
+      toast.error("Erro ao excluir chave!", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+      });
+    }
+  };
 
   const abrirModalNovo = () => {
     setEditando(false);
@@ -86,6 +91,32 @@ function Keys() {
     setModalAberto(true);
   };
 
+  //Mudanças nos filtros
+  const handleFiltroChange = (e) => {
+    const { name, value } = e.target;
+    setFiltros((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  //Filtrar chaves:
+  const chavesFiltradas = chaves.filter((chaves) => {
+    return (
+      (!filtros.ambiente ||
+        chaves.nome_lab
+          .toLowerCase()
+          .includes(filtros.ambiente.toLowerCase())) &&
+      (!filtros.descricao ||
+        (chaves.desc_lab &&
+          chaves.desc_lab
+            .toLowerCase()
+            .includes(filtros.descricao.toLowerCase()))) &&
+      (!filtros.status ||
+        chaves.status.toLowerCase() === filtros.status.toLowerCase())
+    );
+  });
+
   const fetchChaves = () => {
     const token = sessionStorage.getItem("token");
     if (!token) return;
@@ -98,9 +129,9 @@ function Keys() {
       })
       .then((response) => {
         if (response.data && response.data.data) {
-        setChaves(response.data.data);
-      } else if (Array.isArray(response.data)) {
-        setChaves(response.data);
+          setChaves(response.data.data);
+        } else if (Array.isArray(response.data)) {
+          setChaves(response.data);
         } else {
           setChaves([]);
         }
@@ -227,15 +258,30 @@ function Keys() {
         <div className="chaves-filtros">
           <div>
             <h3>Ambiente:</h3>
-            <input type="text" placeholder="Ambiente" />
+            <input
+              type="text"
+              placeholder="Ambiente"
+              name="ambiente"
+              value={filtros.ambiente}
+              onChange={handleFiltroChange}
+            />
           </div>
           <div>
             <h3>Descrição:</h3>
-            <input type="text" placeholder="Descrição" />
+            <input 
+            type="text" 
+            placeholder="Descrição"
+            name="descricao"
+            value={filtros.descricao}
+            onChange={handleFiltroChange}
+             />
           </div>
           <div>
             <h3>Status:</h3>
-            <select value={status} onChange={(e) => setStatus(e.target.value)}>
+            <select 
+            name="status"
+            value={filtros.status} 
+            onChange={handleFiltroChange}>
               <option value="" disabled hidden>
                 Selecione o status
               </option>
@@ -258,8 +304,8 @@ function Keys() {
               </tr>
             </thead>
             <tbody>
-              {chaves.length > 0 ? (
-                chaves.map((chave) => (
+              {chavesFiltradas.length > 0 ? (
+                chavesFiltradas.map((chave) => (
                   <tr key={chave.id}>
                     <td>{chave.id}</td>
                     <td>{chave.nome_lab}</td>
@@ -282,7 +328,7 @@ function Keys() {
               ) : (
                 <tr>
                   <td colSpan="4" style={{ textAlign: "center" }}>
-                    Nenhuma chave cadastrada
+                    {chaves.length === 0 ? "Nenhuma chave cadastrada" : "Nenhuma chave encontrada para os filtros aplicados"}
                   </td>
                 </tr>
               )}

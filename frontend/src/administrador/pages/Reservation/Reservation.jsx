@@ -109,52 +109,52 @@ function Reservation() {
   const modalRef = useRef();
 
   const deleteAgendamento = async () => {
-  if (!editando || !reservaSelecionada) {
-    toast.error("Nenhum agendamento selecionado para exclusão!", {
-      position: "top-right",
-      autoClose: 2000,
-      theme: "light",
-    });
-    return;
-  }
+    if (!editando || !reservaSelecionada) {
+      toast.error("Nenhum agendamento selecionado para exclusão!", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+      });
+      return;
+    }
 
-  const confirmar = window.confirm(
-    `Deseja realmente excluir a reserva de "${reservaSelecionada.nomeProfessor}" no ambiente "${reservaSelecionada.laboratorio}"?`
-  );
-  if (!confirmar) return;
+    const confirmar = window.confirm(
+      `Deseja realmente excluir a reserva de "${reservaSelecionada.nomeProfessor}" no ambiente "${reservaSelecionada.laboratorio}"?`
+    );
+    if (!confirmar) return;
 
-  const token = sessionStorage.getItem("token");
-  if (!token) {
-    toast.error("Você precisa estar logado para excluir uma reserva!", {
-      position: "top-right",
-      autoClose: 2000,
-      theme: "light",
-    });
-    return;
-  }
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+      toast.error("Você precisa estar logado para excluir uma reserva!", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+      });
+      return;
+    }
 
-  try {
-    await api.delete(`/agendamento/${reservaSelecionada.id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    try {
+      await api.delete(`/agendamento/${reservaSelecionada.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    toast.success("Reserva excluída com sucesso!", {
-      position: "top-right",
-      autoClose: 2000,
-      theme: "light",
-    });
+      toast.success("Reserva excluída com sucesso!", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+      });
 
-    setModalAberto(false);
-    carregarReservas(); // Atualiza a tabela
-  } catch (error) {
-    console.error("Erro ao excluir reserva:", error);
-    toast.error("Erro ao excluir reserva!", {
-      position: "top-right",
-      autoClose: 2000,
-      theme: "light",
-    });
-  }
-};
+      setModalAberto(false);
+      carregarReservas(); // Atualiza a tabela
+    } catch (error) {
+      console.error("Erro ao excluir reserva:", error);
+      toast.error("Erro ao excluir reserva!", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+      });
+    }
+  };
   const abrirModalNovo = () => {
     setEditando(false);
     setReservaSelecionada(null);
@@ -227,7 +227,7 @@ function Reservation() {
             dataUtilizacao: reserva.dataUtilizacao || reserva.data_utilizacao,
             horaInicio: reserva.horaInicio || reserva.hora_inicio,
             horaFim: reserva.horaFim || reserva.hora_fim,
-            finalidade: reserva.finalidade || "N/A",
+            finalidade: reserva.finalidade || "--",
             status: reserva.status || "agendado",
             id_usuario: reserva.id_usuario,
             id_labs: reserva.id_labs,
