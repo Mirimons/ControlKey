@@ -26,6 +26,8 @@ function User() {
   const [editando, setEditando] = useState(false);
   const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
 
+  const [erros, setErros] = useState({});
+
   console.log(usuarios);
 
   const modalRef = useRef();
@@ -163,7 +165,9 @@ function User() {
   const handleSalvar = (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-
+    
+    
+    
     if (!token) {
       // alert("Você precisa estar logado!");
       toast.error("Você precisa estar logado!", {
@@ -178,7 +182,7 @@ function User() {
       });
       return;
     }
-
+    
     let payload = {
       tipo: tipo,
       nome,
@@ -186,42 +190,42 @@ function User() {
       data_nasc,
       telefone,
     };
-
+    
     if (cadExtra) {
       payload.email = email;
       payload.matricula = matricula;
     }
-
+    
     if (cadExtraSenha && senha) {
       payload.senha = senha;
     }
-
+    
     if (editando && usuarioSelecionado) {
       api
-        .put(`/usuario/${usuarioSelecionado.id}`, payload, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((res) => {
-          // alert("Usuário atualizado com sucesso!");
-          toast.success("Usuário atualizado com sucesso!", {
-            position: "top-right",
-            autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
-
-          setUsuarios((prev) =>
+      .put(`/usuario/${usuarioSelecionado.id}`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        // alert("Usuário atualizado com sucesso!");
+        toast.success("Usuário atualizado com sucesso!", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        
+        setUsuarios((prev) =>
             prev.map((u) =>
               u.id === usuarioSelecionado.id
                 ? { ...u, ...res.data } // se res.data não vier completo, use { ...u, ...payload }
                 : u
-            )
+              )
           );
-
+          
           fetchUsuarios();
           fecharModal();
         })
@@ -239,9 +243,9 @@ function User() {
             theme: "light",
           });
         });
-    } else {
+      } else {
       api
-        .post("/usuario", payload, {
+      .post("/usuario", payload, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {

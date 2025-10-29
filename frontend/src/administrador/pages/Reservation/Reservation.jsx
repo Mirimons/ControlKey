@@ -325,72 +325,77 @@ function Reservation() {
         </div>
 
         <div className="reservas-filtros">
-          <input
-            placeholder="Finalidade"
-            value={filtroFinalidade}
-            onChange={(e) => setFiltroFinalidade(e.target.value)}
-          />
-          <input
-            placeholder="Solicitante"
-            value={filtroSolicitante}
-            onChange={(e) => setFiltroSolicitante(e.target.value)}
-          />
-          <input
-            placeholder="Ambiente"
-            value={filtroAmbiente}
-            onChange={(e) => setFiltroAmbiente(e.target.value)}
-          />
+          <div>
+            <div>
+              <h3>Solicitante:</h3>
+              <input
+                placeholder="Solicitante"
+                value={filtroSolicitante}
+                onChange={(e) => setFiltroSolicitante(e.target.value)}
+              />
+            </div>
+          </div>
+          <div>
+            <h3>Ambiente:</h3>
+            <input
+              placeholder="Ambiente"
+              value={filtroAmbiente}
+              onChange={(e) => setFiltroAmbiente(e.target.value)}
+            />
+          </div>
         </div>
 
-        <table className="reservas-tabela">
-          <thead>
-            <tr>
-              <th>Solicitante</th>
-              <th>Ambiente</th>
-              <th>Data</th>
-              <th>Início</th>
-              <th>Fim</th>
-              <th>Finalidade</th>
-              <th>Status</th>
-              <th>Editar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reservasFiltradas.length > 0 ? (
-              reservasFiltradas.map((r) => (
-                <tr key={r.id}>
-                  <td>{r.nomeProfessor}</td>
-                  <td>{r.laboratorio}</td>
-                  <td>
-                    {new Date(r.dataUtilizacao).toLocaleDateString("pt-BR")}
-                  </td>
-                  <td>{r.horaInicio}</td>
-                  <td>{r.horaFim}</td>
-                  <td>{r.finalidade}</td>
-                  <td>
-                    <span className={`status-${r.status?.toLowerCase()}`}>
-                      {r.status}
-                    </span>
-                  </td>
-                  <td>
-                    <button
-                      className="editar-btn"
-                      onClick={() => abrirModalEditar(r)}
-                    >
-                      ✏️
-                    </button>
+        <div className="tabela-container">
+          <table className="reservas-tabela">
+            <thead>
+              <tr>
+                <th>Solicitante</th>
+                <th>Ambiente</th>
+                <th>Data</th>
+                <th>Início</th>
+                <th>Fim</th>
+                <th>Finalidade</th>
+                <th>Status</th>
+                <th>Editar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reservasFiltradas.length > 0 ? (
+                reservasFiltradas.map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.nomeProfessor}</td>
+                    <td>{r.laboratorio}</td>
+                    <td>
+                      {new Date(r.dataUtilizacao).toLocaleDateString("pt-BR")}
+                    </td>
+                    <td>{r.horaInicio}</td>
+                    <td>{r.horaFim}</td>
+                    <td>{r.finalidade}</td>
+                    <td>
+                      <span className={`status-${r.status?.toLowerCase()}`}>
+                        {r.status}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        className="editar-btn"
+                        onClick={() => abrirModalEditar(r)}
+                      >
+                        ✏️
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" style={{ textAlign: "center" }}>
+                    Nenhuma reserva encontrada
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="8" style={{ textAlign: "center" }}>
-                  Nenhuma reserva encontrada
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
 
         {modalAberto && (
           <div className="modal-fundo">
