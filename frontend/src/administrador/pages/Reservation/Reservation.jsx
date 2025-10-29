@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { FaTrash } from "react-icons/fa";
 import "./Reservation.css";
 import Navbar from "../../../components/navbar";
 import api from "../../../services/api";
@@ -107,6 +108,53 @@ function Reservation() {
 
   const modalRef = useRef();
 
+  const deleteAgendamento = async () => {
+  if (!editando || !reservaSelecionada) {
+    toast.error("Nenhum agendamento selecionado para exclusão!", {
+      position: "top-right",
+      autoClose: 2000,
+      theme: "light",
+    });
+    return;
+  }
+
+  const confirmar = window.confirm(
+    `Deseja realmente excluir a reserva de "${reservaSelecionada.nomeProfessor}" no ambiente "${reservaSelecionada.laboratorio}"?`
+  );
+  if (!confirmar) return;
+
+  const token = sessionStorage.getItem("token");
+  if (!token) {
+    toast.error("Você precisa estar logado para excluir uma reserva!", {
+      position: "top-right",
+      autoClose: 2000,
+      theme: "light",
+    });
+    return;
+  }
+
+  try {
+    await api.delete(`/agendamento/${reservaSelecionada.id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    toast.success("Reserva excluída com sucesso!", {
+      position: "top-right",
+      autoClose: 2000,
+      theme: "light",
+    });
+
+    setModalAberto(false);
+    carregarReservas(); // Atualiza a tabela
+  } catch (error) {
+    console.error("Erro ao excluir reserva:", error);
+    toast.error("Erro ao excluir reserva!", {
+      position: "top-right",
+      autoClose: 2000,
+      theme: "light",
+    });
+  }
+};
   const abrirModalNovo = () => {
     setEditando(false);
     setReservaSelecionada(null);
@@ -461,6 +509,9 @@ function Reservation() {
                 </select>
 
                 <div className="modal-botoes">
+                  <button type="button" onClick={deleteAgendamento}>
+                    <FaTrash />
+                  </button>
                   <button type="button" onClick={() => setModalAberto(false)}>
                     Cancelar
                   </button>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./Equipaments.css";
+import { FaTrash } from "react-icons/fa";
 import Navbar from "../../../components/navbar";
 import api from "../../../services/api";
 import { toast } from "react-toastify";
@@ -24,7 +25,53 @@ function Equipaments() {
     setTipoEquip("");
     setDescEquip("");
   };
+const deleteEquipamento = async () => {
+  if (!equipamentoId) {
+    toast.error("Nenhum equipamento selecionado para exclusão!", {
+      position: "top-right",
+      autoClose: 2000,
+      theme: "light",
+    });
+    return;
+  }
 
+  const confirmar = window.confirm("Deseja realmente excluir este equipamento?");
+  if (!confirmar) return;
+
+  const token = sessionStorage.getItem("token");
+  if (!token) {
+    toast.error("Você precisa estar logado!", {
+      position: "top-right",
+      autoClose: 2000,
+      theme: "light",
+    });
+    return;
+  }
+
+  try {
+    await api.delete(`/equipamento/${equipamentoId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    toast.success("Equipamento excluído com sucesso!", {
+      position: "top-right",
+      autoClose: 2000,
+      theme: "light",
+    });
+
+    fecharModal();
+    fetchEquipamentos(); // atualiza a lista
+  } catch (error) {
+    console.error("Erro ao excluir equipamento:", error);
+    toast.error("Erro ao excluir equipamento!", {
+      position: "top-right",
+      autoClose: 2000,
+      theme: "light",
+    });
+  }
+};
   // 🔄 Buscar equipamentos
   const fetchEquipamentos = () => {
     const token = sessionStorage.getItem("token");
@@ -242,6 +289,9 @@ function Equipaments() {
                 />
 
                 <div className="modal-botoes">
+                  <button type="button" onClick={deleteEquipamento}>
+                    <FaTrash />
+                  </button>
                   <button type="button" onClick={fecharModal}>
                     Cancelar
                   </button>

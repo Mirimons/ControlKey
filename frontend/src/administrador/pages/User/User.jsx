@@ -36,20 +36,6 @@ function User() {
   const abrirModal = () => setModalAberto(true);
   const fecharModal = () => setModalAberto(false);
   const deleteUsuario = async () => {
-    if (!editando || !usuarioSelecionado) {
-      toast.warning("Selecione um usuário para excluir!", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-      return;
-    }
-
     const confirmar = window.confirm(
       `Tem certeza que deseja excluir o usuário "${usuarioSelecionado.nome}"?`
     );

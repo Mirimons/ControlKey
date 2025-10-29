@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { FaTrash } from "react-icons/fa";
 import "./Keys.css";
 import Navbar from "../../../components/navbar";
 import api from "../../../services/api";
@@ -19,6 +20,53 @@ function Keys() {
 
   const abrirModal = () => setModalAberto(true);
   const fecharModal = () => setModalAberto(false);
+  const deleteLabs = async () => {
+  if (!editando || !chaveSelecionada) {
+    toast.error("Nenhuma chave selecionada para exclusão!", {
+      position: "top-right",
+      autoClose: 2000,
+      theme: "light",
+    });
+    return;
+  }
+
+  const confirmar = window.confirm(
+    `Deseja realmente excluir a chave "${chaveSelecionada.nome_lab}"?`
+  );
+  if (!confirmar) return;
+
+  const token = sessionStorage.getItem("token");
+  if (!token) {
+    toast.error("Você precisa estar logado para excluir uma chave!", {
+      position: "top-right",
+      autoClose: 2000,
+      theme: "light",
+    });
+    return;
+  }
+
+  try {
+    await api.delete(`/labs/${chaveSelecionada.id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    toast.success("Chave excluída com sucesso!", {
+      position: "top-right",
+      autoClose: 2000,
+      theme: "light",
+    });
+
+    fecharModal();
+    fetchChaves(); // Atualiza a tabela
+  } catch (error) {
+    console.error("Erro ao excluir chave:", error);
+    toast.error("Erro ao excluir chave!", {
+      position: "top-right",
+      autoClose: 2000,
+      theme: "light",
+    });
+  }
+};
 
   const abrirModalNovo = () => {
     setEditando(false);
@@ -274,6 +322,9 @@ function Keys() {
                 </select>
 
                 <div className="modal-botoes">
+                  <button type="button" onClick={deleteLabs}>
+                    <FaTrash />
+                  </button>
                   <button type="button" onClick={fecharModal}>
                     Cancelar
                   </button>
