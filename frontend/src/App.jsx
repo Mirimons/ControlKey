@@ -7,6 +7,7 @@ import User from './administrador/pages/User/User';
 import Keys from './administrador/pages/Keys/Keys';
 import Equipaments from './administrador/pages/Equipaments/Equipaments';
 import Reservation from './administrador/pages/Reservation/Reservation';
+import Relatorio from './administrador/pages/Relatorio/Relatorio';
 import Login from './administrador/pages/Login/Login';
 import RetiradaDevolucao from './usuarios/pages/retiradaDevolucao';
 import Retirar from './usuarios/pages/Retirar/Retirar';
@@ -67,6 +68,11 @@ function App() {
           <Route path="/Reservation" element={
             <ProtectedRouter>
               <Reservation />
+            </ProtectedRouter>} 
+          />
+          <Route path="/Relatorio" element={
+            <ProtectedRouter>
+              <Relatorio />
             </ProtectedRouter>} 
           />
           <Route path="/" element={<RetiradaDevolucao />} />
