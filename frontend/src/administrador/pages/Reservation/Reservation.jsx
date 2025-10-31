@@ -4,6 +4,7 @@ import "./Reservation.css";
 import Navbar from "../../../components/navbar";
 import api from "../../../services/api";
 import { toast } from "react-toastify";
+import { SiRarible } from "react-icons/si";
 
 // Select pesquisável
 const SelectPesquisavel = ({
@@ -175,7 +176,8 @@ function Reservation() {
     setNomeProfessor(
       String(reserva.id_usuario || reserva.nomeProfessorId || "")
     );
-    setLaboratorio(String(reserva.id_labs || reserva.laboratorioId || ""));
+    setLaboratorio(
+      String(reserva.id_labs || reserva.laboratorioId || ""));
     setHoraInicio(reserva.horaInicio || reserva.hora_inicio || "");
     setHoraFim(reserva.horaFim || reserva.hora_fim || "");
     setDataUtilizacao(reserva.dataUtilizacao || reserva.data_utilizacao || "");
@@ -208,9 +210,8 @@ function Reservation() {
           let nomeLab = "N/A";
           if (typeof reserva.laboratorio === "string")
             nomeLab = reserva.laboratorio;
-          else if (reserva.laboratorio?.nome_lab)
-            nomeLab = reserva.laboratorio.nome_lab;
           else if (reserva.labs?.nome_lab) nomeLab = reserva.labs.nome_lab;
+          else if (reserva.laboratorio.nome_lab) nomeLab = reserva.laboratorio.nome_lab;
           else if (reserva.id_labs) nomeLab = `Lab ${reserva.id_labs}`;
 
           let nomeProf = "N/A";
@@ -248,7 +249,15 @@ function Reservation() {
     if (!token) return;
     api
       .get("/labs", { headers: { Authorization: `Bearer ${token}` } })
-      .then((res) => setChaves(res.data))
+      .then((res) => {
+        let data = [];
+        if (Array.isArray(res.data)) data = res.data;
+        else if (res.data && Array.isArray(res.data.data)) data = res.data.data;
+        else if (res.data && Array.isArray(res.data.labs))
+          data = res.data.labs;
+        else if (res.data) data = [res.data];
+        setChaves(data);
+      })
       .catch((err) => console.error("Erro ao buscar chaves:", err));
   };
 

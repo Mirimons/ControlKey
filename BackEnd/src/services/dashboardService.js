@@ -63,23 +63,30 @@ class DashboardService {
   async getDashboardDetails() {
     //Detalhes mais importantes
     const agora = new Date();
-    const hoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate())
+    const hoje = new Date(
+      agora.getFullYear(),
+      agora.getMonth(),
+      agora.getDate()
+    );
     const amanha = new Date(hoje);
     amanha.setDate(amanha.getDate() + 1);
-    const ontem = new Date(hoje)
-    ontem.setDate(ontem.getDate() - 1)
+    const ontem = new Date(hoje);
+    ontem.setDate(ontem.getDate() - 1);
+    const fimOntem = new Date(ontem);
+    fimOntem.setHours(23, 59, 59, 999);
 
     try {
       // Controls que estão atrasadas (pendentes) dia anterior
       const controlsAtrasadas = await controlRepository.find({
         where: {
           status: "pendente",
-          data_inicio: Between(ontem, hoje),
+          data_fim: Between(ontem, hoje),
           deletedAt: IsNull(),
         },
         relations: ["usuario", "laboratorio", "equipamento"],
         order: { data_inicio: "DESC" },
       });
+
 
       // Reservas das próximas 24h
       const reservasProximas = await agendamentoRepository.find({
@@ -96,7 +103,7 @@ class DashboardService {
       return {
         controlsAtrasadas: controlsAtrasadas.map((control) => ({
           id: control.id,
-          tipo: 'atraso',
+          tipo: "atraso",
           laboratorio:
             control.laboratorio?.nome_lab || "Laboratório não encontrado",
           equipamento:
@@ -109,7 +116,7 @@ class DashboardService {
         })),
         reservasProximas: reservasProximas.map((agendamento) => ({
           id: agendamento.id,
-          tipo: 'reserva',
+          tipo: "reserva",
           laboratorio:
             agendamento.laboratorio?.nome_lab || "Laboratório não encontrado",
           usuario: agendamento.usuario?.nome || "Usuário não encontrado",

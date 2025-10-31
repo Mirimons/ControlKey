@@ -55,7 +55,7 @@ const Notificacoes = ({ notificacao, index }) => {
         <div className="notificacao-content">
           <strong>📅 Reserva para hoje</strong>
           <p>
-            <strong>Laboratório:</strong> {notificacao.laboratorio}
+            <strong>Ambiente:</strong> {notificacao.laboratorio}
           </p>
           <p>
             <strong>Usuário:</strong> {notificacao.usuario}
@@ -95,7 +95,7 @@ function Home() {
 
         //Combina data + hora para criar o timestamp completo
         const timestampA = new Date(`${a.data_utilizacao}T${a.hora_inicio}`)
-        const timestampB = new Date(`${b.data_utilizacao}T${b.data_inicio}`)
+        const timestampB = new Date(`${b.data_utilizacao}T${b.hora_inicio}`)
 
         return timestampA - timestampB ;
       }
