@@ -353,7 +353,7 @@ function Keys() {
                 <label>Descrição:</label>
                 <input
                   type="text"
-                  placeholder="Descrição (Opcional)"
+                  placeholder="Descrição"
                   value={desc_lab}
                   onChange={(e) => setDesc_lab(e.target.value)}
                 />

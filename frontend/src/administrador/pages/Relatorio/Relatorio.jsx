@@ -118,7 +118,7 @@ function Relatorio() {
     <div className="relatorio-page">
       <div className="relatorio-container">
         <header>
-          <h1>Relatórios</h1>
+          <h2>Relatórios</h2>
         </header>
 
         <div className="filtros-container">

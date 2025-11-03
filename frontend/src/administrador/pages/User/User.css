@@ -83,7 +83,7 @@ body {
   /* Gruda o cabeçalho */
   top: 0;
   /* No topo do .tabela-container */
-  z-index: 1;
+  z-index: 5;
 }
 
 .usuarios-tabela tbody tr:nth-child(even) {
