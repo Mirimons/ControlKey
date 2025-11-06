@@ -3,9 +3,11 @@ import "./navbar.css";
 import { FaDoorOpen } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import logo from "../assets/LOGOCERTO.png";
+import { toast } from "react-toastify"  ;
 
 function handleLogout() {
   sessionStorage.clear()
+  toast.success("Usuário deslogado com sucesso!")
   console.log("Usuário deslogado");
 }
 

@@ -93,6 +93,9 @@ body {
   color: #072355;
   background-color: #7BBDE8;
   font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .editar-btn {

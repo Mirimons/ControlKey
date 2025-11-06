@@ -12,7 +12,7 @@ body {
   padding-right: 90px;
   background: transparent;
   flex: 1;
-}
+};
 
 .usuarios-header {
   display: flex;
@@ -83,7 +83,7 @@ body {
   /* Gruda o cabeçalho */
   top: 0;
   /* No topo do .tabela-container */
-  z-index: 1;
+  z-index: 5;
 }
 
 .usuarios-tabela tbody tr:nth-child(even) {
@@ -351,4 +351,25 @@ select:disabled {
 
 .tabela-container::-webkit-scrollbar-thumb:hover {
   background-color: #5ca9da;
+}
+
+/* Adicione esta nova classe ao seu User.css */
+.form-group-campo {
+    /* Define a margem *ABAIXO* de CADA campo, controlando a separação entre blocos */
+    margin-bottom: 20px; 
+}
+
+/* Garante que o input interno não adicione mais margem desnecessária */
+.form-group-campo input,
+.form-group-campo select {
+    margin-bottom: 0 !important; /* Remove a margem extra do input */
+}
+
+
+/* Ajuste a mensagem de erro para o espaçamento interno */
+.erro-validacao {
+    color: #e30000;
+    font-size: 0.85em;
+    margin-top: 5px; /* Define o espaçamento ENTRE o INPUT e a MENSAGEM */
+    display: block;
 }

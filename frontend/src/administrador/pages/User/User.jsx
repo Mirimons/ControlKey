@@ -4,6 +4,9 @@ import "./User.css";
 import Navbar from "../../../components/navbar";
 import api from "../../../services/api";
 import { toast } from "react-toastify";
+import { handleApiError } from "../../../helpers/errorHelper";
+import { redirect } from "react-router-dom";
+import Swal from "sweetalert2";
 
 function User() {
   const [modalAberto, setModalAberto] = useState(false);
@@ -36,13 +39,26 @@ function User() {
   const cadExtraSenha = tipo === "Administrador";
 
   const abrirModal = () => setModalAberto(true);
-  const fecharModal = () => setModalAberto(false);
-  const deleteUsuario = async () => {
-    const confirmar = window.confirm(
-      `Tem certeza que deseja excluir o usuário "${usuarioSelecionado.nome}"?`
-    );
+  const fecharModal = () => {
+    setErros({});
+    setModalAberto(false);
+  }
 
-    if (!confirmar) return;
+  const deleteUsuario = async () => {
+    const result = await Swal.fire({
+      title: "Você tem certeza?",
+      html: `Você não poderá reverter a exclusão do usuário <strong>"${usuarioSelecionado.nome}"</strong>!`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc3545", // Vermelho
+      cancelButtonColor: "#6c757d", // Cinza
+      confirmButtonText: "Sim, Excluir!",
+      cancelButtonText: "Cancelar"
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
 
     try {
       const token = sessionStorage.getItem("token");
@@ -81,18 +97,20 @@ function User() {
       );
 
       fecharModal();
+
     } catch (err) {
-      console.error("Erro ao excluir usuário:", err);
-      toast.error("Erro ao excluir usuário!", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+      handleApiError(err, "Erro ao excluir usuário!");
+      // console.error("Erro ao excluir usuário:", err);
+      // toast.error("Erro ao excluir usuário!", {
+      //   position: "top-right",
+      //   autoClose: 2000,
+      //   hideProgressBar: false,
+      //   closeOnClick: false,
+      //   pauseOnHover: true,
+      //   draggable: true,
+      //   progress: undefined,
+      //   theme: "light",
+      // });
     }
   };
 
@@ -109,6 +127,7 @@ function User() {
     setData_nasc("");
     setTipo("");
     setSenha("");
+    setErros({});
     setModalAberto(true);
   };
 
@@ -123,6 +142,7 @@ function User() {
     setTelefone(user.telefone);
     setMatricula(user.usuario_cad?.matricula || "");
     setData_nasc(user.data_nasc || "");
+    setErros({});
     setSenha("");
     setModalAberto(true);
   };
@@ -141,7 +161,10 @@ function User() {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setUsuarios(res.data.data))
-      .catch((err) => console.error("Erro ao buscar usuários:", err));
+      .catch((err) => {
+        handleApiError(err, "Erro ao buscar usuário.");
+      })
+    // .catch((err) => console.error("Erro ao buscar usuários:", err));
   };
 
   const aplicarFiltros = () => {
@@ -150,6 +173,7 @@ function User() {
 
   const handleSalvar = (e) => {
     e.preventDefault();
+    setErros({});
     const token = sessionStorage.getItem("token");
 
     if (!token) {
@@ -166,7 +190,7 @@ function User() {
       });
       return;
     }
-    
+
     let payload = {
       tipo: tipo,
       nome,
@@ -174,49 +198,24 @@ function User() {
       data_nasc,
       telefone,
     };
-    
+
     if (cadExtra) {
       payload.email = email;
       payload.matricula = matricula;
     }
-    
+
     if (cadExtraSenha && senha) {
       payload.senha = senha;
     }
-    
+
     if (editando && usuarioSelecionado) {
       api
-      .put(`/usuario/${usuarioSelecionado.id}`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        // alert("Usuário atualizado com sucesso!");
-        toast.success("Usuário atualizado com sucesso!", {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        
-        setUsuarios((prev) =>
-            prev.map((u) =>
-              u.id === usuarioSelecionado.id
-                ? { ...u, ...res.data } // se res.data não vier completo, use { ...u, ...payload }
-                : u
-              )
-          );
-          
-          fetchUsuarios();
-          fecharModal();
+        .put(`/usuario/${usuarioSelecionado.id}`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
         })
-        .catch((err) => {
-          console.error("Erro ao editar:", err);
-          // alert(err.response?.data?.error || "Erro ao editar usuário!");
-          toast.error("Erro ao editar usuário!", {
+        .then((res) => {
+          // alert("Usuário atualizado com sucesso!");
+          toast.success("Usuário atualizado com sucesso!", {
             position: "top-right",
             autoClose: 2000,
             hideProgressBar: false,
@@ -226,10 +225,39 @@ function User() {
             progress: undefined,
             theme: "light",
           });
+
+          setUsuarios((prev) =>
+            prev.map((u) =>
+              u.id === usuarioSelecionado.id
+                ? { ...u, ...res.data } // se res.data não vier completo, use { ...u, ...payload }
+                : u
+            )
+          );
+
+          fetchUsuarios();
+          fecharModal();
+        })
+        .catch((err) => {
+          const validationErrors = handleApiError(err, "Erro ao editar usuário!");
+          if (validationErrors) {
+            setErros(validationErrors);
+          }
+          // console.error("Erro ao editar:", err);
+          // // alert(err.response?.data?.error || "Erro ao editar usuário!");
+          // toast.error("Erro ao editar usuário!", {
+          //   position: "top-right",
+          //   autoClose: 2000,
+          //   hideProgressBar: false,
+          //   closeOnClick: false,
+          //   pauseOnHover: true,
+          //   draggable: true,
+          //   progress: undefined,
+          //   theme: "light",
+          // });
         });
-      } else {
+    } else {
       api
-      .post("/usuario", payload, {
+        .post("/usuario", payload, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
@@ -257,18 +285,23 @@ function User() {
           fetchUsuarios();
         })
         .catch((err) => {
-          console.error("Erro ao cadastrar:", err);
-          // alert(err.response?.data?.error || "Erro ao cadastrar usuário!");
-          toast.error("Erro ao cadastrar usuário!", {
-            position: "top-right",
-            autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
+          const validationErrors = handleApiError(err, "Erro ao cadastrar usuário!");
+          if (validationErrors) {
+            setErros(validationErrors);
+          }
+
+          // console.error("Erro ao cadastrar:", err);
+          // // alert(err.response?.data?.error || "Erro ao cadastrar usuário!");
+          // toast.error("Erro ao cadastrar usuário!", {
+          //   position: "top-right",
+          //   autoClose: 2000,
+          //   hideProgressBar: false,
+          //   closeOnClick: false,
+          //   pauseOnHover: true,
+          //   draggable: true,
+          //   progress: undefined,
+          //   theme: "light",
+          // });
         });
     }
   };
@@ -349,8 +382,8 @@ function User() {
             </select>
           </div>
           {/* <button onClick={aplicarFiltros} className="botao-pesquisa">
-          <FaSearch /> Pesquisar
-        </button> */}
+            <FaSearch /> Pesquisar
+          </button> */}
         </div>
 
         <div className="tabela-container">
@@ -400,89 +433,146 @@ function User() {
               <form onSubmit={handleSalvar}>
                 <h2>{editando ? "Editar Usuário" : "Adicionar Usuário"}</h2>
 
-                <label>Tipo de usuário:</label>
-                <select
-                  value={tipo}
-                  onChange={(e) => setTipo(e.target.value)}
-                  required
-                >
-                  <option value="" disabled hidden>
-                    Selecione o tipo de usuário
-                  </option>
-                  <option value="Administrador">Administrador</option>
-                  <option value="Comum">Comum</option>
-                  <option value="Terceiro">Terceiro</option>
-                </select>
+                <div className="form-group-campo">
+                  <label>Tipo de usuário:</label>
+                  <select
+                    value={tipo}
+                    onChange={(e) => setTipo(e.target.value)}
+                    required
+                  >
+                    <option value="" disabled hidden>
+                      Selecione o tipo de usuário
+                    </option>
+                    <option value="Administrador">Administrador</option>
+                    <option value="Comum">Comum</option>
+                    <option value="Terceiro">Terceiro</option>
+                  </select>
+                  {erros.tipo && (
+                    <div className="erro-validacao">
+                      {erros.tipo}
+                    </div>
+                  )}
+                </div>
 
-                <label>Nome completo:</label>
-                <input
-                  type="text"
-                  placeholder="Nome completo"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  required
-                />
-
-                <label>CPF:</label>
-                <input
-                  type="text"
-                  placeholder="CPF"
-                  value={cpf}
-                  onChange={(e) => setCpf(e.target.value)}
-                  required
-                />
-
-                <label>E-mail institucional:</label>
-                <input
-                  type="email"
-                  placeholder="Email Institucional"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required={cadExtra}
-                  disabled={tipo === "Terceiro"}
-                />
-
-                <label>Telefone (celular):</label>
-                <input
-                  type="tel"
-                  placeholder="Telefone (celular)"
-                  value={telefone}
-                  onChange={(e) => setTelefone(e.target.value)}
-                  required
-                />
-
-                <label>Matrícula:</label>
-                <input
-                  type="text"
-                  placeholder="Matrícula"
-                  value={matricula}
-                  onChange={(e) => setMatricula(e.target.value)}
-                  required={cadExtra}
-                  disabled={tipo === "Terceiro"}
-                />
-
-                <label>Data de nascimento:</label>
-                <input
-                  type="date"
-                  placeholder="Data de Nascimento"
-                  value={data_nasc}
-                  onChange={(e) => setData_nasc(e.target.value)}
-                  required
-                />
-
-                <label>Senha:</label>
-                <div className="senha-container">
+                <div className="form-group-campo">
+                  <label>Nome completo:</label>
                   <input
-                    type={mostrarSenha ? "text" : "password"}
-                    placeholder={
-                      editando ? "Deixe em branco para manter a atual" : "Senha"
-                    }
-                    value={senha}
-                    onChange={(e) => setSenha(e.target.value)}
-                    autoComplete="new-password"
-                    disabled={tipo !== "Administrador"}
-                    required={!editando && tipo === "Administrador"}
+                    type="text"
+                    placeholder="Nome completo"
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                    required
                   />
+                  {erros.nome && (
+                    <div className="erro-validacao">
+                      {erros.nome}
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group-campo">
+                  <label>CPF:</label>
+                  <input
+                    type="text"
+                    placeholder="CPF"
+                    value={cpf}
+                    onChange={(e) => setCpf(e.target.value)}
+                    required
+                  />
+                  {erros.cpf && (
+                    <div className="erro-validacao">
+                      {erros.cpf}
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group-campo">
+                  <label>E-mail institucional:</label>
+                  <input
+                    type="email"
+                    placeholder="Email Institucional"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required={cadExtra}
+                    disabled={tipo === "Terceiro"}
+                  />
+                  {erros.email && (
+                    <div className="erro-validacao">
+                      {erros.email}
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group-campo">
+                  <label>Telefone (celular):</label>
+                  <input
+                    type="tel"
+                    placeholder="Telefone (celular)"
+                    value={telefone}
+                    onChange={(e) => setTelefone(e.target.value)}
+                    required
+                  />
+                  {erros.telefone && (
+                    <div className="erro-validacao">
+                      {erros.telefone}
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group-campo">
+                  <label>Matrícula:</label>
+                  <input
+                    type="text"
+                    placeholder="Matrícula"
+                    value={matricula}
+                    onChange={(e) => setMatricula(e.target.value)}
+                    required={cadExtra}
+                    disabled={tipo === "Terceiro"}
+                  />
+                  {erros.matricula && (
+                    <div className="erro-validacao">
+                      {erros.matricula}
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group-campo">
+                  <label>Data de nascimento:</label>
+                  <input
+                    type="date"
+                    placeholder="Data de Nascimento"
+                    value={data_nasc}
+                    onChange={(e) => setData_nasc(e.target.value)}
+                    required
+                  />
+                  {erros.data_nasc && (
+                    <div className="erro-validacao">
+                      {erros.data_nasc}
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group-campo">
+                  <label>Senha:</label>
+                  <div className="senha-container">
+                    <input
+                      type={mostrarSenha ? "text" : "password"}
+                      placeholder={
+                        editando ? "Deixe em branco para manter a atual" : "Senha"
+                      }
+                      value={senha}
+                      onChange={(e) => setSenha(e.target.value)}
+                      autoComplete="new-password"
+                      disabled={tipo !== "Administrador"}
+                      required={!editando && tipo === "Administrador"}
+                    />
+                    {erros.senha && (
+                      <div className="erro-validacao">
+                        {erros.senha}
+                      </div>
+                    )}
+                  </div>
+
                   <button
                     type="button"
                     className="toggle-senha"
@@ -504,12 +594,13 @@ function User() {
               </form>
             </div>
           </div>
-        )}
-      </div>
+        )
+        }
+      </div >
       <footer className="footer">
         <p>© 2025 - Sistema de Monitoramento de Laboratórios</p>
       </footer>
-    </div>
+    </div >
   );
 }
 
