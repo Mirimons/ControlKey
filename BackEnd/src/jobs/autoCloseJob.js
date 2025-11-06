@@ -3,7 +3,8 @@ import controlService from '../services/controlService.js'
 
 class AutoCloseJob {
     init() {
-        cron.schedule('0 23 59 59 999', async() => {
+        //Todo dia meia-noite:
+        cron.schedule('0 0 * * *', async() => {
             try {
                 console.log('Iniciando fechamento automático diário...')
                 const result = await controlService.autoCloseControl()

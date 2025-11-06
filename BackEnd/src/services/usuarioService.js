@@ -22,11 +22,11 @@ class UsuarioService {
       id_tipo,
       tipo_desc,
       filtro_tipo_tipo,
-      page = 1,
-      limit = 10,
+      // page = 1,
+      // limit = 10,
     } = validatedData;
 
-    const skip = (page - 1) * limit;
+    // const skip = (page - 1) * limit;
 
     const queryBuilder = usuarioRepository
       .createQueryBuilder("usuario")
@@ -50,18 +50,20 @@ class UsuarioService {
     }
 
     // Ordenação e paginação
-    queryBuilder.orderBy("usuario.nome", "ASC").skip(skip).take(limit);
+    queryBuilder.orderBy("usuario.nome", "ASC")
+    // .skip(skip)
+    // .take(limit);
 
     const [usuarios, total] = await queryBuilder.getManyAndCount();
 
     return {
       data: usuarios,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      // pagination: {
+      //   page,
+      //   limit,
+      //   total,
+      //   totalPages: Math.ceil(total / limit),
+      // },
     };
   }
 

@@ -14,8 +14,8 @@ class AgendamentoService {
         hora_fim,
         data_utilizacao,
         status,
-        page = 1,
-        limit = 10,
+        // page = 1,
+        // limit = 10,
       } = filtros;
 
       const query = agendamentoRepository
@@ -64,19 +64,19 @@ class AgendamentoService {
       }
 
       // Paginação
-      const skip = (page - 1) * limit;
-      query.skip(skip).take(limit);
+      // const skip = (page - 1) * limit;
+      // query.skip(skip).take(limit);
 
       const [agendamentos, total] = await query.getManyAndCount();
 
       return {
         agendamentos: agendamentos,
-        paginacao: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
+        // paginacao: {
+        //   page: parseInt(page),
+        //   limit: parseInt(limit),
+        //   total,
+        //   totalPages: Math.ceil(total / limit),
+        // },
       };
     } catch (error) {
       throw new Error(`Erro ao buscar agendamentos: ${error.message}`);

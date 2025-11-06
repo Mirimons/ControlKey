@@ -15,17 +15,20 @@ class AgendamentoRequestDTO extends BaseDTO {
   async validateGetAgendamentos() {
     this.clearValidatedData();
 
-    const { page, limit, status } = this.data;
+    const { 
+      // page, 
+      // limit, 
+      status } = this.data;
 
-    if (page !== undefined) {
-      if (!this.validateNumber("page", "Página")) return false;
-      this.validatedData.page = Math.max(1, Number(page));
-    }
+    // if (page !== undefined) {
+    //   if (!this.validateNumber("page", "Página")) return false;
+    //   this.validatedData.page = Math.max(1, Number(page));
+    // }
 
-    if (limit !== undefined) {
-      if (!this.validateNumber("limit", "Limite")) return false;
-      this.validatedData.limit = Math.min(Math.max(1, Number(limit)), 100); // Max 100 por página
-    }
+    // if (limit !== undefined) {
+    //   if (!this.validateNumber("limit", "Limite")) return false;
+    //   this.validatedData.limit = Math.min(Math.max(1, Number(limit)), 100); // Max 100 por página
+    // }
 
     if (status !== undefined) {
       const statusValidos = ["agendado", "finalizado", "cancelado"];

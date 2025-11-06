@@ -9,20 +9,26 @@ class LabsRequestDTO extends BaseDTO {
   async validateGetLabs() {
     this.clearValidatedData();
 
-    const { nome_lab, desc_lab, status, page, limit } = this.data;
+    const {
+      nome_lab,
+      desc_lab,
+      status,
+      //  page,
+      // limit
+    } = this.data;
 
-    this.validatedData.page = 1;
-    this.validatedData.limit = 10;
+    // this.validatedData.page = 1;
+    // this.validatedData.limit = 10;
 
-    if (page !== undefined && page != null && page !== "") {
-      if (!this.validateParamsId("page", "Página", 1, 1000)) return false;
-      this.validatedData.page = Math.max(1, Number(page));
-    }
+    // if (page !== undefined && page != null && page !== "") {
+    //   if (!this.validateParamsId("page", "Página", 1, 1000)) return false;
+    //   this.validatedData.page = Math.max(1, Number(page));
+    // }
 
-    if (limit !== undefined && limit !== null && limit !== "") {
-      if (!this.validateParamsId("limit", "Limite", 1, 100)) return false;
-      this.validatedData.limit = Math.min(Math.max(1, Number(limit)), 100);
-    }
+    // if (limit !== undefined && limit !== null && limit !== "") {
+    //   if (!this.validateParamsId("limit", "Limite", 1, 100)) return false;
+    //   this.validatedData.limit = Math.min(Math.max(1, Number(limit)), 100);
+    // }
 
     if (nome_lab !== undefined && nome_lab !== null && nome_lab !== "") {
       if (!this.validateString("nome_lab", "Nome do laboratório", 2))

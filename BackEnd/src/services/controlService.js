@@ -25,8 +25,8 @@ class ControlService {
         status,
         data_inicio,
         data_fim,
-        page = 1,
-        limit = 10,
+        // page = 1,
+        // limit = 10,
       } = filtros;
 
       const query = controlRepository
@@ -82,19 +82,19 @@ class ControlService {
         query.andWhere("control.data_inicio <= :end", { end: data_fim });
       }
       //Paginação:
-      const skip = (page - 1) * limit;
-      query.skip(skip).take(limit);
+      // const skip = (page - 1) * limit;
+      // query.skip(skip).take(limit);
 
       const [controls, total] = await query.getManyAndCount();
 
       return {
         controls,
-        paginacao: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
+        // paginacao: {
+        //   page: parseInt(page),
+        //   limit: parseInt(limit),
+        //   total,
+        //   totalPages: Math.ceil(total / limit),
+        // },
       };
     } catch (error) {
       throw new Error(`Erro ao buscar controles: ${error.message}`);

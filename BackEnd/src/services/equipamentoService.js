@@ -20,11 +20,11 @@ class EquipService {
       id_tipo,
       tipo_desc,
       filtro_tipo_tipo,
-      page = 1,
-      limit = 10,
+      // page = 1,
+      // limit = 10,
     } = filtros;
 
-    const skip = (page - 1) * limit;
+    // const skip = (page - 1) * limit;
 
     const queryBuilder = equipamentoRepository
       .createQueryBuilder("equipamento")
@@ -46,19 +46,19 @@ class EquipService {
     }
     queryBuilder
       .orderBy("equipamento.desc_equip", "ASC")
-      .skip(skip)
-      .take(limit);
+      // .skip(skip)
+      // .take(limit);
 
     const [equipamentos, total] = await queryBuilder.getManyAndCount();
 
     return {
       data: equipamentos,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      // pagination: {
+      //   page,
+      //   limit,
+      //   total,
+      //   totalPages: Math.ceil(total / limit),
+      // },
     };
   }
 

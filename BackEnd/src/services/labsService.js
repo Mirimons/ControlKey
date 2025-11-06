@@ -13,7 +13,13 @@ class LabsService {
 
   async getLabs(filtros = {}) {
     try {
-      const { nome_lab, desc_lab, status, page = 1, limit = 10 } = filtros;
+      const { 
+        nome_lab, 
+        desc_lab, 
+        status, 
+        // page = 1, 
+        // limit = 10 
+      } = filtros;
 
       const query = labsRepository
         .createQueryBuilder("labs")
@@ -31,19 +37,19 @@ class LabsService {
         query.andWhere("labs.status = :status", { status });
       }
 
-      const skip = (page - 1) * limit;
-      query.skip(skip).take(limit);
+      // const skip = (page - 1) * limit;
+      // query.skip(skip).take(limit);
 
       const [labs, total] = await query.getManyAndCount();
 
       return {
         data: labs,
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
+        // pagination: {
+        //   page: parseInt(page),
+        //   limit: parseInt(limit),
+        //   total,
+        //   totalPages: Math.ceil(total / limit),
+        // },
       };
     } catch (error) {
       throw new Error(`Erro ao bucar laboratórios: ${error.message}`);
