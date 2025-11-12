@@ -366,10 +366,39 @@ select:disabled {
 }
 
 
-/* Ajuste a mensagem de erro para o espaçamento interno */
 .erro-validacao {
-    color: #e30000;
-    font-size: 0.85em;
-    margin-top: 5px; /* Define o espaçamento ENTRE o INPUT e a MENSAGEM */
-    display: block;
+    /* Cor e tamanho da fonte */
+    color: #dc3545; /* Vermelho padrão para erros (Bootstrap danger) */
+    font-size: 0.85rem;
+    margin-top: 5px; /* Espaçamento acima da mensagem */
+    margin-bottom: 10px; /* Espaçamento abaixo da mensagem */
+    font-weight: 500; /* Um pouco mais de destaque */
+    padding-left: 5px; /* Pequeno recuo para separar do input */
+}
+
+/* Estilo opcional para destacar o input com erro */
+.modal-conteudo input:not([type="button"]).input-error,
+.modal-conteudo select.input-error {
+    border: 1px solid #dc3545; /* Borda vermelha */
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25); /* Sombra suave vermelha */
+}
+
+.modal-conteudo label {
+    margin-bottom: 5px;
+    margin-top: 10px; /* Espaçamento entre campos */
+    display: block; /* Garante que a label ocupe a linha toda */
+}
+
+/* Ajuste nos inputs do modal para melhor visibilidade */
+.modal-conteudo input[type="text"],
+.modal-conteudo input[type="email"],
+.modal-conteudo input[type="password"],
+.modal-conteudo input[type="date"],
+.modal-conteudo select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 0; /* Remove a margem padrão para usar a margem do .erro-validacao ou da próxima label */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Garante que padding e borda não aumentem o width total */
 }

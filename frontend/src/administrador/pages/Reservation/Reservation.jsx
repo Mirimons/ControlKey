@@ -5,20 +5,22 @@ import Navbar from "../../../components/navbar";
 import api from "../../../services/api";
 import { toast } from "react-toastify";
 import { SiRarible } from "react-icons/si";
+import Swal from "sweetalert2";
+import { handleApiError } from "../../../helpers/errorHelper";
 
-// Select pesquisável
+// Select pesquisável (Não alterado)
 const SelectPesquisavel = ({
   options,
   value,
   onChange,
   placeholder,
   required,
+  className,
 }) => {
   const [inputValue, setInputValue] = useState("");
   const [mostrarOpcoes, setMostrarOpcoes] = useState(false);
   const containerRef = useRef(null);
 
-  // Encontrar a opção selecionada usando comparação de strings
   const selectedOption = options.find(
     (opt) => String(opt.value) === String(value)
   );
@@ -63,6 +65,7 @@ const SelectPesquisavel = ({
         onFocus={() => setMostrarOpcoes(true)}
         placeholder={placeholder}
         required={required}
+        className={className}
       />
       {mostrarOpcoes && (
         <div className="opcoes-lista">
@@ -105,7 +108,8 @@ function Reservation() {
   const [chaves, setChaves] = useState([]);
   const [solicitantes, setSolicitantes] = useState([]);
   const [reservas, setReservas] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // Estado de carregamento
+  const [errosValidacao, setErrosValidacao] = useState({});
 
   const modalRef = useRef();
 
@@ -119,10 +123,18 @@ function Reservation() {
       return;
     }
 
-    const confirmar = window.confirm(
-      `Deseja realmente excluir a reserva de "${reservaSelecionada.nomeProfessor}" no ambiente "${reservaSelecionada.laboratorio}"?`
-    );
-    if (!confirmar) return;
+    const result = await Swal.fire({
+      title: "Tem certeza?",
+      text: `Deseja realmente excluir a reserva de "${reservaSelecionada.nomeProfessor}" no ambiente "${reservaSelecionada.laboratorio}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Sim, excluir!",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!result.isConfirmed) return;
 
     const token = sessionStorage.getItem("token");
     if (!token) {
@@ -166,6 +178,7 @@ function Reservation() {
     setDataUtilizacao("");
     setFinalidade("");
     setStatus("agendado");
+    setErrosValidacao({});
     setModalAberto(true);
   };
 
@@ -173,16 +186,15 @@ function Reservation() {
     setEditando(true);
     setReservaSelecionada(reserva);
 
-    setNomeProfessor(
-      String(reserva.id_usuario || reserva.nomeProfessorId || "")
-    );
-    setLaboratorio(
-      String(reserva.id_labs || reserva.laboratorioId || ""));
+    setNomeProfessor(String(reserva.id_usuario || ""));
+    setLaboratorio(String(reserva.id_labs || ""));
+
     setHoraInicio(reserva.horaInicio || reserva.hora_inicio || "");
     setHoraFim(reserva.horaFim || reserva.hora_fim || "");
     setDataUtilizacao(reserva.dataUtilizacao || reserva.data_utilizacao || "");
     setFinalidade(reserva.finalidade || "");
     setStatus(reserva.status || "agendado");
+    setErrosValidacao({});
 
     setModalAberto(true);
   };
@@ -190,7 +202,7 @@ function Reservation() {
   const carregarReservas = () => {
     const token = sessionStorage.getItem("token");
     if (!token) return;
-    setLoading(true);
+    setLoading(true); // Inicia o carregamento
 
     api
       .get("/agendamento", { headers: { Authorization: `Bearer ${token}` } })
@@ -211,15 +223,20 @@ function Reservation() {
           if (typeof reserva.laboratorio === "string")
             nomeLab = reserva.laboratorio;
           else if (reserva.labs?.nome_lab) nomeLab = reserva.labs.nome_lab;
-          else if (reserva.laboratorio.nome_lab) nomeLab = reserva.laboratorio.nome_lab;
-          else if (reserva.id_labs) nomeLab = `Lab ${reserva.id_labs}`;
+          else if (reserva.laboratorio?.nome_lab) nomeLab = reserva.laboratorio.nome_lab;
+          else if (reserva.id_labs) {
+            const labEncontrado = chaves.find(c => String(c.id) === String(reserva.id_labs));
+            nomeLab = labEncontrado ? labEncontrado.nome_lab : `Lab ${reserva.id_labs}`;
+          }
 
           let nomeProf = "N/A";
           if (typeof reserva.nomeProfessor === "string")
             nomeProf = reserva.nomeProfessor;
           else if (reserva.usuario?.nome) nomeProf = reserva.usuario.nome;
-          else if (reserva.id_usuario)
-            nomeProf = `Usuário ${reserva.id_usuario}`;
+          else if (reserva.id_usuario) {
+            const solicitanteEncontrado = solicitantes.find(s => String(s.id) === String(reserva.id_usuario));
+            nomeProf = solicitanteEncontrado ? solicitanteEncontrado.nome : `Usuário ${reserva.id_usuario}`;
+          }
 
           return {
             id: reserva.id || `reserva-${index}`,
@@ -239,9 +256,10 @@ function Reservation() {
       })
       .catch((err) => {
         console.error("Erro ao buscar reservas:", err);
+        toast.error("Erro ao carregar lista de reservas!"); // Feedback de erro
         setReservas([]);
       })
-      .finally(() => setLoading(false));
+      .finally(() => setLoading(false)); // Finaliza o carregamento
   };
 
   const carregarChaves = () => {
@@ -279,10 +297,13 @@ function Reservation() {
   };
 
   useEffect(() => {
-    carregarReservas();
+    // Chama todas as funções para carregar dados iniciais
     carregarChaves();
     carregarSolicitantes();
+    carregarReservas();
+
   }, []);
+
 
   const handleSalvar = (e) => {
     e.preventDefault();
@@ -302,6 +323,9 @@ function Reservation() {
       status,
     };
 
+    // Limpa erros antes de tentar salvar
+    setErrosValidacao({});
+
     if (editando && reservaSelecionada) {
       api
         .put(`/agendamento/${reservaSelecionada.id}`, payload, {
@@ -310,11 +334,14 @@ function Reservation() {
         .then(() => {
           toast.success("Reserva atualizada com sucesso!");
           setModalAberto(false);
-          carregarReservas();
+          carregarReservas(); // Chama a recarga para ver a atualização
         })
         .catch((err) => {
-          console.error(err);
-          toast.error("Erro ao atualizar reserva!");
+          console.error("Erro ao atualizar reserva:", err);
+          const validationErrors = handleApiError(err, "Erro ao atualizar reserva!");
+          if (validationErrors) {
+            setErrosValidacao(validationErrors);
+          }
         });
     } else {
       api
@@ -324,11 +351,14 @@ function Reservation() {
         .then(() => {
           toast.success("Reserva criada com sucesso!");
           setModalAberto(false);
-          carregarReservas();
+          carregarReservas(); // Chama a recarga para ver a nova reserva
         })
         .catch((err) => {
-          console.error(err);
-          toast.error("Erro ao criar reserva!");
+          console.error("Erro ao realizar uma reserva:", err);
+          const validationErrors = handleApiError(err, "Erro ao criar reserva!");
+          if (validationErrors) {
+            setErrosValidacao(validationErrors);
+          }
         });
     }
   };
@@ -417,7 +447,13 @@ function Reservation() {
               </tr>
             </thead>
             <tbody>
-              {reservasFiltradas.length > 0 ? (
+              {loading ? ( // 👈 NOVO: Mostrar loading
+                <tr>
+                  <td colSpan="8" style={{ textAlign: "center" }}>
+                    Carregando reservas...
+                  </td>
+                </tr>
+              ) : reservasFiltradas.length > 0 ? (
                 reservasFiltradas.map((r) => (
                   <tr key={r.id}>
                     <td>{r.nomeProfessor}</td>
@@ -467,7 +503,13 @@ function Reservation() {
                   onChange={setNomeProfessor}
                   placeholder="Selecione o solicitante"
                   required
+                  className={errosValidacao.id_usuario ? 'input-error' : ''}
                 />
+                {errosValidacao.id_usuario && (
+                  <div className="erro-validacao">
+                    {errosValidacao.id_usuario}
+                  </div>
+                )}
 
                 <label>Ambiente:</label>
                 <SelectPesquisavel
@@ -476,7 +518,13 @@ function Reservation() {
                   onChange={setLaboratorio}
                   placeholder="Selecione o laboratório"
                   required
+                  className={errosValidacao.id_labs ? 'input-error' : ''}
                 />
+                {errosValidacao.id_labs && (
+                  <div className="erro-validacao">
+                    {errosValidacao.id_labs}
+                  </div>
+                )}
 
                 <label>Data de utilização:</label>
                 <input
@@ -485,7 +533,13 @@ function Reservation() {
                   onChange={(e) => setDataUtilizacao(e.target.value)}
                   required
                   min={new Date().toISOString().split("T")[0]}
+                  className={errosValidacao.data_utilizacao ? 'input-error' : ''}
                 />
+                {errosValidacao.data_utilizacao && (
+                  <div className="erro-validacao">
+                    {errosValidacao.data_utilizacao}
+                  </div>
+                )}
 
                 <label>Horário início:</label>
                 <input
@@ -493,7 +547,13 @@ function Reservation() {
                   value={horaInicio}
                   onChange={(e) => setHoraInicio(e.target.value)}
                   required
+                  className={errosValidacao.hora_inicio ? 'input-error' : ''}
                 />
+                {errosValidacao.hora_inicio && (
+                  <div className="erro-validacao">
+                    {errosValidacao.hora_inicio}
+                  </div>
+                )}
 
                 <label>Horário fim:</label>
                 <input
@@ -501,7 +561,13 @@ function Reservation() {
                   value={horaFim}
                   onChange={(e) => setHoraFim(e.target.value)}
                   required
+                  className={errosValidacao.hora_fim ? 'input-error' : ''}
                 />
+                {errosValidacao.hora_fim && (
+                  <div className="erro-validacao">
+                    {errosValidacao.hora_fim}
+                  </div>
+                )}
 
                 <label>Finalidade:</label>
                 <input
@@ -509,21 +575,38 @@ function Reservation() {
                   value={finalidade}
                   onChange={(e) => setFinalidade(e.target.value)}
                   required
+                  className={errosValidacao.finalidade ? 'input-error' : ''}
                 />
+                {errosValidacao.finalidade && (
+                  <div className="erro-validacao">
+                    {errosValidacao.finalidade}
+                  </div>
+                )}
 
                 <label>Status:</label>
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                   required
+                  className={errosValidacao.status ? 'input-error' : ''}
                 >
                   <option value="agendado">Agendado</option>
                   <option value="concluído">Concluído</option>
                   <option value="cancelado">Cancelado</option>
                 </select>
+                {errosValidacao.status && (
+                  <div className="erro-validacao">
+                    {errosValidacao.status}
+                  </div>
+                )}
+
 
                 <div className="modal-botoes">
-                  <button type="button" onClick={deleteAgendamento}>
+                  <button
+                    type="button"
+                    onClick={deleteAgendamento}
+                    disabled={!editando || !reservaSelecionada}
+                  >
                     <FaTrash />
                   </button>
                   <button type="button" onClick={() => setModalAberto(false)}>

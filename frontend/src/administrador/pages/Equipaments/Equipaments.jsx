@@ -4,6 +4,8 @@ import { FaTrash } from "react-icons/fa";
 import Navbar from "../../../components/navbar";
 import api from "../../../services/api";
 import { toast } from "react-toastify";
+import { handleApiError } from "../../../helpers/errorHelper";
+import Swal from "sweetalert2";
 
 function Equipaments() {
   const [modalAberto, setModalAberto] = useState(false);
@@ -21,44 +23,54 @@ function Equipaments() {
   // Controle de edição
   const [editando, setEditando] = useState(false);
   const [equipamentoId, setEquipamentoId] = useState(null);
+  const [equipamentoDescricao, setEquipamentoDescricao] = useState("");
+
+  const [errosValidacao, setErrosValidacao] = useState({});
 
   const modalRef = useRef();
 
-  const abrirModal = () => setModalAberto(true);
+  const abrirModal = () => {
+    setErrosValidacao({});
+    setModalAberto(true);
+  }
+
   const fecharModal = () => {
     setModalAberto(false);
     setEditando(false);
     setEquipamentoId(null);
+    setEquipamentoDescricao("");
     setTipoEquip("");
     setDescEquip("");
+    setErrosValidacao({});
     setStatus("livre");
   };
   const deleteEquipamento = async () => {
-    if (!equipamentoId) {
-      toast.error("Nenhum equipamento selecionado para exclusão!", {
-        position: "top-right",
-        autoClose: 2000,
-        theme: "light",
-      });
-      return;
-    }
+    const result = await Swal.fire({
+      title: "Você tem certeza?",
+      html: `Você não poderá reverter a exclusão do equipamento <strong>"${equipamentoDescricao}"</strong>!`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc3545", // Vermelho
+      cancelButtonColor: "#6c757d", // Cinza
+      confirmButtonText: "Sim, Excluir!",
+      cancelButtonText: "Cancelar"
+    });
 
-    const confirmar = window.confirm(
-      "Deseja realmente excluir este equipamento?"
-    );
-    if (!confirmar) return;
-
-    const token = sessionStorage.getItem("token");
-    if (!token) {
-      toast.error("Você precisa estar logado!", {
-        position: "top-right",
-        autoClose: 2000,
-        theme: "light",
-      });
+    if (!result.isConfirmed) {
       return;
     }
 
     try {
+      const token = sessionStorage.getItem("token");
+      if (!token) {
+        toast.error("Você precisa estar logado!", {
+          position: "top-right",
+          autoClose: 2000,
+          theme: "light",
+        });
+        return;
+      }
+
       await api.delete(`/equipamento/${equipamentoId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -151,15 +163,15 @@ function Equipaments() {
     // corpo da requisição corrigido
     const payload = editando
       ? {
-          id: equipamentoId, // necessário pelo DTO de atualização
-          desc_equip: descEquip,
-          status:status,
-        }
+        id: equipamentoId, // necessário pelo DTO de atualização
+        desc_equip: descEquip,
+        status: status,
+      }
       : {
-          tipo: tipoEquip,
-          desc_equip: descEquip,
-          status: status,
-        };
+        tipo: tipoEquip,
+        desc_equip: descEquip,
+        status: status,
+      };
 
     try {
       if (editando) {
@@ -181,21 +193,21 @@ function Equipaments() {
           theme: "light",
         });
       }
-
       fecharModal();
       fetchEquipamentos();
     } catch (error) {
       console.error("Erro ao salvar equipamento:", error);
-      toast.error(
+
+      const validationErrors = handleApiError(
+        error,
         editando
-          ? "Erro ao atualizar equipamento!"
-          : "Erro ao cadastrar equipamento!",
-        {
-          position: "top-right",
-          autoClose: 2000,
-          theme: "light",
-        }
+          ? "Erro ao editar equipamento!"
+          : "Erro ao cadastrar equipamento!"
       );
+
+      if (validationErrors) {
+        setErrosValidacao(validationErrors);
+      }
     }
   };
 
@@ -203,6 +215,7 @@ function Equipaments() {
   const handleEditar = (equip) => {
     setEditando(true);
     setEquipamentoId(equip.id);
+    setEquipamentoDescricao(equip.desc_equip || "");
     setTipoEquip(equip.tipo?.desc_tipo || "");
     setDescEquip(equip.desc_equip || "");
     setStatus(equip.status || "livre");
@@ -250,38 +263,38 @@ function Equipaments() {
         <div className="equipamentos-filtros">
           <div>
             <h3>Equipamento:</h3>
-            <input 
-            type="text" 
-            placeholder="Equipamento"
-            name="equipamento"
-            value={filtros.equipamento}
-            onChange={handleFiltroChange}
-             />
+            <input
+              type="text"
+              placeholder="Equipamento"
+              name="equipamento"
+              value={filtros.equipamento}
+              onChange={handleFiltroChange}
+            />
           </div>
           <div>
             <h3>Descrição:</h3>
-            <input 
-            type="text" 
-            placeholder="Descrição"
-            name="descricao"
-            value={filtros.descricao}
-            onChange={handleFiltroChange}
-             />
+            <input
+              type="text"
+              placeholder="Descrição"
+              name="descricao"
+              value={filtros.descricao}
+              onChange={handleFiltroChange}
+            />
           </div>
           <div>
             <h3>Status:</h3>
-            <select 
-            name="status"
-            value={filtros.status}
-            onChange={handleFiltroChange}
-             >
-               <option value="" disabled hidden>
+            <select
+              name="status"
+              value={filtros.status}
+              onChange={handleFiltroChange}
+            >
+              <option value="" disabled hidden>
                 Selecione o status
               </option>
               <option value="">Todos</option>
               <option value="livre">Livre</option>
               <option value="ocupado">Ocupado</option>
-              </select>
+            </select>
           </div>
 
         </div>
@@ -322,8 +335,8 @@ function Equipaments() {
               ) : (
                 <tr>
                   <td colSpan="5" style={{ textAlign: "center" }}>
-                    {equipamentos.length === 0 
-                      ? "Nenhum equipamento cadastrado" 
+                    {equipamentos.length === 0
+                      ? "Nenhum equipamento cadastrado"
                       : "Nenhum equipamento encontrado para os filtros aplicados"
                     }
                   </td>
@@ -351,7 +364,13 @@ function Equipaments() {
                       value={tipoEquip}
                       onChange={(e) => setTipoEquip(e.target.value)}
                       required
+                      className={errosValidacao.tipo ? 'input-error' : ''} // 🚨 Corrigido: 'tipo'
                     />
+                    {errosValidacao.tipo && ( // 🚨 Corrigido: 'tipo'
+                      <div className="erro-validacao">
+                        {errosValidacao.tipo}
+                      </div>
+                    )}
                   </>
                 )}
 
@@ -362,16 +381,28 @@ function Equipaments() {
                   value={descEquip}
                   onChange={(e) => setDescEquip(e.target.value)}
                   required
+                  className={errosValidacao.desc_equip ? 'input-error' : ''} // 🚨 Corrigido: 'desc_equip'
                 />
+                {errosValidacao.desc_equip && ( // 🚨 Corrigido: 'desc_equip'
+                  <div className="erro-validacao">
+                    {errosValidacao.desc_equip}
+                  </div>
+                )}
 
                 <label>Status:</label>
                 <select value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                required
+                  onChange={(e) => setStatus(e.target.value)}
+                  required
+                  className={errosValidacao.status ? 'input-error' : ''} // 🚨 Adicionado verificação de status (caso o BE valide)
                 >
                   <option value="livre">Livre</option>
                   <option value="ocupado">Ocupado</option>
                 </select>
+                {errosValidacao.status && (
+                  <div className="erro-validacao">
+                    {errosValidacao.status}
+                  </div>
+                )}
 
                 <div className="modal-botoes">
                   <button type="button" onClick={deleteEquipamento}>

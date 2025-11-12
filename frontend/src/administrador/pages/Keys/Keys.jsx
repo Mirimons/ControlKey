@@ -4,6 +4,8 @@ import "./Keys.css";
 import Navbar from "../../../components/navbar";
 import api from "../../../services/api";
 import { toast } from "react-toastify";
+import { handleApiError } from "../../../helpers/errorHelper";
+import Swal from "sweetalert2";
 
 function Keys() {
   const [modalAberto, setModalAberto] = useState(false);
@@ -21,36 +23,43 @@ function Keys() {
   const [editando, setEditando] = useState(false);
   const [chaveSelecionada, setChaveSelecionada] = useState(null);
 
+  const [errosValidacao, setErrosValidacao] = useState({});
+
   const modalRef = useRef();
 
   const abrirModal = () => setModalAberto(true);
-  const fecharModal = () => setModalAberto(false);
+  const fecharModal = () => {
+    setErrosValidacao({});
+    setModalAberto(false);
+  }
+
   const deleteLabs = async () => {
-    if (!editando || !chaveSelecionada) {
-      toast.error("Nenhuma chave selecionada para exclusão!", {
-        position: "top-right",
-        autoClose: 2000,
-        theme: "light",
-      });
-      return;
-    }
+    const result = await Swal.fire({
+      title: "Você tem certeza?",
+      html: `Você não poderá reverter a exclusão da chave <strong>"${chaveSelecionada.nome_lab}"</strong>!`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc3545", // Vermelho
+      cancelButtonColor: "#6c757d", // Cinza
+      confirmButtonText: "Sim, Excluir!",
+      cancelButtonText: "Cancelar"
+    });
 
-    const confirmar = window.confirm(
-      `Deseja realmente excluir a chave "${chaveSelecionada.nome_lab}"?`
-    );
-    if (!confirmar) return;
-
-    const token = sessionStorage.getItem("token");
-    if (!token) {
-      toast.error("Você precisa estar logado para excluir uma chave!", {
-        position: "top-right",
-        autoClose: 2000,
-        theme: "light",
-      });
+    if (!result.isConfirmed) {
       return;
     }
 
     try {
+      const token = sessionStorage.getItem("token");
+      if (!token) {
+        toast.error("Você precisa estar logado para excluir uma chave!", {
+          position: "top-right",
+          autoClose: 2000,
+          theme: "light",
+        });
+        return;
+      }
+
       await api.delete(`/labs/${chaveSelecionada.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -79,6 +88,7 @@ function Keys() {
     setNome_lab("");
     setDesc_lab("");
     setStatus("livre");
+    setErrosValidacao({});
     setModalAberto(true);
   };
 
@@ -88,6 +98,7 @@ function Keys() {
     setNome_lab(chave.nome_lab);
     setDesc_lab(chave.desc_lab || "");
     setStatus(chave.status || "livre");
+    setErrosValidacao({});
     setModalAberto(true);
   };
 
@@ -181,11 +192,15 @@ function Keys() {
         })
         .catch((error) => {
           console.error("Erro ao editar chave:", error);
-          toast.error("Erro ao editar chave!", {
-            position: "top-right",
-            autoClose: 2000,
-            theme: "light",
-          });
+          const validationErrors = handleApiError(error, "Erro ao editar chave!");
+          if (validationErrors) {
+            setErrosValidacao(validationErrors);
+          }
+          // toast.error("Erro ao editar chave!", {
+          //   position: "top-right",
+          //   autoClose: 2000,
+          //   theme: "light",
+          // });
         });
     } else {
       // Cadastro de nova chave
@@ -207,11 +222,15 @@ function Keys() {
         })
         .catch((error) => {
           console.error("Erro ao cadastrar chave:", error);
-          toast.error("Erro ao cadastrar chave!", {
-            position: "top-right",
-            autoClose: 2000,
-            theme: "light",
-          });
+          const validationErrors = handleApiError(error, "Erro ao cadastrar chave!");
+          if (validationErrors) {
+            setErrosValidacao(validationErrors);
+          }
+          // toast.error("Erro ao cadastrar chave!", {
+          //   position: "top-right",
+          //   autoClose: 2000,
+          //   theme: "light",
+          // });
         });
     }
   };
@@ -268,20 +287,20 @@ function Keys() {
           </div>
           <div>
             <h3>Descrição:</h3>
-            <input 
-            type="text" 
-            placeholder="Descrição"
-            name="descricao"
-            value={filtros.descricao}
-            onChange={handleFiltroChange}
-             />
+            <input
+              type="text"
+              placeholder="Descrição"
+              name="descricao"
+              value={filtros.descricao}
+              onChange={handleFiltroChange}
+            />
           </div>
           <div>
             <h3>Status:</h3>
-            <select 
-            name="status"
-            value={filtros.status} 
-            onChange={handleFiltroChange}>
+            <select
+              name="status"
+              value={filtros.status}
+              onChange={handleFiltroChange}>
               <option value="" disabled hidden>
                 Selecione o status
               </option>
@@ -342,6 +361,7 @@ function Keys() {
             <div className="modal-conteudo" ref={modalRef}>
               <h2>{editando ? "Editar Chave" : "Adicionar Chave"}</h2>
               <form onSubmit={handleSalvar}>
+
                 <label>Nome:</label>
                 <input
                   type="text"
@@ -349,23 +369,43 @@ function Keys() {
                   value={nome_lab}
                   onChange={(e) => setNome_lab(e.target.value)}
                   required
+                  className={errosValidacao.nome_lab ? 'input-error' : ''}
                 />
+                {errosValidacao.nome_lab && (
+                  <div className="erro-validacao">
+                    {errosValidacao.nome_lab}
+                  </div>
+                )}
+
                 <label>Descrição:</label>
                 <input
                   type="text"
                   placeholder="Descrição"
                   value={desc_lab}
                   onChange={(e) => setDesc_lab(e.target.value)}
+                  className={errosValidacao.desc_lab ? 'input-error' : ''}
                 />
+                {errosValidacao.desc_lab && (
+                  <div className="erro-validacao">
+                    {errosValidacao.desc_lab}
+                  </div>
+                )}
+
                 <label>Status:</label>
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                   required
+                  className={errosValidacao.status ? 'input-error' : ''}
                 >
                   <option value="livre">Livre</option>
                   <option value="ocupado">Ocupado</option>
                 </select>
+                {errosValidacao.status && (
+                  <div className="erro-validacao">
+                    {errosValidacao.status}
+                  </div>
+                )}
 
                 <div className="modal-botoes">
                   <button type="button" onClick={deleteLabs}>

@@ -439,6 +439,7 @@ function User() {
                     value={tipo}
                     onChange={(e) => setTipo(e.target.value)}
                     required
+                    className={erros.tipo ? 'input-error' : ''}
                   >
                     <option value="" disabled hidden>
                       Selecione o tipo de usuário
@@ -462,6 +463,7 @@ function User() {
                     value={nome}
                     onChange={(e) => setNome(e.target.value)}
                     required
+                    className={erros.nome ? 'input-error' : ''}
                   />
                   {erros.nome && (
                     <div className="erro-validacao">
@@ -478,6 +480,7 @@ function User() {
                     value={cpf}
                     onChange={(e) => setCpf(e.target.value)}
                     required
+                    className={erros.cpf ? 'input-error' : ''}
                   />
                   {erros.cpf && (
                     <div className="erro-validacao">
@@ -495,6 +498,7 @@ function User() {
                     onChange={(e) => setEmail(e.target.value)}
                     required={cadExtra}
                     disabled={tipo === "Terceiro"}
+                    className={erros.email ? 'input-error' : ''}
                   />
                   {erros.email && (
                     <div className="erro-validacao">
@@ -511,6 +515,7 @@ function User() {
                     value={telefone}
                     onChange={(e) => setTelefone(e.target.value)}
                     required
+                    className={erros.telefone ? 'input-error' : ''}
                   />
                   {erros.telefone && (
                     <div className="erro-validacao">
@@ -528,6 +533,7 @@ function User() {
                     onChange={(e) => setMatricula(e.target.value)}
                     required={cadExtra}
                     disabled={tipo === "Terceiro"}
+                    className={erros.matricula ? 'input-error' : ''}
                   />
                   {erros.matricula && (
                     <div className="erro-validacao">
@@ -544,6 +550,7 @@ function User() {
                     value={data_nasc}
                     onChange={(e) => setData_nasc(e.target.value)}
                     required
+                    className={erros.data_nasc ? 'input-error' : ''}
                   />
                   {erros.data_nasc && (
                     <div className="erro-validacao">
@@ -565,6 +572,7 @@ function User() {
                       autoComplete="new-password"
                       disabled={tipo !== "Administrador"}
                       required={!editando && tipo === "Administrador"}
+                      className={erros.senha ? 'input-error' : ''}
                     />
                     {erros.senha && (
                       <div className="erro-validacao">

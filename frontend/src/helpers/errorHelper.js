@@ -11,34 +11,33 @@ export const handleApiError = (error, genericMessage = "Ocorreu um erro inespera
   if (error.response) {
     const { data, status } = error.response;
 
-    // CASO A: Erro de Validação (400)
-    // Se o backend retornou Status 400 E uma lista de erros (validation errors)
+    // 🚨 CASO A: Erro de Validação (400) com ARRAY de erros (SEU CASO)
     if (status === 400 && data.errors && Array.isArray(data.errors)) {
-      
-      // 🚨 MUDANÇA CRUCIAL AQUI: Converter o Array de erros em um Objeto simples
+
+      // Converte o array de erros em um objeto { campo: mensagem }
       const validationErrors = data.errors.reduce((acc, currentError) => {
-        // Usa o 'field' como chave (ex: 'cpf') e o 'message' como valor
         if (currentError.field && currentError.message) {
           acc[currentError.field] = currentError.message;
         }
         return acc;
-      }, {}); // Começa com um objeto vazio {}
+      }, {});
 
-      // Exibe um toast genérico para avisar sobre a validação
-      toast.error(data.message || "Por favor, corrija os erros no formulário.");
-      
-      return validationErrors; // Retorna o objeto { chave: valor } para setErros
+      // 🛑 REMOVEMOS A CHAMADA toast.error AQUI
+      // Isto garante que para ERROS DE VALIDAÇÃO 400, APENAS 
+      // a mensagem vermelha abaixo do campo apareça.
+
+      return validationErrors; // Retorna o objeto para o Front-end
     }
 
-    // CASO B: Erros de Negócio (404, 409, 500)
-    // (Ainda usa a chave 'response' ou 'message' para exibir o erro)
+    // CASO B: Outros Erros (401, 404, 500, etc., ou 400 com mensagem simples)
     if (data.response || data.message) {
+      // Mantém o toast para erros não relacionados à validação de campos
       toast.error(data.response || data.message);
       return null;
     }
   }
-  
-  // Erro Genérico
+
+  // Erro Genérico (Ex: erro de rede)
   toast.error(genericMessage);
   return null;
 };
