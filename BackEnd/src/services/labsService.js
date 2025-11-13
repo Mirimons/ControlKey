@@ -11,6 +11,17 @@ class LabsService {
     });
   }
 
+  async getByNomeLivre(nome) {
+    return await labsRepository.find({
+      where: {
+        nome_lab: Like(`%${nome}%`),
+        status: "livre",
+        deletedAt: IsNull(),
+      },
+    });
+  }
+  
+
   async getLabs(filtros = {}) {
     try {
       const { 

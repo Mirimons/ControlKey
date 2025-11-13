@@ -40,6 +40,26 @@ function handleUsuarioError(response, error) {
   });
 }
 
+route.get("/buscar/:identificacao", async (request, response) => {
+  try {
+    const { identificacao } = request.params;
+    const usuario = await usuarioService.getUsuarioByIdentificacao(identificacao);
+
+    if (!usuario) {
+      return response.status(404).json({ response: "Usuário não encontrado." });
+    }
+
+    return response.status(200).json(usuario);
+  } catch (error) {
+    console.error("Erro ao buscar usuário por RM/CPF:", error);
+    return response.status(500).json({
+      response: "Erro interno no servidor.",
+      error: getErrorMessage(error),
+    });
+  }
+});
+
+
 route.get("/:id", async (request, response) => {
   try {
     const { id } = request.params;

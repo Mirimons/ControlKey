@@ -10,12 +10,6 @@ import Reservation from './administrador/pages/Reservation/Reservation';
 import Relatorio from './administrador/pages/Relatorio/Relatorio';
 import Login from './administrador/pages/Login/Login';
 import RetiradaDevolucao from './usuarios/pages/retiradaDevolucao';
-import Retirar from './usuarios/pages/Retirar/Retirar';
-import Devolver from './usuarios/pages/Devolver/Devolver';
-import RetirarChave from './usuarios/pages/Retirar/RetirarChave/retirarChave';
-import RetirarEquipamento from './usuarios/pages/Retirar/RetirarEquipamento/retirarEquipamento';
-import DevolverChave from './usuarios/pages/Devolver/DevolverChave/devolverChave';
-import DevolverEquipamento from './usuarios/pages/Devolver/DevolverEquipamento/devolverEquipamento';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ProtectedRouter from './helpers/protectedRouter';
@@ -76,12 +70,6 @@ function App() {
             </ProtectedRouter>} 
           />
           <Route path="/" element={<RetiradaDevolucao />} />
-          <Route path="/Retirar" element={<Retirar />} />
-          <Route path="/Devolver" element={<Devolver />} />
-          <Route path="/Retirar/RetirarChave" element={<RetirarChave />} />
-          <Route path="/Retirar/RetirarEquipamento" element={<RetirarEquipamento />} />
-          <Route path="/Devolver/DevolverChave" element={<DevolverChave />} />
-          <Route path="/Devolver/DevolverEquipamento" element={<DevolverEquipamento />} />
           <Route path="/EsqueceuSenha" element={<EsqueceuSenha />} />
         </Routes>
       </div>

@@ -15,6 +15,20 @@ class UsuarioService {
     });
   }
 
+  async getUsuarioByIdentificacao(identificacao) {
+    const usuario = await usuarioRepository
+      .createQueryBuilder("usuario")
+      .leftJoinAndSelect("usuario.tipo", "tipo")
+      .leftJoinAndSelect("usuario.usuario_cad", "usuario_cad")
+      .where("usuario_cad.matricula = :identificacao OR usuario.cpf = :identificacao", {
+        identificacao,
+      })
+      .getOne();
+  
+    return usuario;
+  }  
+
+
   //Filtros
   async getUsuarios(validatedData = {}) {
     const {

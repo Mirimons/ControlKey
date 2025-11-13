@@ -136,3 +136,29 @@ body {
   justify-content: center;
   gap: 20px;
 }
+
+.lista-sugestoes {
+  border: 1px solid #ccc;
+  background: white;
+  max-height: 180px;
+  overflow-y: auto;
+  border-radius: 8px;
+  margin-top: 4px;
+  padding: 0;
+  list-style: none;
+}
+
+.opcao-lab {
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.opcao-lab:hover {
+  background-color: #f0f8ff;
+}
+
+.input-codigo {
+  width: 100%;
+  margin-top: 6px;
+}

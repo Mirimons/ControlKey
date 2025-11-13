@@ -11,6 +11,21 @@ const validateDelete = validationMiddleware(LabsRequestDTO, "validateDelete");
 
 const route = express.Router();
 
+// Buscar laboratórios livres conforme o nome digitado
+route.get("/buscar/:nome", async (request, response) => {
+  try {
+    const { nome } = request.params;
+    const labsLivres = await labsService.getByNomeLivre(nome);
+    return response.status(200).json(labsLivres);
+  } catch (error) {
+    console.error("Erro ao buscar laboratórios: ", error);
+    return response.status(500).json({
+      response: "Erro interno no servidor.",
+      error: error.message,
+    });
+  }
+});
+
 route.get("/:id", async (request, response) => {
   try {
     const { id } = request.params;
