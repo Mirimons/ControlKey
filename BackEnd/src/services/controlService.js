@@ -191,7 +191,7 @@ class ControlService {
     });
   }
 
-  //Ciente 
+  //Ciente bollean
   async confirmAwareness(controlData) {
     const { id, ciente } = controlData;
 
@@ -218,17 +218,14 @@ class ControlService {
       const inicioDia = new Date(hoje)
       inicioDia.setHours(0,0,0,0)
 
-      const fimDia = new Date(hoje)
-      fimDia.setHours(23,59,59,999)
+      // const fimDia = new Date(hoje)
+      // fimDia.setHours(23,59,59,999)
 
       //Busca dos controles em aberto
       const controlsToClose = await controlRepository
       .createQueryBuilder("control")
       .where("control.status = :status", {status: "aberto"})
-      .andWhere("control.data_inicio BETWEEN :inicio AND :fim", {
-        inicio: inicioDia,
-        fim: fimDia
-      })
+      .andWhere("control.data_inicio < :inicioDia",{inicioDia: inicioDia})
       .andWhere("control.deletedAt IS NULL")
       .getMany();
 

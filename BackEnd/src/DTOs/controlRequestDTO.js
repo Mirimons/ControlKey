@@ -4,7 +4,7 @@ import Usuario from "../entities/usuario.js";
 import Labs from "../entities/labs.js";
 import Equipamento from "../entities/equipamento.js";
 import { AppDataSource } from "../database/data-source.js";
-import { IsNull } from "typeorm";
+import { IsNull, Like } from "typeorm";
 import validationUtils from "../utils/validationUtils.js";
 
 const controlRepository = AppDataSource.getRepository(Control);
@@ -161,7 +161,7 @@ class ControlRequestDTO extends BaseDTO {
         where: [
           { cpf: identificador.trim(), deletedAt: IsNull() },
           {
-            usuario_cad: { matricula: identificador.trim() },
+            usuario_cad: { matricula: identificador.trim()},
             deletedAt: IsNull(),
           },
         ],
