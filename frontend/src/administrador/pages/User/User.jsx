@@ -31,18 +31,109 @@ function User() {
 
   const [erros, setErros] = useState({});
 
-  console.log(usuarios);
-
   const modalRef = useRef();
 
   const cadExtra = tipo === "Administrador" || tipo === "Comum";
   const cadExtraSenha = tipo === "Administrador";
 
+  //Função para aplicar máscara no CPF
+  const mascaraCPF = (valor) => {
+    const apenasNumeros = valor.replace(/\D/g, "");
+
+    //Aplicar máscara: 000.000.000-00
+    if (apenasNumeros.length <= 3) {
+      return apenasNumeros;
+    } else if (apenasNumeros.length <= 6) {
+      return `${apenasNumeros.slice(0, 3)}.${apenasNumeros.slice(3)}`;
+    } else if (apenasNumeros.length <= 9) {
+      return `${apenasNumeros.slice(0, 3)}.${apenasNumeros.slice(
+        3,
+        6
+      )}.${apenasNumeros.slice(6)}`;
+    } else {
+      return `${apenasNumeros.slice(0, 3)}.${apenasNumeros.slice(
+        3,
+        6
+      )}.${apenasNumeros.slice(6, 9)}-${apenasNumeros.slice(9, 11)}`;
+    }
+  };
+
+  //Função para aplicar máscara no Telefone
+  const mascaraTelefone = (valor) => {
+    const apenasNumeros = valor.replace(/\D/g, "");
+
+    //Aplicar máscara: (00) 00000-0000
+    if (apenasNumeros.length <= 2) {
+      return `${apenasNumeros}`;
+    } else if (apenasNumeros.length <= 6) {
+      return `(${apenasNumeros.slice(0, 2)}) ${apenasNumeros.slice(2)}`;
+    } else if (apenasNumeros.length <= 10) {
+      return `(${apenasNumeros.slice(0, 2)}) ${apenasNumeros.slice(
+        2,
+        6
+      )}-${apenasNumeros.slice(6)}`;
+    } else {
+      return `(${apenasNumeros.slice(0, 2)}) ${apenasNumeros.slice(
+        2,
+        7
+      )}-${apenasNumeros.slice(7, 11)}`;
+    }
+  };
+
+  //Função para validar matrícula (apenas números, máx 6)
+  const validarRM = (valor) => {
+    const apenasNumeros = valor.replace(/\D/g, "");
+
+    //Limite de 6 dígitos
+    return apenasNumeros.slice(0, 6);
+  };
+
+  //Handle para campos com máscara
+  const handleCpfChange = (e) => {
+    const valorComMascara = mascaraCPF(e.target.value);
+    setCpf(valorComMascara);
+  };
+
+  const handleTelefoneChange = (e) => {
+    const valorComMascara = mascaraTelefone(e.target.value);
+    setTelefone(valorComMascara);
+  };
+
+  const handleMatriculaChange = (e) => {
+    const valorValidado = validarRM(e.target.value);
+    setMatricula(valorValidado);
+  };
+
+  //Função para validar o formulário antes de enviar
+  const validarFormulario = () => {
+    const novosErros = {};
+
+    //Matrícula
+    if (cadExtra && matricula) {
+      if (matricula.length !== 6) {
+        novosErros.matricula = "A matrícula deve ter exatamente 6 dígitos";
+      }
+    }
+
+    //CPF
+    if (cpf && cpf.length !== 14) {
+      novosErros.cpf = "CPF deve ter 11 dígitos";
+    }
+
+    //Telefone
+    if (telefone && telefone.length < 15) {
+      novosErros.telefone = "Telefone deve ter pelo menos 10 dígitos com DDD";
+    }
+
+    setErros(novosErros);
+    return Object.keys(novosErros).length === 0;
+  };
+
   const abrirModal = () => setModalAberto(true);
   const fecharModal = () => {
     setErros({});
     setModalAberto(false);
-  }
+  };
 
   const deleteUsuario = async () => {
     const result = await Swal.fire({
@@ -53,7 +144,7 @@ function User() {
       confirmButtonColor: "#dc3545", // Vermelho
       cancelButtonColor: "#6c757d", // Cinza
       confirmButtonText: "Sim, Excluir!",
-      cancelButtonText: "Cancelar"
+      cancelButtonText: "Cancelar",
     });
 
     if (!result.isConfirmed) {
@@ -92,12 +183,9 @@ function User() {
       });
 
       // Atualiza a lista de usuários
-      setUsuarios((prev) =>
-        prev.filter((u) => u.id !== usuarioSelecionado.id)
-      );
+      setUsuarios((prev) => prev.filter((u) => u.id !== usuarioSelecionado.id));
 
       fecharModal();
-
     } catch (err) {
       handleApiError(err, "Erro ao excluir usuário!");
       // console.error("Erro ao excluir usuário:", err);
@@ -137,9 +225,21 @@ function User() {
 
     setTipo(user.tipo?.desc_tipo || "");
     setNome(user.nome);
-    setCpf(user.cpf);
+
+    if(user.cpf) {
+      setCpf(mascaraCPF(user.cpf));
+    } else {
+      setCpf("");
+    }
+
     setEmail(user.usuario_cad?.email || "");
-    setTelefone(user.telefone);
+
+    if (user.telefone) {
+      setTelefone(mascaraTelefone(user.telefone));
+    }else {
+      setTelefone("")
+    }
+
     setMatricula(user.usuario_cad?.matricula || "");
     setData_nasc(user.data_nasc || "");
     setErros({});
@@ -163,7 +263,7 @@ function User() {
       .then((res) => setUsuarios(res.data.data))
       .catch((err) => {
         handleApiError(err, "Erro ao buscar usuário.");
-      })
+      });
     // .catch((err) => console.error("Erro ao buscar usuários:", err));
   };
 
@@ -174,6 +274,12 @@ function User() {
   const handleSalvar = (e) => {
     e.preventDefault();
     setErros({});
+
+    //Valida formulário antes de enviar
+    if(!validarFormulario()) {
+      return;
+    }
+
     const token = sessionStorage.getItem("token");
 
     if (!token) {
@@ -191,10 +297,13 @@ function User() {
       return;
     }
 
+    //Remove as máscaras antes de enviar para a API
+    const cpfSemMascara = cpf.replace(/\D/g, '');
+
     let payload = {
       tipo: tipo,
       nome,
-      cpf,
+      cpf: cpfSemMascara,
       data_nasc,
       telefone,
     };
@@ -238,22 +347,13 @@ function User() {
           fecharModal();
         })
         .catch((err) => {
-          const validationErrors = handleApiError(err, "Erro ao editar usuário!");
+          const validationErrors = handleApiError(
+            err,
+            "Erro ao editar usuário!"
+          );
           if (validationErrors) {
             setErros(validationErrors);
           }
-          // console.error("Erro ao editar:", err);
-          // // alert(err.response?.data?.error || "Erro ao editar usuário!");
-          // toast.error("Erro ao editar usuário!", {
-          //   position: "top-right",
-          //   autoClose: 2000,
-          //   hideProgressBar: false,
-          //   closeOnClick: false,
-          //   pauseOnHover: true,
-          //   draggable: true,
-          //   progress: undefined,
-          //   theme: "light",
-          // });
         });
     } else {
       api
@@ -285,23 +385,13 @@ function User() {
           fetchUsuarios();
         })
         .catch((err) => {
-          const validationErrors = handleApiError(err, "Erro ao cadastrar usuário!");
+          const validationErrors = handleApiError(
+            err,
+            "Erro ao cadastrar usuário!"
+          );
           if (validationErrors) {
             setErros(validationErrors);
           }
-
-          // console.error("Erro ao cadastrar:", err);
-          // // alert(err.response?.data?.error || "Erro ao cadastrar usuário!");
-          // toast.error("Erro ao cadastrar usuário!", {
-          //   position: "top-right",
-          //   autoClose: 2000,
-          //   hideProgressBar: false,
-          //   closeOnClick: false,
-          //   pauseOnHover: true,
-          //   draggable: true,
-          //   progress: undefined,
-          //   theme: "light",
-          // });
         });
     }
   };
@@ -404,7 +494,7 @@ function User() {
                     <td>{user.id}</td>
                     <td>{user.nome}</td>
                     <td>{user.tipo?.desc_tipo || user.id_tipo}</td>
-                    <td>{user.telefone}</td>
+                    <td>{user.telefone ? mascaraTelefone(user.telefone) : ''}</td>
                     <td>
                       <button
                         className="editar-btn"
@@ -439,7 +529,7 @@ function User() {
                     value={tipo}
                     onChange={(e) => setTipo(e.target.value)}
                     required
-                    className={erros.tipo ? 'input-error' : ''}
+                    className={erros.tipo ? "input-error" : ""}
                   >
                     <option value="" disabled hidden>
                       Selecione o tipo de usuário
@@ -449,9 +539,7 @@ function User() {
                     <option value="Terceiro">Terceiro</option>
                   </select>
                   {erros.tipo && (
-                    <div className="erro-validacao">
-                      {erros.tipo}
-                    </div>
+                    <div className="erro-validacao">{erros.tipo}</div>
                   )}
                 </div>
 
@@ -463,12 +551,10 @@ function User() {
                     value={nome}
                     onChange={(e) => setNome(e.target.value)}
                     required
-                    className={erros.nome ? 'input-error' : ''}
+                    className={erros.nome ? "input-error" : ""}
                   />
                   {erros.nome && (
-                    <div className="erro-validacao">
-                      {erros.nome}
-                    </div>
+                    <div className="erro-validacao">{erros.nome}</div>
                   )}
                 </div>
 
@@ -476,16 +562,15 @@ function User() {
                   <label>CPF:</label>
                   <input
                     type="text"
-                    placeholder="CPF"
+                    placeholder="000.000.000-00"
                     value={cpf}
-                    onChange={(e) => setCpf(e.target.value)}
+                    onChange={handleCpfChange}
                     required
-                    className={erros.cpf ? 'input-error' : ''}
+                    maxLength={14}
+                    className={erros.cpf ? "input-error" : ""}
                   />
                   {erros.cpf && (
-                    <div className="erro-validacao">
-                      {erros.cpf}
-                    </div>
+                    <div className="erro-validacao">{erros.cpf}</div>
                   )}
                 </div>
 
@@ -498,12 +583,10 @@ function User() {
                     onChange={(e) => setEmail(e.target.value)}
                     required={cadExtra}
                     disabled={tipo === "Terceiro"}
-                    className={erros.email ? 'input-error' : ''}
+                    className={erros.email ? "input-error" : ""}
                   />
                   {erros.email && (
-                    <div className="erro-validacao">
-                      {erros.email}
-                    </div>
+                    <div className="erro-validacao">{erros.email}</div>
                   )}
                 </div>
 
@@ -511,16 +594,15 @@ function User() {
                   <label>Telefone (celular):</label>
                   <input
                     type="tel"
-                    placeholder="Telefone (celular)"
+                    placeholder="(00) 00000-0000"
                     value={telefone}
-                    onChange={(e) => setTelefone(e.target.value)}
+                    onChange={handleTelefoneChange}
                     required
-                    className={erros.telefone ? 'input-error' : ''}
+                    maxLength={15}
+                    className={erros.telefone ? "input-error" : ""}
                   />
                   {erros.telefone && (
-                    <div className="erro-validacao">
-                      {erros.telefone}
-                    </div>
+                    <div className="erro-validacao">{erros.telefone}</div>
                   )}
                 </div>
 
@@ -530,15 +612,14 @@ function User() {
                     type="text"
                     placeholder="Matrícula"
                     value={matricula}
-                    onChange={(e) => setMatricula(e.target.value)}
+                    onChange={handleMatriculaChange}
                     required={cadExtra}
                     disabled={tipo === "Terceiro"}
-                    className={erros.matricula ? 'input-error' : ''}
+                    maxLength={6}
+                    className={erros.matricula ? "input-error" : ""}
                   />
                   {erros.matricula && (
-                    <div className="erro-validacao">
-                      {erros.matricula}
-                    </div>
+                    <div className="erro-validacao">{erros.matricula}</div>
                   )}
                 </div>
 
@@ -550,12 +631,10 @@ function User() {
                     value={data_nasc}
                     onChange={(e) => setData_nasc(e.target.value)}
                     required
-                    className={erros.data_nasc ? 'input-error' : ''}
+                    className={erros.data_nasc ? "input-error" : ""}
                   />
                   {erros.data_nasc && (
-                    <div className="erro-validacao">
-                      {erros.data_nasc}
-                    </div>
+                    <div className="erro-validacao">{erros.data_nasc}</div>
                   )}
                 </div>
 
@@ -565,19 +644,19 @@ function User() {
                     <input
                       type={mostrarSenha ? "text" : "password"}
                       placeholder={
-                        editando ? "Deixe em branco para manter a atual" : "Senha"
+                        editando
+                          ? "Deixe em branco para manter a atual"
+                          : "Senha"
                       }
                       value={senha}
                       onChange={(e) => setSenha(e.target.value)}
                       autoComplete="new-password"
                       disabled={tipo !== "Administrador"}
                       required={!editando && tipo === "Administrador"}
-                      className={erros.senha ? 'input-error' : ''}
+                      className={erros.senha ? "input-error" : ""}
                     />
                     {erros.senha && (
-                      <div className="erro-validacao">
-                        {erros.senha}
-                      </div>
+                      <div className="erro-validacao">{erros.senha}</div>
                     )}
                   </div>
 
@@ -602,13 +681,12 @@ function User() {
               </form>
             </div>
           </div>
-        )
-        }
-      </div >
+        )}
+      </div>
       <footer className="footer">
         <p>© 2025 - Sistema de Monitoramento de Laboratórios</p>
       </footer>
-    </div >
+    </div>
   );
 }
 

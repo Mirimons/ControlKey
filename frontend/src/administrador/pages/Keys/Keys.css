@@ -6,8 +6,8 @@ body {
 }
 
 .chaves-container {
-  margin-left: 243px;
-  padding-left: 70px;
+  margin-left: 200px;
+  padding-left: 10px;
   padding-top: 90px;
   padding-right: 90px;
   flex: 1;
@@ -134,12 +134,12 @@ body {
 }
 
 .chaves-tabela tbody tr:nth-child(even) {
-  background-color: #d8d8d8;
+  background-color: #e9eefb;
   /* Cinza/lilás claro (para linhas pares) */
 }
 
 .chaves-tabela tbody tr:nth-child(odd) {
-  background-color: #c7c7c7;
+  background-color: #ffffff;
   /* Branco (para linhas ímpares) */
 }
 

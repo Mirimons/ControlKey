@@ -1,18 +1,22 @@
 body {
-  height: 100%;              
-  margin: 0;                 
+  height: 100%;
+  margin: 0;
   padding: 0;
-  background: linear-gradient(135deg, #bdd8e9, #7bbde8); 
+  background: linear-gradient(135deg, #bdd8e9, #7bbde8);
 }
 
 .usuarios-container {
-  margin-left: 243px;
-  padding-left: 70px;
+  margin-left: 200px;
+  padding-left: 10px;
+  /* Reduza o padding lateral para ganhar espaço */
   padding-top: 90px;
-  padding-right: 90px;
+  padding-right: 10px;
+  /* Reduza o padding lateral para ganhar espaço */
   background: transparent;
   flex: 1;
-};
+}
+
+;
 
 .usuarios-header {
   display: flex;
@@ -87,12 +91,12 @@ body {
 }
 
 .usuarios-tabela tbody tr:nth-child(even) {
-  background-color: #d8d8d8;
+  background-color: #e9eefb;
   /* Cinza/lilás claro (para linhas pares) */
 }
 
 .usuarios-tabela tbody tr:nth-child(odd) {
-  background-color: #c7c7c7;
+  background-color: #ffffff;
   /* Branco (para linhas ímpares) */
 }
 
@@ -324,10 +328,11 @@ select:disabled {
 }
 
 .tabela-container {
-  width: 80%;
-  /* <-- A LARGURA DE 80% FICA AQUI */
-  height: 240px;
-  /* <-- A ALTURA MÁXIMA FICA AQUI */
+  width: 95%;
+  /* <-- Aumentado de 80% para 95% para mais largura */
+  /* height: 240px; <-- Removido para permitir que o conteúdo dite a altura */
+  max-height: 450px;
+  /* <-- Adicionado um limite máximo maior para mostrar mais linhas */
   overflow-y: auto;
   /* <-- A ROLAGEM FICA AQUI */
 
@@ -355,38 +360,48 @@ select:disabled {
 
 /* Adicione esta nova classe ao seu User.css */
 .form-group-campo {
-    /* Define a margem *ABAIXO* de CADA campo, controlando a separação entre blocos */
-    margin-bottom: 20px; 
+  /* Define a margem *ABAIXO* de CADA campo, controlando a separação entre blocos */
+  margin-bottom: 20px;
 }
 
 /* Garante que o input interno não adicione mais margem desnecessária */
 .form-group-campo input,
 .form-group-campo select {
-    margin-bottom: 0 !important; /* Remove a margem extra do input */
+  margin-bottom: 0 !important;
+  /* Remove a margem extra do input */
 }
 
 
 .erro-validacao {
-    /* Cor e tamanho da fonte */
-    color: #dc3545; /* Vermelho padrão para erros (Bootstrap danger) */
-    font-size: 0.85rem;
-    margin-top: 5px; /* Espaçamento acima da mensagem */
-    margin-bottom: 10px; /* Espaçamento abaixo da mensagem */
-    font-weight: 500; /* Um pouco mais de destaque */
-    padding-left: 5px; /* Pequeno recuo para separar do input */
+  /* Cor e tamanho da fonte */
+  color: #dc3545;
+  /* Vermelho padrão para erros (Bootstrap danger) */
+  font-size: 0.85rem;
+  margin-top: 5px;
+  /* Espaçamento acima da mensagem */
+  margin-bottom: 10px;
+  /* Espaçamento abaixo da mensagem */
+  font-weight: 500;
+  /* Um pouco mais de destaque */
+  padding-left: 5px;
+  /* Pequeno recuo para separar do input */
 }
 
 /* Estilo opcional para destacar o input com erro */
 .modal-conteudo input:not([type="button"]).input-error,
 .modal-conteudo select.input-error {
-    border: 1px solid #dc3545; /* Borda vermelha */
-    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25); /* Sombra suave vermelha */
+  border: 1px solid #dc3545;
+  /* Borda vermelha */
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+  /* Sombra suave vermelha */
 }
 
 .modal-conteudo label {
-    margin-bottom: 5px;
-    margin-top: 10px; /* Espaçamento entre campos */
-    display: block; /* Garante que a label ocupe a linha toda */
+  margin-bottom: 5px;
+  margin-top: 10px;
+  /* Espaçamento entre campos */
+  display: block;
+  /* Garante que a label ocupe a linha toda */
 }
 
 /* Ajuste nos inputs do modal para melhor visibilidade */
@@ -395,10 +410,12 @@ select:disabled {
 .modal-conteudo input[type="password"],
 .modal-conteudo input[type="date"],
 .modal-conteudo select {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 0; /* Remove a margem padrão para usar a margem do .erro-validacao ou da próxima label */
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box; /* Garante que padding e borda não aumentem o width total */
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 0;
+  /* Remove a margem padrão para usar a margem do .erro-validacao ou da próxima label */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  /* Garante que padding e borda não aumentem o width total */
 }

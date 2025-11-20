@@ -2,7 +2,7 @@ import { AppDataSource } from "../database/data-source.js";
 import Laboratorio from "../entities/labs.js";
 import Agendamento from "../entities/agendamento.js";
 import Control from "../entities/control.js";
-import { IsNull, MoreThan, Between } from "typeorm";
+import { IsNull, Between, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
 
 const labsRepository = AppDataSource.getRepository(Laboratorio);
 const agendamentoRepository = AppDataSource.getRepository(Agendamento);
@@ -35,15 +35,19 @@ class DashboardService {
       const reservasAgendadas = await agendamentoRepository.count({
         where: {
           status: "agendado",
-          data_utilizacao: MoreThan(hoje),
+          data_utilizacao: MoreThanOrEqual(hoje),
           deletedAt: IsNull(),
         },
       });
 
       //Chaves atrasadas (controls com status: pendente)
+      const ontem = new Date()
+      ontem.setDate(ontem.getDate() -1);
+
       const chavesAtrasadas = await controlRepository.count({
         where: {
           status: "pendente",
+          data_fim: LessThanOrEqual(ontem),
           deletedAt: IsNull(),
         },
       });
@@ -68,19 +72,22 @@ class DashboardService {
       agora.getMonth(),
       agora.getDate()
     );
+
     const amanha = new Date(hoje);
     amanha.setDate(amanha.getDate() + 1);
+
     const ontem = new Date(hoje);
     ontem.setDate(ontem.getDate() - 1);
-    const fimOntem = new Date(ontem);
-    fimOntem.setHours(23, 59, 59, 999);
+
+    // const fimOntem = new Date(ontem);
+    // fimOntem.setHours(23, 59, 59, 999);
 
     try {
       // Controls que estão atrasadas (pendentes) dia anterior
       const controlsAtrasadas = await controlRepository.find({
         where: {
           status: "pendente",
-          data_fim: Between(ontem, hoje),
+          data_fim: LessThanOrEqual(ontem),
           deletedAt: IsNull(),
         },
         relations: ["usuario", "laboratorio", "equipamento"],
@@ -97,7 +104,7 @@ class DashboardService {
         },
         relations: ["usuario", "laboratorio"],
         order: { data_utilizacao: "ASC", hora_inicio: "ASC" },
-        take: 15,
+        // take: 15,
       });
 
       return {

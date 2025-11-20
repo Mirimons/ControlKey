@@ -18,8 +18,15 @@ function Relatorio() {
     carregarRelatorios();
   }, []);
 
+  //Mapeamento dos status para exibição
+  const mapeamentoStatus = {
+    "aberto": "Retirado",
+    "fechado": "Devolvido",
+    "pendente": "Pendente"
+  }
+
   const carregarRelatorios = () => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) {
       console.error("Token não encontrado");
       return;
@@ -51,6 +58,8 @@ function Relatorio() {
               dataInicio: item.data_inicio || item.dataInicio,
               dataFim: item.data_fim || item.dataFim,
               status: item.status || "--",
+              //Aplica o mapeamento para exibição
+              statusDisplay: mapeamentoStatus[item.status] || item.status || "--",
               ciente: item.ciente ? "Sim" : "Não",
             }))
           : [];
@@ -73,7 +82,7 @@ function Relatorio() {
   // const formatarData = (dataString) => {
   //   if(!dataString) return "--";
   //   try {
-  //     const data = new Dtae(dataString)
+  //     const data = new Date(dataString)
   //     return data.toLocaleDateString("pt-BR")
   //   }catch(error) {
   //     return "Data inválida";
@@ -163,8 +172,8 @@ function Relatorio() {
               onChange={handleChange}
             >
               <option value="">Todos</option>
-              <option value="retirada">Aberto</option>
-              <option value="devolvido">Fechado</option>
+              <option value="aberto">Retirado</option>
+              <option value="fechado">Devolvido</option>
               <option value="pendente">Pendente</option>
             </select>
           </div>
@@ -188,8 +197,8 @@ function Relatorio() {
                 <th>Laboratório</th>
                 <th>Equipamento</th>
                 <th>Data</th>
-                <th>Hora Início</th>
-                <th>Hora Fim</th>
+                <th>Hora Retirada</th>
+                <th>Hora Devolução</th>
                 <th>Status</th>
                 <th>Ciente</th>
               </tr>
@@ -219,8 +228,8 @@ function Relatorio() {
                       {formatarHora(r.dataFim)}
                     </td>
                     <td>
-                      <span className={`status-${r.status?.toLowerCase()}`}>
-                        {r.status}
+                      <span className={`status-${r.statusDisplay?.toLowerCase()}`}>
+                        {r.statusDisplay}
                       </span>
                     </td>
                     <td>{r.ciente}</td>

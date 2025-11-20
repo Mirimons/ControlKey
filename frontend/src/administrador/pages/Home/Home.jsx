@@ -41,9 +41,14 @@ const Notificacoes = ({ notificacao, index }) => {
             <strong>Usuário:</strong> {notificacao.usuario}
           </p>
           <p>
-            <strong>Data:</strong>{" "}
-            {new Date(notificacao.data_inicio).toLocaleDateString("pt-BR")}
+            <strong>Horário:</strong> {notificacao.hora_inicio} -{" "}
+            {notificacao.hora_fim}
           </p>
+          {/* <p>
+            <strong>Data da retirada:</strong>{" "}
+            {new Date(notificacao.data_inicio).toLocaleDateString("pt-BR")}
+          </p> */}
+
         </div>
       </div>
     );

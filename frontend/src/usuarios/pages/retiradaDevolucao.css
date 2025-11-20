@@ -148,14 +148,44 @@ body {
   list-style: none;
 }
 
-.opcao-lab {
+/* Itens livres (clicáveis) */
+.opcao-lab.livre,
+.opcao-equip.livre {
   padding: 10px;
   cursor: pointer;
   transition: background 0.2s;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.opcao-lab:hover {
+.opcao-lab.livre:hover,
+.opcao-equip.livre:hover {
   background-color: #f0f8ff;
+}
+
+/* Itens ocupados (não clicáveis) */
+.opcao-lab.ocupado,
+.opcao-equip.ocupado {
+  padding: 10px;
+  cursor: not-allowed;
+  background-color: #f8f8f8;
+  color: #999;
+  border-bottom: 1px solid #eee;
+  opacity: 0.7;
+}
+
+
+/* Indicador visual para os ocupados */
+.opcao-lab.ocupado::before,
+.opcao-equip.ocupado::before {
+  content: "⛔ ";
+  margin-right: 5px;
+}
+
+/* Indicador para os livres */
+.opcao-lab.livre::before,
+.opcao-equip.livre::before {
+  /* content: "✅ "; */
+  margin-right: 5px;
 }
 
 .input-codigo {

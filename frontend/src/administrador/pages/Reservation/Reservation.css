@@ -69,12 +69,12 @@ body {
 }
 
 .reservas-tabela tbody tr:nth-child(even) {
-  background-color: #d8d8d8;
+  background-color: #e9eefb;
   /* Cinza/lilás claro (para linhas pares) */
 }
 
 .reservas-tabela tbody tr:nth-child(odd) {
-  background-color: #c7c7c7;
+  background-color: #ffffff;
   /* Branco (para linhas ímpares) */
 }
 

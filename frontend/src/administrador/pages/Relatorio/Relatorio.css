@@ -13,7 +13,7 @@ body {
 }
 
 .relatorio-container {
-  margin-left: 243px;
+  margin-left: 200px;
   padding: 80px 60px 30px 60px;
   flex: 1;
 }
@@ -120,7 +120,7 @@ body {
 }
 
 .relatorio-tabela tbody tr:nth-child(even) {
-  background-color: #f0f4ff;
+  background-color: #e9eefb;
 }
 
 .relatorio-tabela tbody tr:nth-child(odd) {
@@ -133,8 +133,8 @@ body {
 }
 
 /* ---------- STATUS COLORIDO ---------- */
-.status-retirada {
-  color: #ff8c00;
+.status-retirado {
+  color: #CC9900;
   font-weight: bold;
 }
 

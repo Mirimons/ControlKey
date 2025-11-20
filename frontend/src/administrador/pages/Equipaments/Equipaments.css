@@ -113,11 +113,11 @@ body {
 
 /* Linhas alternadas */
 .equipamentos-tabela tbody tr:nth-child(even) {
-  background-color: #d8d8d8;
+  background-color: #e9eefb;
 }
 
 .equipamentos-tabela tbody tr:nth-child(odd) {
-  background-color: #c7c7c7;
+  background-color: #ffffff;
 }
 
 /* Última linha sem borda inferior */

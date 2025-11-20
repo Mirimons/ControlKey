@@ -168,6 +168,14 @@ function Reservation() {
       });
     }
   };
+
+  const formatarData = (dataString) => {
+    if(!dataString) return "N/A"
+
+    const [ano, mes, dia] = dataString.split('-')
+    return `${dia}/${mes}/${ano}`
+  }
+
   const abrirModalNovo = () => {
     setEditando(false);
     setReservaSelecionada(null);
@@ -223,10 +231,15 @@ function Reservation() {
           if (typeof reserva.laboratorio === "string")
             nomeLab = reserva.laboratorio;
           else if (reserva.labs?.nome_lab) nomeLab = reserva.labs.nome_lab;
-          else if (reserva.laboratorio?.nome_lab) nomeLab = reserva.laboratorio.nome_lab;
+          else if (reserva.laboratorio?.nome_lab)
+            nomeLab = reserva.laboratorio.nome_lab;
           else if (reserva.id_labs) {
-            const labEncontrado = chaves.find(c => String(c.id) === String(reserva.id_labs));
-            nomeLab = labEncontrado ? labEncontrado.nome_lab : `Lab ${reserva.id_labs}`;
+            const labEncontrado = chaves.find(
+              (c) => String(c.id) === String(reserva.id_labs)
+            );
+            nomeLab = labEncontrado
+              ? labEncontrado.nome_lab
+              : `Lab ${reserva.id_labs}`;
           }
 
           let nomeProf = "N/A";
@@ -234,8 +247,12 @@ function Reservation() {
             nomeProf = reserva.nomeProfessor;
           else if (reserva.usuario?.nome) nomeProf = reserva.usuario.nome;
           else if (reserva.id_usuario) {
-            const solicitanteEncontrado = solicitantes.find(s => String(s.id) === String(reserva.id_usuario));
-            nomeProf = solicitanteEncontrado ? solicitanteEncontrado.nome : `Usuário ${reserva.id_usuario}`;
+            const solicitanteEncontrado = solicitantes.find(
+              (s) => String(s.id) === String(reserva.id_usuario)
+            );
+            nomeProf = solicitanteEncontrado
+              ? solicitanteEncontrado.nome
+              : `Usuário ${reserva.id_usuario}`;
           }
 
           return {
@@ -271,8 +288,7 @@ function Reservation() {
         let data = [];
         if (Array.isArray(res.data)) data = res.data;
         else if (res.data && Array.isArray(res.data.data)) data = res.data.data;
-        else if (res.data && Array.isArray(res.data.labs))
-          data = res.data.labs;
+        else if (res.data && Array.isArray(res.data.labs)) data = res.data.labs;
         else if (res.data) data = [res.data];
         setChaves(data);
       })
@@ -301,9 +317,7 @@ function Reservation() {
     carregarChaves();
     carregarSolicitantes();
     carregarReservas();
-
   }, []);
-
 
   const handleSalvar = (e) => {
     e.preventDefault();
@@ -338,7 +352,10 @@ function Reservation() {
         })
         .catch((err) => {
           console.error("Erro ao atualizar reserva:", err);
-          const validationErrors = handleApiError(err, "Erro ao atualizar reserva!");
+          const validationErrors = handleApiError(
+            err,
+            "Erro ao atualizar reserva!"
+          );
           if (validationErrors) {
             setErrosValidacao(validationErrors);
           }
@@ -355,7 +372,10 @@ function Reservation() {
         })
         .catch((err) => {
           console.error("Erro ao realizar uma reserva:", err);
-          const validationErrors = handleApiError(err, "Erro ao criar reserva!");
+          const validationErrors = handleApiError(
+            err,
+            "Erro ao criar reserva!"
+          );
           if (validationErrors) {
             setErrosValidacao(validationErrors);
           }
@@ -458,9 +478,7 @@ function Reservation() {
                   <tr key={r.id}>
                     <td>{r.nomeProfessor}</td>
                     <td>{r.laboratorio}</td>
-                    <td>
-                      {new Date(r.dataUtilizacao).toLocaleDateString("pt-BR")}
-                    </td>
+                    <td>{formatarData(r.dataUtilizacao)}</td>
                     <td>{r.horaInicio}</td>
                     <td>{r.horaFim}</td>
                     <td>{r.finalidade}</td>
@@ -503,7 +521,7 @@ function Reservation() {
                   onChange={setNomeProfessor}
                   placeholder="Selecione o solicitante"
                   required
-                  className={errosValidacao.id_usuario ? 'input-error' : ''}
+                  className={errosValidacao.id_usuario ? "input-error" : ""}
                 />
                 {errosValidacao.id_usuario && (
                   <div className="erro-validacao">
@@ -518,12 +536,10 @@ function Reservation() {
                   onChange={setLaboratorio}
                   placeholder="Selecione o laboratório"
                   required
-                  className={errosValidacao.id_labs ? 'input-error' : ''}
+                  className={errosValidacao.id_labs ? "input-error" : ""}
                 />
                 {errosValidacao.id_labs && (
-                  <div className="erro-validacao">
-                    {errosValidacao.id_labs}
-                  </div>
+                  <div className="erro-validacao">{errosValidacao.id_labs}</div>
                 )}
 
                 <label>Data de utilização:</label>
@@ -533,7 +549,9 @@ function Reservation() {
                   onChange={(e) => setDataUtilizacao(e.target.value)}
                   required
                   min={new Date().toISOString().split("T")[0]}
-                  className={errosValidacao.data_utilizacao ? 'input-error' : ''}
+                  className={
+                    errosValidacao.data_utilizacao ? "input-error" : ""
+                  }
                 />
                 {errosValidacao.data_utilizacao && (
                   <div className="erro-validacao">
@@ -547,7 +565,7 @@ function Reservation() {
                   value={horaInicio}
                   onChange={(e) => setHoraInicio(e.target.value)}
                   required
-                  className={errosValidacao.hora_inicio ? 'input-error' : ''}
+                  className={errosValidacao.hora_inicio ? "input-error" : ""}
                 />
                 {errosValidacao.hora_inicio && (
                   <div className="erro-validacao">
@@ -561,7 +579,7 @@ function Reservation() {
                   value={horaFim}
                   onChange={(e) => setHoraFim(e.target.value)}
                   required
-                  className={errosValidacao.hora_fim ? 'input-error' : ''}
+                  className={errosValidacao.hora_fim ? "input-error" : ""}
                 />
                 {errosValidacao.hora_fim && (
                   <div className="erro-validacao">
@@ -575,7 +593,7 @@ function Reservation() {
                   value={finalidade}
                   onChange={(e) => setFinalidade(e.target.value)}
                   required
-                  className={errosValidacao.finalidade ? 'input-error' : ''}
+                  className={errosValidacao.finalidade ? "input-error" : ""}
                 />
                 {errosValidacao.finalidade && (
                   <div className="erro-validacao">
@@ -588,18 +606,15 @@ function Reservation() {
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                   required
-                  className={errosValidacao.status ? 'input-error' : ''}
+                  className={errosValidacao.status ? "input-error" : ""}
                 >
                   <option value="agendado">Agendado</option>
                   <option value="concluído">Concluído</option>
                   <option value="cancelado">Cancelado</option>
                 </select>
                 {errosValidacao.status && (
-                  <div className="erro-validacao">
-                    {errosValidacao.status}
-                  </div>
+                  <div className="erro-validacao">{errosValidacao.status}</div>
                 )}
-
 
                 <div className="modal-botoes">
                   <button
