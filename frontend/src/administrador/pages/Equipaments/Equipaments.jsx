@@ -254,12 +254,6 @@ function Equipaments() {
           <h1>Equipamentos</h1>
         </header>
 
-        <div className="equipamentos-acoes">
-          <button type="button" onClick={abrirModal}>
-            Adicionar Equipamento
-          </button>
-        </div>
-
         <div className="equipamentos-filtros">
           <div>
             <h3>Equipamento:</h3>
@@ -296,7 +290,12 @@ function Equipaments() {
               <option value="ocupado">Ocupado</option>
             </select>
           </div>
+        </div>
 
+        <div className="btn-add-container">
+          <button className="btn-add" type="button" onClick={abrirModal}>
+            Adicionar Equipamento
+          </button>
         </div>
 
         <div className="tabela-container">
@@ -405,15 +404,17 @@ function Equipaments() {
                 )}
 
                 <div className="modal-botoes">
-                  <button type="button" onClick={deleteEquipamento}>
-                    <FaTrash />
-                  </button>
+                  {editando && (
+                    <button type="button" onClick={deleteEquipamento}>
+                      <FaTrash />
+                    </button>
+                  )}
+
                   <button type="button" onClick={fecharModal}>
                     Cancelar
                   </button>
-                  <button type="submit">
-                    {editando ? "Atualizar" : "Salvar"}
-                  </button>
+
+                  <button type="submit">Salvar</button>
                 </div>
               </form>
             </div>

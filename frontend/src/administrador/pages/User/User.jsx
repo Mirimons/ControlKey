@@ -226,7 +226,7 @@ function User() {
     setTipo(user.tipo?.desc_tipo || "");
     setNome(user.nome);
 
-    if(user.cpf) {
+    if (user.cpf) {
       setCpf(mascaraCPF(user.cpf));
     } else {
       setCpf("");
@@ -236,7 +236,7 @@ function User() {
 
     if (user.telefone) {
       setTelefone(mascaraTelefone(user.telefone));
-    }else {
+    } else {
       setTelefone("")
     }
 
@@ -276,7 +276,7 @@ function User() {
     setErros({});
 
     //Valida formulário antes de enviar
-    if(!validarFormulario()) {
+    if (!validarFormulario()) {
       return;
     }
 
@@ -439,12 +439,6 @@ function User() {
           <h1>Usuários</h1>
         </header>
 
-        <div className="usuarios-acoes">
-          <button type="button" onClick={abrirModalNovo}>
-            Adicionar Usuário
-          </button>
-        </div>
-
         <div className="usuarios-filtros">
           <div>
             <h3>Nome completo</h3>
@@ -471,9 +465,9 @@ function User() {
               <option value="Terceiro">Terceiro</option>
             </select>
           </div>
-          {/* <button onClick={aplicarFiltros} className="botao-pesquisa">
-            <FaSearch /> Pesquisar
-          </button> */}
+          <button className="btn-add" type="button" onClick={abrirModalNovo}>
+            Adicionar Usuário
+          </button>
         </div>
 
         <div className="tabela-container">
@@ -670,12 +664,16 @@ function User() {
                 </div>
 
                 <div className="modal-botoes">
-                  <button type="button" onClick={deleteUsuario}>
-                    <FaTrash />
-                  </button>
+                  {editando && (
+                    <button type="button" onClick={deleteUsuario}>
+                      <FaTrash />
+                    </button>
+                  )}
+
                   <button type="button" onClick={fecharModal}>
                     Cancelar
                   </button>
+
                   <button type="submit">Salvar</button>
                 </div>
               </form>

@@ -270,9 +270,6 @@ function Keys() {
           <h1>Chaves</h1>
         </header>
 
-        <div className="chaves-acoes">
-          <button onClick={abrirModalNovo}>Adicionar Chave</button>
-        </div>
 
         <div className="chaves-filtros">
           <div>
@@ -309,6 +306,9 @@ function Keys() {
               <option value="ocupado">Ocupado</option>
             </select>
           </div>
+          <button className="btn-add" type="button" onClick={abrirModalNovo}>
+            Adicionar Chave
+          </button>
         </div>
 
         <div className="tabela-container">
@@ -408,12 +408,16 @@ function Keys() {
                 )}
 
                 <div className="modal-botoes">
-                  <button type="button" onClick={deleteLabs}>
-                    <FaTrash />
-                  </button>
+                  {editando && (
+                    <button type="button" onClick={deleteLabs}>
+                      <FaTrash />
+                    </button>
+                  )}
+
                   <button type="button" onClick={fecharModal}>
                     Cancelar
                   </button>
+
                   <button type="submit">Salvar</button>
                 </div>
               </form>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "./retiradaDevolucao.css";
 import api from "../../services/api";
+import Swal from "sweetalert2";
 
 function RetiradaDevolucao() {
   const [identificacao, setIdentificacao] = useState("");
@@ -64,8 +65,8 @@ function RetiradaDevolucao() {
 
   // Função para retirar
   const handleRetirar = async () => {
-    if (!professor) return alert("Professor não identificado!");
-    if (!tipo) return alert("Selecione se é chave ou equipamento!");
+    if (!professor) return Swal.fire("Atenção", "Professor não identificado!", "warning");;
+    if (!tipo) return Swal.fire("Atenção", "Selecione se é chave ou equipamento!", "warning");
 
     try {
       //Normaliza a identificação antes de enviar
@@ -80,7 +81,7 @@ function RetiradaDevolucao() {
       } else if (tipo === "equipamento" && equipSelecionado) {
         payload.id_equip = equipSelecionado.id;
       } else {
-        alert("Selecione um item válido para retirar!");
+        Swal.fire("Atenção", "Selecione um item válido para retirar!", "warning");
         return;
       }
 
@@ -92,25 +93,32 @@ function RetiradaDevolucao() {
 
       //Usando a rota da control no back
       const response = await api.post("/control/retirada", payload);
-      alert(
-        `✅ ${
-          tipo === "chave" ? "Laboratório" : "Equipamento"
-        } retirado com sucesso!`
-      );
+
+      Swal.fire({
+        icon: "success",
+        title: "Retirada Registrada!",
+        text: `${tipo === "chave" ? "Laboratório" : "Equipamento"} retirado com sucesso!`,
+        timer: 2500,
+        showConfirmButton: false
+      });
       console.log("Retirada registrada:", response.data);
 
       // Reseta o formulário após sucesso
       resetarFormulario();
     } catch (err) {
       console.error("Erro ao retirar:", err);
-      alert("Erro ao retirar. Tente novamente.");
+      Swal.fire({
+        icon: "error",
+        title: "Erro na Retirada",
+        text: "Não foi possível registrar a retirada. Verifique se o item está livre ou se há alguma reserva pendente.",
+      });
     }
   };
 
   // Função para devolver
   const handleDevolver = async () => {
-    if (!professor) return alert("Professor não identificado!");
-    if (!tipo) return alert("Selecione se é chave ou equipamento!");
+    if (!professor) return Swal.fire("Atenção", "Professor não identificado!", "warning");
+    if (!tipo) return Swal.fire("Atenção", "Selecione se é chave ou equipamento!", "warning");
 
     try {
       const identificadorNormalizado = normalizarRM(identificacao);
@@ -122,7 +130,7 @@ function RetiradaDevolucao() {
       } else if (tipo === "equipamento" && equipSelecionado) {
         payload.id_equip = equipSelecionado.id;
       } else {
-        alert("Selecione um item válido para devolver!");
+        Swal.fire("Atenção", "Selecione um item válido para devolver!", "warning");
         return;
       }
 
@@ -133,18 +141,26 @@ function RetiradaDevolucao() {
       });
 
       const response = await api.put("/control/devolucao", payload);
-      alert(
-        `✅ ${
-          tipo === "chave" ? "Laboratório" : "Equipamento"
-        } devolvido com sucesso!`
-      );
+
+      Swal.fire({
+        icon: "success",
+        title: "Devolução Registrada!",
+        text: `${tipo === "chave" ? "Laboratório" : "Equipamento"} devolvido com sucesso!`,
+        timer: 2500,
+        showConfirmButton: false
+      });
+
       console.log("Devolução registrada:", response.data);
 
       // Reseta o formulário após sucesso
       resetarFormulario();
     } catch (err) {
       console.error("Erro ao devolver:", err);
-      alert("Erro ao devolver. Tente novamente.");
+      Swal.fire({
+        icon: "error",
+        title: "Erro na Devolução",
+        text: "Não foi possível registrar a devolução. Verifique se o item está realmente em posse ou se o código está correto.",
+      });
     }
   };
 
@@ -379,9 +395,8 @@ function RetiradaDevolucao() {
                     <li
                       key={lab.id}
                       onClick={() => handleSelecionarLab(lab)}
-                      className={`opcao-lab ${
-                        lab.status === "livre" ? "livre" : "ocupado"
-                      }`}
+                      className={`opcao-lab ${lab.status === "livre" ? "livre" : "ocupado"
+                        }`}
                     >
                       {lab.nome_lab} - {lab.desc_lab}
                       {lab.status !== "livre" && " (Ocupado)"}
@@ -400,9 +415,8 @@ function RetiradaDevolucao() {
                     <li
                       key={equip.id}
                       onClick={() => handleSelecionarEquip(equip)}
-                      className={`opcao-equip ${
-                        equip.status === "livre" ? "livre" : "ocupado"
-                      }`}
+                      className={`opcao-equip ${equip.status === "livre" ? "livre" : "ocupado"
+                        }`}
                     >
                       {equip.tipo?.desc_tipo} - {equip.desc_equip}
                       {equip.status !== "livre" && " (Ocupado)"}

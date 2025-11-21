@@ -170,7 +170,7 @@ function Reservation() {
   };
 
   const formatarData = (dataString) => {
-    if(!dataString) return "N/A"
+    if (!dataString) return "N/A"
 
     const [ano, mes, dia] = dataString.split('-')
     return `${dia}/${mes}/${ano}`
@@ -427,9 +427,6 @@ function Reservation() {
         <header>
           <h1>Reservas</h1>
         </header>
-        <div className="reservas-acoes">
-          <button onClick={abrirModalNovo}>Reservar</button>
-        </div>
 
         <div className="reservas-filtros">
           <div>
@@ -450,6 +447,9 @@ function Reservation() {
               onChange={(e) => setFiltroAmbiente(e.target.value)}
             />
           </div>
+          <button className="btn-add" type="button" onClick={abrirModalNovo}>
+            Reservar
+          </button>
         </div>
 
         <div className="tabela-container">
@@ -617,13 +617,11 @@ function Reservation() {
                 )}
 
                 <div className="modal-botoes">
-                  <button
-                    type="button"
-                    onClick={deleteAgendamento}
-                    disabled={!editando || !reservaSelecionada}
-                  >
-                    <FaTrash />
-                  </button>
+                  {editando && reservaSelecionada && (
+                    <button type="button" onClick={deleteAgendamento}>
+                      <FaTrash />
+                    </button>
+                  )}
                   <button type="button" onClick={() => setModalAberto(false)}>
                     Cancelar
                   </button>

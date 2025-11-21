@@ -47,22 +47,23 @@ body {
   border-radius: 6px;
 }
 
-.usuarios-acoes {
-  margin-bottom: 20px;
-}
-
-.usuarios-acoes button {
+/* Botão de adicionar usuário dentro dos filtros */
+.btn-add {
   padding: 10px 15px;
-  margin-right: 10px;
+  background-color: #7BBDE8;
   border: none;
   border-radius: 6px;
-  background-color: #7BBDE8;
-  color: rgb(0, 0, 0);
+  color: #000;
   cursor: pointer;
+  font-weight: bold;
+  height: 42px;
+  /* Alinha com altura dos inputs */
+  margin-top: 60px;
+  /* Desce o botão para alinhar com a base dos inputs */
   transition: background 0.3s;
 }
 
-.usuarios-acoes button:hover {
+.btn-add:hover {
   background-color: #6e96b1;
 }
 
