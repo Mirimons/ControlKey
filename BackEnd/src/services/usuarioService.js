@@ -20,9 +20,11 @@ class UsuarioService {
       .createQueryBuilder("usuario")
       .leftJoinAndSelect("usuario.tipo", "tipo")
       .leftJoinAndSelect("usuario.usuario_cad", "usuario_cad")
-      .where("usuario_cad.matricula = :identificacao OR usuario.cpf = :identificacao", {
+      .where("(usuario_cad.matricula = :identificacao OR usuario.cpf = :identificacao)", {
         identificacao,
       })
+      .andWhere("usuario.deletedAt IS NULL")
+      .andWhere("(usuario_cad.deletedAt IS NULL OR usuario_cad.id_usuario IS NULL)")
       .getOne();
   
     return usuario;
@@ -46,7 +48,8 @@ class UsuarioService {
       .createQueryBuilder("usuario")
       .leftJoinAndSelect("usuario.tipo", "tipo")
       .leftJoinAndSelect("usuario.usuario_cad", "usuario_cad")
-      .where("usuario.deletedAt IS NULL");
+      .where("usuario.deletedAt IS NULL")
+      .where("(usuario_cad.deletedAt IS NULL OR usuario_cad.id_usuario IS NULL)")
 
     // Filtro por nome
     if (nome) {
@@ -215,8 +218,104 @@ class UsuarioService {
       throw new Error("O id precisa ser um valor numérico.");
     }
 
-    await usuarioRepository.update({ id }, { deletedAt: new Date() });
-    return true;
+    const queryRunner = AppDataSource.createQueryRunner()
+    await queryRunner.connect()
+    await queryRunner;queryRunner.startTransaction()
+  
+    try {
+      //Primeiro verifica se existe registro ativo em usuario_cad
+      const usuarioCad = await usuarioCadRepository.findOne({
+        where: {
+          id_usuario: id,
+          deletedAt: IsNull()
+        }
+      });
+
+      //Se existir, faz soft delete em usuario_cad
+      if(usuarioCad) {
+        await usuarioCadRepository.update(
+          {id_usuario: id},
+          {deletedAt: new Date()}
+        );
+      }
+      //Depois faz o soft delete em usuario
+      await usuarioRepository.update({ id }, { deletedAt: new Date() });
+
+      await queryRunner.commitTransaction()
+      return true;
+    }catch(error) {
+      await queryRunner.rollbackTransaction()
+      throw error
+    } finally {
+      await queryRunner.release()
+    }
+  }
+
+  // MÉTODOS PARA ATIVAÇÃO/REATIVAÇÃO
+
+  async getInactiveUsuarios() {
+    const queryBuilder = usuarioRepository
+      .createQueryBuilder("usuario")
+      .leftJoinAndSelect("usuario.tipo", "tipo")
+      .leftJoinAndSelect("usuario.usuario_cad", "usuario_cad")
+      .withDeleted() //Inclui registros deletados
+      .where("usuario.deletedAt IS NOT NULL") //Apenas os desativados
+    
+      queryBuilder.orderBy("usuario.deletedAt", "DESC")
+
+      const [usuarios, total] = await queryBuilder.getManyAndCount()
+
+      return {
+        data: usuarios,
+        total
+      };
+  }
+
+  async getUsuarioByIdIncludingInactive(id) {
+    return await usuarioRepository.findOne({
+      where: {id},
+      relations: ["tipo", "usuario_cad"],
+      withDeleted: true //Inclue registros com deletedAt preenchido
+    });
+  }
+
+  //Função para reativar usuário
+  async activateUsuario(id) {
+    if (isNaN(Number(id))) {
+      throw new Error("O id precisa ser um valor numérico.")
+    }
+
+    const queryRunner = AppDataSource.createQueryRunner()
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
+
+    try {
+      //Primeiro reativa o usuário principal
+      await usuarioRepository.update({id}, {deletedAt: null})
+
+      //Verifica se existe usuario_cad (incluindo desativados) para reativar
+      const usuarioCad = await usuarioCadRepository.findOne({
+        where: {id_usuario: id},
+        withDeleted: true
+      });
+
+      if (usuarioCad) {
+        await usuarioCadRepository.update(
+          {id_usuario: id},
+          {deletedAt: null}
+        );
+      }
+
+      await queryRunner.commitTransaction();
+
+      //Retorna o usuário reativado
+      return await this.getUsuarioById(id)
+    }catch (error) {
+      await queryRunner.rollbackTransaction()
+      throw error
+    } finally {
+      await queryRunner.release()
+    }
   }
 }
 
