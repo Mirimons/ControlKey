@@ -1,12 +1,14 @@
 import Control from "../entities/control.js";
-import Labs from "../entities/labs.js"
-import Equipamento from "../entities/equipamento.js"
+import Labs from "../entities/labs.js";
+import Equipamento from "../entities/equipamento.js";
+import Usuario from "../entities/usuario.js";
 import { AppDataSource } from "../database/data-source.js";
 import { IsNull } from "typeorm";
 
 const controlRepository = AppDataSource.getRepository(Control);
 const labsRepository = AppDataSource.getRepository(Labs)
 const equipamentoRepository = AppDataSource.getRepository(Equipamento)
+const usuarioRepository = AppDataSource.getRepository(Usuario)
 
 class ControlService {
   async getControlById(id) {
@@ -98,6 +100,42 @@ class ControlService {
       };
     } catch (error) {
       throw new Error(`Erro ao buscar controles: ${error.message}`);
+    }
+  }
+
+  //Get para a devolução
+  async getControlsByUsuario(identificador) {
+    try{
+      //Primeiro busca o usuário pelo identificador
+      const usuario = await usuarioRepository.findOne({
+        where: [
+          {cpf: identificador, deletedAt:IsNull()},
+          {usuario_cad: {matricula: identificador}, deletedAt: IsNull()}
+        ],
+        relations: ["usuario_cad"],
+      });
+
+      if(!usuario) {
+        throw new Error("Usuário não encontrado");
+      }
+
+      //Busca controles em aberto do usuário
+      const controles = await controlRepository
+        .createQueryBuilder("control")
+        .leftJoinAndSelect("control.usuario", "usuario")
+        .leftJoinAndSelect("usuario.usuario_cad", "usuario_cad")
+        .leftJoinAndSelect("control.equipamento", "equipamento")
+        .leftJoinAndSelect("equipamento.tipo", "tipo")
+        .leftJoinAndSelect("control.laboratorio", "laboratorio")
+        .where("control.id_usuario = :id_usuario", {id_usuario: usuario.id})
+        .andWhere("control.status = :status", {status: "aberto"})
+        .andWhere("control.deletedAt IS NULL")
+        .orderBy("control.data_inicio", "DESC")
+        .getMany()
+
+        return controles;
+    }catch(error) {
+      throw new Error(`Erro ao buscar controles do usuário: ${error.message}`)
     }
   }
 

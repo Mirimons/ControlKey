@@ -4,7 +4,7 @@ import Usuario from "../entities/usuario.js";
 import Labs from "../entities/labs.js";
 import Equipamento from "../entities/equipamento.js";
 import { AppDataSource } from "../database/data-source.js";
-import { IsNull, Like } from "typeorm";
+import { IsNull} from "typeorm";
 import validationUtils from "../utils/validationUtils.js";
 
 const controlRepository = AppDataSource.getRepository(Control);

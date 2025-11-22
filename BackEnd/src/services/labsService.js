@@ -20,16 +20,15 @@ class LabsService {
       },
     });
   }
-  
 
   async getLabs(filtros = {}) {
     try {
-      const { 
-        nome_lab, 
-        desc_lab, 
-        status, 
-        // page = 1, 
-        // limit = 10 
+      const {
+        nome_lab,
+        desc_lab,
+        status,
+        // page = 1,
+        // limit = 10
       } = filtros;
 
       const query = labsRepository
@@ -107,8 +106,59 @@ class LabsService {
   }
 
   async deleteLabs(id) {
+    if (isNaN(Number(id))) {
+      throw new Error("O id precisa ser numérico.");
+    }
+
+    const lab = await this.getLabById(id);
+    if (!lab) {
+      throw new Error("Laboratório não encontrado.");
+    }
+
     await labsRepository.update({ id }, { deletedAt: new Date() });
     return true;
+  }
+
+  //MÉTODOS PARA ATIVAÇÃO/REATIVAÇÃO
+  //Get apenas com os inativos
+  async getInactiveLab() {
+    const queryBuilder = labsRepository
+      .createQueryBuilder("labs")
+      .withDeleted()
+      .where("labs.deletedAt IS NOT NULL");
+
+    queryBuilder.orderBy("labs.deletedAt", "DESC");
+
+    const [labs, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      data: labs,
+      total,
+    };
+  }
+
+  //Get que inclui os inativos
+  async getLabByIdIncludingInactive(id) {
+    return await labsRepository.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+  }
+
+  //Função para reativar laboratório
+  async activateLab(id) {
+    if (isNaN(Number(id))) {
+      throw new Error("O id precisa ser um valor numérico.");
+    }
+
+    const labInativo = await this.getLabByIdIncludingInactive(id);
+    if (!labInativo) {
+      throw new Error("Laboratório não encontrado.");
+    }
+
+    await labsRepository.update({ id }, { deletedAt: null });
+
+    return await this.getLabById(id);
   }
 }
 

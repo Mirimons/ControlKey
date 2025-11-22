@@ -7,12 +7,12 @@ const tipoEquipRepository = AppDataSource.getRepository(TipoEquip);
 const equipamentoRepository = AppDataSource.getRepository(Equip);
 
 class EquipService {
-   async getEquipById(id) {
-      return await equipamentoRepository.findOne({
-        where: { id, deletedAt: IsNull() },
-        relations: ["tipo"],
-      });
-    }
+  async getEquipById(id) {
+    return await equipamentoRepository.findOne({
+      where: { id, deletedAt: IsNull() },
+      relations: ["tipo"],
+    });
+  }
 
   async getEquip(filtros = {}) {
     const {
@@ -44,10 +44,9 @@ class EquipService {
         tipo_desc: `%${tipo_desc}%`,
       });
     }
-    queryBuilder
-      .orderBy("equipamento.desc_equip", "ASC")
-      // .skip(skip)
-      // .take(limit);
+    queryBuilder.orderBy("equipamento.desc_equip", "ASC");
+    // .skip(skip)
+    // .take(limit);
 
     const [equipamentos, total] = await queryBuilder.getManyAndCount();
 
@@ -107,9 +106,64 @@ class EquipService {
       relations: ["tipo"],
     });
   }
+
   async deleteEquip(id) {
+    if (isNaN(Number(id))) {
+      throw new Error("O id precisa ser numérico.");
+    }
+
+    const equip = await this.getEquipById(id);
+    if (!equip) {
+      throw new Error("Equipamento não encontrado.");
+    }
+
     await equipamentoRepository.update({ id }, { deletedAt: new Date() });
     return true;
   }
+
+  //MÉTODOS PARA ATIVAÇÃO/REATIVAÇÃO
+  //Get apenas com os inativos
+  async getInactiveEquip() {
+    const queryBuilder = equipamentoRepository
+      .createQueryBuilder("equipamento")
+      .leftJoinAndSelect("equipamento.tipo", "tipo")
+      .withDeleted()
+      .where("equipamento.deletedAt IS NOT NULL");
+
+    queryBuilder.orderBy("equipamento.deletedAt", "DESC");
+
+    const [equipamentos, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      data: equipamentos,
+      total,
+    };
+  }
+
+  //Get que inclui os inativos
+  async getEquipByIdIncludingInactive(id) {
+    return await equipamentoRepository.findOne({
+      where: { id },
+      relations: ["tipo"],
+      withDeleted: true,
+    });
+  }
+
+  //Função para reativar equipamento
+  async activateEquip(id) {
+    if (isNaN(Number(id))) {
+      throw new Error("O id precisa ser um valor numérico.");
+    }
+
+    const equipInativo = await this.getEquipByIdIncludingInactive(id);
+    if (!equipInativo) {
+      throw new Error("Equipamento não encontrado.");
+    }
+
+    await equipamentoRepository.update({ id }, { deletedAt: null });
+
+    return await this.getEquipById(id);
+  }
 }
+
 export default new EquipService();

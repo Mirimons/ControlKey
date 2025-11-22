@@ -60,6 +60,42 @@ route.get("/", validateGetLabs, async (request, response) => {
   }
 });
 
+//NOVAS ROTAS PARA LABORATÓRIOS DESATIVADOS
+//Listar apenas os laboratórios inativos
+route.get("/inativos/listar", async (request, response) => {
+  try {
+    const labsInativos = await labsService.getInactiveLab();
+    return response.status(200).json(labsInativos);
+  } catch (error) {
+    console.error("Erro ao listar equipamentos inativos: ", error);
+    return response.status(500).json({
+      response: "Erro interno no servidor.",
+      error: getErrorMessage(error),
+    });
+  }
+});
+
+//Lostar por ID todos (ativos e inativos)
+route.get("/:id/inativo", async (request, response) => {
+  try {
+    const { id } = request.params;
+    const lab = await labsService.getLabByIdIncludingInactive(id);
+
+    if (!lab) {
+      return response
+        .status(404)
+        .json({ response: "Laboratório não encontrado." });
+    }
+    return response.status(200).json(lab);
+  } catch (error) {
+    console.error("Erro ao buscar laboratório (incluindo inativo): ", error);
+    return response.status(500).json({
+      response: "Erro interno no servidor.",
+      error: getErrorMessage(error),
+    });
+  }
+});
+
 route.post("/", validateCreate, async (request, response) => {
   try {
     const newLab = await labsService.postLabs(request.validatedData);
@@ -93,6 +129,24 @@ route.put("/:id", validateUpdate, async (request, response) => {
     console.error("Erro ao atualizar laboratório: ", error);
 
     return response.status(500).json({ error: error.message });
+  }
+});
+
+route.patch("/:id/reativar", async (request, response) => {
+  try {
+    const { id } = request.params;
+    const labReativado = await labsService.activateLab(id);
+
+    return response.status(200).json({
+      response: "Laboratório reativado com sucesso!",
+      data: labReativado,
+    });
+  } catch (error) {
+    console.error("Erro ao reativar laboratório: ", error);
+    if (error.message.includes("não encontrado")) {
+      return response.status(404).json({ error: error.message });
+    }
+    return response.status(400).json({ error: error.message });
   }
 });
 

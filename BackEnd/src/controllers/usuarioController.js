@@ -29,7 +29,7 @@ function handleUsuarioError(response, error) {
   if (error.code?.startsWith("ER_") || error.errno) {
     return response.status(409).json({
       response: handleDatabaseError(error),
-      error: "Erro de banco de dados",
+      error: "Erro no banco de dados",
     });
   }
 
@@ -106,6 +106,7 @@ route.get("/", validateGetUsuarios, async (request, response) => {
 });
 
 //NOVAS ROTAS PARA USUÁRIOS DESATIVADOS
+//Listar apenas os usuários inativos
 route.get("/inativos/listar", async (request, response) => {
   try {
     const usuariosInativos = await usuarioService.getInactiveUsuarios();
@@ -119,6 +120,7 @@ route.get("/inativos/listar", async (request, response) => {
   }
 });
 
+//Listar por ID todos (ativos e inativos)
 route.get("/:id/inativo", async (request, response) => {
   try {
     const { id } = request.params;
@@ -135,21 +137,6 @@ route.get("/:id/inativo", async (request, response) => {
       response: "Erro interno no servidor.",
       error: getErrorMessage(error),
     });
-  }
-});
-
-route.patch("/:id/reativar", async (request, response) => {
-  try {
-    const { id } = request.params;
-    const usuarioReativado = await usuarioService.activateUsuario(id);
-
-    return response.status(200).json({
-      response: "Usuário reativado com sucesso!",
-      data: usuarioReativado,
-    });
-  } catch (error) {
-    console.error("Erro ao reativar usuário: ", error);
-    return handleUsuarioError(response, error);
   }
 });
 
@@ -198,6 +185,22 @@ route.put("/:id", validateUpdate, async (request, response) => {
     });
   } catch (error) {
     console.error("Erro ao atualizar usuário:", error);
+    return handleUsuarioError(response, error);
+  }
+});
+
+//Para reativar usuário
+route.patch("/:id/reativar", async (request, response) => {
+  try {
+    const { id } = request.params;
+    const usuarioReativado = await usuarioService.activateUsuario(id);
+
+    return response.status(200).json({
+      response: "Usuário reativado com sucesso!",
+      data: usuarioReativado,
+    });
+  } catch (error) {
+    console.error("Erro ao reativar usuário: ", error);
     return handleUsuarioError(response, error);
   }
 });

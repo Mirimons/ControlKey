@@ -252,7 +252,7 @@ class UsuarioService {
   }
 
   // MÉTODOS PARA ATIVAÇÃO/REATIVAÇÃO
-
+  //Get com apenas os inativos
   async getInactiveUsuarios() {
     const queryBuilder = usuarioRepository
       .createQueryBuilder("usuario")
@@ -271,11 +271,12 @@ class UsuarioService {
       };
   }
 
+  //Get que inclui os inativos
   async getUsuarioByIdIncludingInactive(id) {
     return await usuarioRepository.findOne({
       where: {id},
       relations: ["tipo", "usuario_cad"],
-      withDeleted: true //Inclue registros com deletedAt preenchido
+      withDeleted: true //Inclui registros com deletedAt preenchido
     });
   }
 
