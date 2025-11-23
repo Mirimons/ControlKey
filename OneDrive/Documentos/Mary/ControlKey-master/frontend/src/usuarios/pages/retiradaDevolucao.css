@@ -1,0 +1,194 @@
+/* Fundo da página */
+body {
+  background-color: #BDD8E9;
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Wrapper para centralizar o container */
+.wrapper-pagprofs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* Container centralizado */
+.container-pagprofs {
+  width: 90%;
+  max-width: 400px;
+  padding: 50px 40px;
+  background: #f9f9f9;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+/* Título */
+.container-pagprofs h2 {
+  margin-bottom: 25px;
+  color: #333;
+  font-size: 1.8rem;
+}
+
+/* Labels dos inputs */
+.form-label {
+  display: block;
+  text-align: left;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+/* Input de RM/CPF e código */
+.input-identificacao,
+.input-codigo {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 25px;
+  border: 1.5px solid #ccc;
+  border-radius: 25px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.input-identificacao:focus,
+.input-codigo:focus {
+  outline: none;
+  border-color: #4da6ff;
+  box-shadow: 0 0 5px rgba(77, 166, 255, 0.5);
+}
+
+/* Opções de Chave / Equipamento */
+.opcoes {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 30px;
+}
+
+/* Label dos radios */
+.radio-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 16px;
+  position: relative;
+  user-select: none;
+  color: #555;
+  transition: color 0.3s ease;
+}
+
+.radio-label:hover {
+  color: #4da6ff;
+}
+
+/* Esconde o radio padrão */
+.radio-label input {
+  display: none;
+}
+
+/* Bolinha customizada */
+.custom-radio {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #555;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 10px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* Bolinha preenchida quando selecionado */
+.radio-label input:checked+.custom-radio::after {
+  content: "";
+  width: 12px;
+  height: 12px;
+  background: #4da6ff;
+  border-radius: 50%;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+}
+
+/* Botões Retirar e Devolver */
+.btn-retirar,
+.btn-devolver {
+  background-color: #4da6ff;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  font-size: 16px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-retirar:hover,
+.btn-devolver:hover {
+  background: #3479be;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Container dos botões */
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.lista-sugestoes {
+  border: 1px solid #ccc;
+  background: white;
+  max-height: 180px;
+  overflow-y: auto;
+  border-radius: 8px;
+  margin-top: 4px;
+  padding: 0;
+  list-style: none;
+}
+
+/* Itens livres (clicáveis) */
+.opcao-lab.livre,
+.opcao-equip.livre {
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.opcao-lab.livre:hover,
+.opcao-equip.livre:hover {
+  background-color: #f0f8ff;
+}
+
+/* Itens ocupados (não clicáveis) */
+.opcao-lab.ocupado,
+.opcao-equip.ocupado {
+  padding: 10px;
+  cursor: not-allowed;
+  background-color: #f8f8f8;
+  color: #999;
+  border-bottom: 1px solid #eee;
+  opacity: 0.7;
+}
+
+
+/* Indicador visual para os ocupados */
+.opcao-lab.ocupado::before,
+.opcao-equip.ocupado::before {
+  content: "⛔ ";
+  margin-right: 5px;
+}
+
+/* Indicador para os livres */
+.opcao-lab.livre::before,
+.opcao-equip.livre::before {
+  /* content: "✅ "; */
+  margin-right: 5px;
+}
+
+.input-codigo {
+  width: 100%;
+  margin-top: 6px;
+}
