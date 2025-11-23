@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaEye, FaEyeSlash, FaSearch, FaTrash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaSearch, FaTrash, FaCheck } from "react-icons/fa";
 import "./User.css";
 import Navbar from "../../../components/navbar";
 import api from "../../../services/api";
@@ -202,6 +202,83 @@ function User() {
     }
   };
 
+  const reativarUsuario = async (e) => {
+    // Versão flexível: aceita tanto um evento de checkbox (e.target)
+    // quanto uma chamada direta com o usuário (passando o objeto user).
+    let user = usuarioSelecionado;
+    let fromCheckbox = false;
+
+    if (e && e.target) {
+      const checked = e.target.checked;
+      if (!checked) return;
+      fromCheckbox = true;
+    } else if (e) {
+      user = e;
+    }
+
+    // certifica-se que temos um usuário alvo
+    if (!user) return;
+
+    setUsuarioSelecionado(user);
+
+    const result = await Swal.fire({
+      title: "Você tem certeza?",
+      html: `Deseja reativar o usuário <strong>"${user.nome}"</strong>?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Sim, Reativar!",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!result.isConfirmed) {
+      if (fromCheckbox && e && e.target) e.target.checked = false;
+      return;
+    }
+
+    try {
+      const token = sessionStorage.getItem("token");
+      if (!token) {
+        toast.error("Você precisa estar logado!", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        if (fromCheckbox && e && e.target) e.target.checked = false;
+        return;
+      }
+
+      await api.patch(`/usuario/${user.id}/reativar`, null, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      toast.success("Usuário reativado com sucesso!", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+
+      // Remove da lista de inativos (ela agora volta a ativos)
+      setUsuarios((prev) => prev.filter((u) => u.id !== user.id));
+
+      fecharModal();
+    } catch (err) {
+      if (fromCheckbox && e && e.target) e.target.checked = false;
+      handleApiError(err, "Erro ao reativar usuário!");
+    }
+  };
+
   const abrirModalNovo = () => {
     setEditando(false);
     setUsuarioSelecionado(null);
@@ -250,6 +327,29 @@ function User() {
   const fetchUsuarios = () => {
     const token = sessionStorage.getItem("token");
     if (!token) return;
+    // Caso o filtro seja 'Desabilitado', chamamos a rota que retorna
+    // apenas usuários inativos e aplicamos o filtro de nome no cliente
+    // para manter o mesmo comportamento dos outros filtros.
+    if (filtroTipo === "Desabilitado") {
+      api
+        .get("/usuario/inativos/listar", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          let data = res.data.data || [];
+          if (filtroNome) {
+            const nomeLower = filtroNome.toLowerCase();
+            data = data.filter((u) =>
+              u.nome ? u.nome.toLowerCase().includes(nomeLower) : false
+            );
+          }
+          setUsuarios(data);
+        })
+        .catch((err) => {
+          handleApiError(err, "Erro ao buscar usuários desabilitados.");
+        });
+      return;
+    }
 
     const params = {};
     if (filtroNome) params.nome = filtroNome;
@@ -463,6 +563,7 @@ function User() {
               <option value="Administrador">Administrador</option>
               <option value="Comum">Comum</option>
               <option value="Terceiro">Terceiro</option>
+              <option value="Desabilitado">Desabilitado</option>
             </select>
           </div>
           <button className="btn-add" type="button" onClick={abrirModalNovo}>
@@ -472,13 +573,18 @@ function User() {
 
         <div className="tabela-container">
           <table className="usuarios-tabela">
-            <thead>
+                <thead>
               <tr>
                 <th>Código</th>
                 <th>Nome</th>
                 <th>Tipo de usuário</th>
                 <th>Telefone</th>
-                <th>Editar</th>
+                {filtroTipo !== "Desabilitado" ? (
+                  <th>Editar</th>
+                ) : null}
+                {filtroTipo === "Desabilitado" ? (
+                  <th>Ativar</th>
+                ) : null}
               </tr>
             </thead>
             <tbody>
@@ -489,14 +595,27 @@ function User() {
                     <td>{user.nome}</td>
                     <td>{user.tipo?.desc_tipo || user.id_tipo}</td>
                     <td>{user.telefone ? mascaraTelefone(user.telefone) : ''}</td>
-                    <td>
-                      <button
-                        className="editar-btn"
-                        onClick={() => abrirModalEditar(user)}
-                      >
-                        ✏️
-                      </button>
-                    </td>
+                    {filtroTipo !== "Desabilitado" ? (
+                      <td>
+                        <button
+                          className="editar-btn"
+                          onClick={() => abrirModalEditar(user)}
+                        >
+                          ✏️
+                        </button>
+                      </td>
+                    ) : null}
+                    {filtroTipo === "Desabilitado" ? (
+                      <td>
+                        <button
+                          className="editar-btn"
+                          onClick={() => reativarUsuario(user)}
+                          title="Reativar usuário"
+                        >
+                          <FaCheck />
+                        </button>
+                      </td>
+                    ) : null}
                   </tr>
                 ))
               ) : (
@@ -664,11 +783,9 @@ function User() {
                 </div>
 
                 <div className="modal-botoes">
-                  {editando && (
-                    <button type="button" onClick={deleteUsuario}>
-                      <FaTrash />
-                    </button>
-                  )}
+                  <button type="button" onClick={deleteUsuario}>
+                    <FaTrash />
+                  </button>
 
                   <button type="button" onClick={fecharModal}>
                     Cancelar
