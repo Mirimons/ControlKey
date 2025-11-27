@@ -104,28 +104,6 @@ route.get("/", validateGetControls, async (request, response) => {
 });
 
 //NOVA ROTA PARA BUSCAR CONTROLES DO USUÁRIO
-<<<<<<< HEAD
-route.get("/usuario/:identificador", async (request, response) => {
-  try {
-    const { identificador } = request.params;
-    const controles = await controlService.getControlsByUsuario(identificador);
-
-    return response.status(200).json({
-      success: true,
-      data: controles,
-      message: "Controles do usuário recuperados com sucesso",
-    });
-  } catch (error) {
-    console.error("Erro ao buscar controles do usuário: ", error);
-    return response.status(500).json({
-      success: false,
-      data: [],
-      message: error.message,
-    });
-  }
-});
-=======
->>>>>>> 1b747988ebdd6cb3e4adc8285192af17699d81e4
 
 //Retirada
 route.post("/retirada", validateOpen, async (request, response) => {
