@@ -1,6 +1,6 @@
 import "./Login.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import logo from '../../../assets/LOGOCERTO.png';
+import logo from "../../../assets/LOGOCERTO.png";
 import { useState, useEffect } from "react";
 import api from "../../../services/api";
 import { toast } from "react-toastify";
@@ -8,7 +8,6 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 export default function Login() {
-
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -16,13 +15,26 @@ export default function Login() {
 
   async function handleLogin(e) {
     e.preventDefault();
-    api.post('/login', {
-      email: email,
-      senha: senha
-    })
-      .then(response => {
+    api
+      .post("/login", {
+        email: email,
+        senha: senha,
+      })
+      .then((response) => {
         console.log("Login bem-sucedido: ", response.data);
-        toast.success('Login efetuado com sucesso', {
+
+        sessionStorage.setItem("token", response.data.token);
+        localStorage.setItem("refreshToken", response.data.refreshToken);
+        sessionStorage.setItem(
+          "usuario",
+          JSON.stringify({
+            id: response.data.usuario.usuarioId,
+            email: response.data.usuario.email,
+            tipo: response.data.usuario.tipo,
+            id_tipo: response.data.usuario.id_tipo,
+          })
+        );
+        toast.success("Login efetuado com sucesso", {
           position: "top-right",
           autoClose: 2000,
           hideProgressBar: false,
@@ -30,23 +42,17 @@ export default function Login() {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          theme: 'light'
+          theme: "light",
         }),
-          sessionStorage.setItem('token', response.data.token);
-        sessionStorage.setItem('usuario', JSON.stringify({
-          id: response.data.usuario.usuarioId,
-          email: response.data.usuario.email
-
-        }));
-
-        setTimeout(() => {
-          navigate("/home");
-        }, 2000);
+        
+          setTimeout(() => {
+            navigate("/home");
+          }, 2000);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Erro no login: ", error);
         // alert(error.response?.data?.error || "Email ou senha incorretos!");
-        toast.error('E-mail ou senha incorretos', {
+        toast.error("E-mail ou senha incorretos", {
           position: "top-right",
           autoClose: 2000,
           hideProgressBar: false,
@@ -54,11 +60,10 @@ export default function Login() {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          theme: 'light'
-        })
+          theme: "light",
+        });
       });
   }
-
 
   return (
     <div className="login-container">
@@ -67,10 +72,13 @@ export default function Login() {
           <img src={logo}></img>
           <h2>CONTROLKEY</h2>
 
-          <input type="email"
+          <input
+            type="email"
             placeholder="seunome@email.com"
             value={email}
-            onChange={(e) => { setEmail(e.target.value) }}
+            onChange={(e) => {
+              setEmail(e.target.value);
+            }}
             required
           />
 

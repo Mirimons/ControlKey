@@ -24,6 +24,10 @@ const validateDelete = validationMiddleware(
   ControlRequestDTO,
   "validateDelete"
 );
+const validateAdminClose = validationMiddleware(
+  ControlRequestDTO,
+  "validateAdminClose"
+);
 
 //Função auxiliar para tratamento de erros
 function handleControlError(response, error) {
@@ -80,22 +84,22 @@ route.get("/", validateGetControls, async (request, response) => {
 });
 
 //NOVA ROTA PARA BUSCAR CONTROLES DO USUÁRIO
-route.get("/usuario/:identificador", async(request, response) => {
+route.get("/usuario/:identificador", async (request, response) => {
   try {
-    const {identificador} = request.params
-    const controles = await controlService.getControlsByUsuario(identificador)
+    const { identificador } = request.params;
+    const controles = await controlService.getControlsByUsuario(identificador);
 
     return response.status(200).json({
-      sucess: true,
+      success: true,
       data: controles,
-      message: "Controles do usuário recuperados com sucesso"
+      message: "Controles do usuário recuperados com sucesso",
     });
-  }catch(error) {
-    console.error("Erro ao buscar controles do usuário: ", error)
+  } catch (error) {
+    console.error("Erro ao buscar controles do usuário: ", error);
     return response.status(500).json({
-      sucess: false,
+      success: false,
       data: [],
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -127,7 +131,7 @@ route.post(
       });
     }
     console.log("Ambiente atual: ", process.env.NODE_ENV);
-    
+
     try {
       const result = await controlService.autoCloseControl();
       return response.status(200).json({
@@ -159,6 +163,46 @@ route.put("/devolucao", validateClose, async (request, response) => {
     return handleControlError(response, error);
   }
 });
+
+//Rota para admins fecharem qualquer contorle
+route.put(
+  "/admin/devolucao",
+  authenticateToken,
+  validateAdminClose,
+  async (request, response) => {
+    try {
+      const { id_control } = request.body;
+
+      if (!id_control) {
+        return response.status(400).json({
+          success: false,
+          message: "ID do controle é obrigatório",
+        });
+      }
+
+      const result = await controlService.closeControlAsAdmin(id_control);
+
+      return response.status(200).json(result);
+    } catch (error) {
+      console.error("Erro ao fechar controle como admin: ", error);
+
+      if (
+        error.message.includes("não encontrado") ||
+        error.message.includes("já está fechado")
+      ) {
+        return response.status(400).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
+      return response.status(500).json({
+        success: false,
+        message: "Erro interno ao fechar controle.",
+      });
+    }
+  }
+);
 
 //Ciente
 route.patch("/ciente/:id", validateCiente, async (request, response) => {

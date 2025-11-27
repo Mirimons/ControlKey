@@ -4,7 +4,7 @@ import Usuario from "../entities/usuario.js";
 import Labs from "../entities/labs.js";
 import Equipamento from "../entities/equipamento.js";
 import { AppDataSource } from "../database/data-source.js";
-import { IsNull} from "typeorm";
+import { IsNull } from "typeorm";
 import validationUtils from "../utils/validationUtils.js";
 
 const controlRepository = AppDataSource.getRepository(Control);
@@ -161,7 +161,7 @@ class ControlRequestDTO extends BaseDTO {
         where: [
           { cpf: identificador.trim(), deletedAt: IsNull() },
           {
-            usuario_cad: { matricula: identificador.trim()},
+            usuario_cad: { matricula: identificador.trim() },
             deletedAt: IsNull(),
           },
         ],
@@ -290,7 +290,7 @@ class ControlRequestDTO extends BaseDTO {
   async validateClose() {
     this.clearValidatedData();
 
-    const {identificador, id_equip, id_labs } = this.data;
+    const { identificador, id_equip, id_labs } = this.data;
 
     if (!identificador || !identificador.trim()) {
       this.addError("identificador", "CPF ou matrícula é obrigatório");
@@ -371,6 +371,21 @@ class ControlRequestDTO extends BaseDTO {
       this.addError("sistema", "Erro ao buscar controle para fechar");
       return false;
     }
+    return this.isValid();
+  }
+
+  async validateAdminClose() {
+    this.clearValidatedData();
+
+    const { id_control } = this.data;
+
+    if (!id_control) {
+      this.addError("id_control", "ID do controle é obrigatório.");
+      return false;
+    }
+
+    if (!this.validateParamsId("id_control", "ID do Controle")) return false;
+
     return this.isValid();
   }
 

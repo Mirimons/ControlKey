@@ -13,7 +13,7 @@ if (!secret) {
 }
 
 if (!refresh) {
-  throw new Error("JWT_REFRESH_SECRET não configurado no arquivo .env");
+  throw new Error("JWT_REFRESH não configurado no arquivo .env");
 }
 
 function generateToken(payload) {

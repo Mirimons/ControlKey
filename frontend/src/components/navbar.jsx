@@ -1,17 +1,21 @@
 import React from "react";
 import "./navbar.css";
 import { FaDoorOpen } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/LOGOCERTO.png";
-import { toast } from "react-toastify"  ;
+import { toast } from "react-toastify";
 
-function handleLogout() {
-  sessionStorage.clear()
-  toast.success("Usuário deslogado com sucesso!")
-  console.log("Usuário deslogado");
-}
+const Navbar = () => {
+  const navigate = useNavigate();
 
-const navbar = () => {
+  const handleLogout = () => {
+    sessionStorage.clear();
+    localStorage.removeItem("refreshToken");
+    toast.success("Usuário deslogado com sucesso!");
+    console.log("Usuário deslogado");
+    navigate("/login");
+  };
+
   return (
     <div className="navbar">
       <img src={logo} alt="Logo da ETEC" className="navbar-logo" />
@@ -37,9 +41,12 @@ const navbar = () => {
             <Link to="/relatorio">Relatório</Link>
           </li>
           <li>
-            <Link to="/login">
-              <FaDoorOpen className="logout" onClick={handleLogout}/>
-            </Link>
+            <FaDoorOpen
+              className="logout"
+              onClick={handleLogout}
+              style={{ cursor: "pointer" }}
+              title="Sair"
+            />
           </li>
         </ul>
       </div>
@@ -47,4 +54,4 @@ const navbar = () => {
   );
 };
 
-export default navbar;
+export default Navbar;
