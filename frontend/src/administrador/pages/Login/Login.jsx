@@ -21,6 +21,12 @@ export default function Login() {
         senha: senha,
       })
       .then((response) => {
+        console.log("✅ ESTRUTURA COMPLETA:", response.data);
+        console.log(
+          "✅ PROPRIEDADES DO USUÁRIO:",
+          Object.keys(response.data.usuario)
+        );
+
         console.log("Login bem-sucedido: ", response.data);
 
         sessionStorage.setItem("token", response.data.token);
@@ -28,7 +34,7 @@ export default function Login() {
         sessionStorage.setItem(
           "usuario",
           JSON.stringify({
-            id: response.data.usuario.usuarioId,
+            id: response.data.usuario.id,
             email: response.data.usuario.email,
             tipo: response.data.usuario.tipo,
             id_tipo: response.data.usuario.id_tipo,
@@ -44,7 +50,6 @@ export default function Login() {
           progress: undefined,
           theme: "light",
         }),
-        
           setTimeout(() => {
             navigate("/home");
           }, 2000);

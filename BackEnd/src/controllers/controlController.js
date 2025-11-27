@@ -168,7 +168,7 @@ route.put("/devolucao", validateClose, async (request, response) => {
 //Rota para admins fecharem qualquer contorle
 route.put(
   "/admin/devolucao",
-  authenticateToken,
+  // authenticateToken,
   validateAdminClose,
   async (request, response) => {
     try {
