@@ -110,7 +110,14 @@ class ControlService {
       const usuario = await usuarioRepository.findOne({
         where: [
           { cpf: identificador, deletedAt: IsNull() },
+<<<<<<< HEAD
           { usuario_cad: { matricula: identificador }, deletedAt: IsNull() },
+=======
+          {
+            deletedAt: IsNull(),
+            usuario_cad: { matricula: identificador }
+          }
+>>>>>>> 1b747988ebdd6cb3e4adc8285192af17699d81e4
         ],
         relations: ["usuario_cad"],
       });
@@ -135,7 +142,11 @@ class ControlService {
 
       return controles;
     } catch (error) {
+<<<<<<< HEAD
       throw new Error(`Erro ao buscar controles do usuário: ${error.message}`);
+=======
+      throw new Error(`Erro ao buscar controles do usuário: ${error.message}`)
+>>>>>>> 1b747988ebdd6cb3e4adc8285192af17699d81e4
     }
   }
 
@@ -169,8 +180,13 @@ class ControlService {
       await equipamentoRepository.update(
         { id: id_equip },
         { status: "ocupado", updatedAt: new Date() }
+<<<<<<< HEAD
       );
       console.log(`Equipamento ${id_equip} marcado como OCUPADO`);
+=======
+      )
+      console.log(`Equipamento ${id_equip} marcado como OCUPADO`)
+>>>>>>> 1b747988ebdd6cb3e4adc8285192af17699d81e4
     }
 
     return await controlRepository.findOne({
@@ -185,11 +201,19 @@ class ControlService {
     //Busca o controle atual para pegar o id_labs antes de atualizar
     const currentControl = await controlRepository.findOne({
       where: { id },
+<<<<<<< HEAD
       relations: ["laboratorio", "equipamento"],
     });
 
     if (!currentControl) {
       throw new Error("Controle não encontrado");
+=======
+      relations: ["laboratorio", "equipamento"]
+    });
+
+    if (!currentControl) {
+      throw new Error("Controle não encontrado")
+>>>>>>> 1b747988ebdd6cb3e4adc8285192af17699d81e4
     }
 
     const id_labs = currentControl.id_labs;
@@ -210,8 +234,13 @@ class ControlService {
       await labsRepository.update(
         { id: id_labs },
         { status: "livre", updatedAt: new Date() }
+<<<<<<< HEAD
       );
       console.log(`Laboratório ${id_labs} marcado como LIVRE`);
+=======
+      )
+      console.log(`Laboratório ${id_labs} marcado como LIVRE`)
+>>>>>>> 1b747988ebdd6cb3e4adc8285192af17699d81e4
     }
 
     //Atualiza status do equipamento
@@ -219,8 +248,13 @@ class ControlService {
       await equipamentoRepository.update(
         { id: id_equip },
         { status: "livre", updatedAt: new Date() }
+<<<<<<< HEAD
       );
       console.log(`Equipamento ${id_equip} marcado como LIVRE`);
+=======
+      )
+      console.log(`Equipamento ${id_equip} marcado como LIVRE`)
+>>>>>>> 1b747988ebdd6cb3e4adc8285192af17699d81e4
     }
 
     return await controlRepository.findOne({
@@ -286,11 +320,19 @@ class ControlService {
   //Status: pendente
   async autoCloseControl() {
     try {
+<<<<<<< HEAD
       console.log("🕐 Executando fechamento automático diário...");
 
       const hoje = new Date();
       const inicioDia = new Date(hoje);
       inicioDia.setHours(0, 0, 0, 0);
+=======
+      console.log("🕐 Executando fechamento automático diário...")
+
+      const hoje = new Date()
+      const inicioDia = new Date(hoje)
+      inicioDia.setHours(0, 0, 0, 0)
+>>>>>>> 1b747988ebdd6cb3e4adc8285192af17699d81e4
 
       // const fimDia = new Date(hoje)
       // fimDia.setHours(23,59,59,999)
@@ -308,13 +350,22 @@ class ControlService {
       );
 
       if (controlsToClose.length === 0) {
+<<<<<<< HEAD
         return { update: 0, message: "Nenhum controle para atualizar" };
+=======
+        return { update: 0, message: "Nenhum controle para atualizar" }
+>>>>>>> 1b747988ebdd6cb3e4adc8285192af17699d81e4
       }
 
       //Atualiza os labs para "livre" antes de mudar os controles
       const labsIdsToFree = controlsToClose
+<<<<<<< HEAD
         .map((control) => control.id_labs)
         .filter((id) => id !== null);
+=======
+        .map(control => control.id_labs)
+        .filter(id => id !== null)
+>>>>>>> 1b747988ebdd6cb3e4adc8285192af17699d81e4
 
       if (labsIdsToFree.length > 0) {
         await labsRepository
@@ -322,15 +373,24 @@ class ControlService {
           .update(Labs)
           .set({ status: "livre", updatedAt: new Date() })
           .where("id IN (:...ids)", { ids: labsIdsToFree })
+<<<<<<< HEAD
           .execute();
+=======
+          .execute()
+>>>>>>> 1b747988ebdd6cb3e4adc8285192af17699d81e4
 
         console.log(`${labsIdsToFree.length} laboratórios marcados como LIVRE`);
       }
 
       //Atualiza os equipamentos para "livre" antes de mudar os controles
       const equipIdsToFree = controlsToClose
+<<<<<<< HEAD
         .map((control) => control.id_equip)
         .filter((id) => id !== null);
+=======
+        .map(control => control.id_equip)
+        .filter(id => id !== null)
+>>>>>>> 1b747988ebdd6cb3e4adc8285192af17699d81e4
 
       if (equipIdsToFree.length > 0) {
         await equipamentoRepository
@@ -338,7 +398,11 @@ class ControlService {
           .update(Equipamento)
           .set({ status: "livre", updatedAt: new Date() })
           .where("id IN (:...ids)", { ids: equipIdsToFree })
+<<<<<<< HEAD
           .execute();
+=======
+          .execute()
+>>>>>>> 1b747988ebdd6cb3e4adc8285192af17699d81e4
 
         console.log(
           `${equipIdsToFree.length} equipamentos marcados como LIVRE`
@@ -353,7 +417,11 @@ class ControlService {
         .update(Control)
         .set({
           status: "pendente",
+<<<<<<< HEAD
           updatedAt: new Date(),
+=======
+          updatedAt: new Date()
+>>>>>>> 1b747988ebdd6cb3e4adc8285192af17699d81e4
         })
         .where("id IN (:...ids)", { ids })
         .execute();
@@ -367,8 +435,13 @@ class ControlService {
         message: `${controlsToClose.length} controles marcados como pendente`,
       };
     } catch (error) {
+<<<<<<< HEAD
       console.error("Erro no fechamento automático: ", error);
       throw new Error(`Erro no fechamento automático: ${error.message}`);
+=======
+      console.error("Erro no fechamento automático: ", error)
+      throw new Error(`Erro no fechamento automático: ${error.message}`)
+>>>>>>> 1b747988ebdd6cb3e4adc8285192af17699d81e4
     }
   }
 

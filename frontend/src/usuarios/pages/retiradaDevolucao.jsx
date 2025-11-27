@@ -9,6 +9,7 @@ function RetiradaDevolucao() {
   const [codigo, setCodigo] = useState("");
   const [professor, setProfessor] = useState(null);
   const [erro, setErro] = useState("");
+  const [acao, setAcao] = useState([]);
 
   // Chaves
   const [labs, setLabs] = useState([]);
@@ -65,7 +66,7 @@ function RetiradaDevolucao() {
 
   // Função para retirar
   const handleRetirar = async () => {
-    if (!professor) return Swal.fire("Atenção", "Professor não identificado!", "warning");;
+    if (!professor) return Swal.fire("Atenção", "Usuário não identificado!", "warning");;
     if (!tipo) return Swal.fire("Atenção", "Selecione se é chave ou equipamento!", "warning");
 
     try {
@@ -117,27 +118,52 @@ function RetiradaDevolucao() {
 
   // Função para devolver
   const handleDevolver = async () => {
-    if (!professor) return Swal.fire("Atenção", "Professor não identificado!", "warning");
+    if (!professor) return Swal.fire("Atenção", "Usuário não identificado!", "warning");
     if (!tipo) return Swal.fire("Atenção", "Selecione se é chave ou equipamento!", "warning");
 
+    const identificadorNormalizado = normalizarRM(identificacao);
+    let idControlToClose = null;
+
+    let idLabsToClose = null;
+    let idEquipToClose = null;
+
+    if (tipo === "chave" && labSelecionado) {
+      idControlToClose = labSelecionado.id_control;
+      idLabsToClose = labSelecionado.id;
+    } else if (tipo === "equipamento" && equipSelecionado) {
+      idControlToClose = equipSelecionado.id_control;
+      idEquipToClose = equipSelecionado.id;
+    } else {
+      Swal.fire("Atenção", "Selecione um item válido para devolver!", "warning");
+      return;
+    }
+
+    if (!idControlToClose) {
+      Swal.fire("Atenção", "ID do controle de posse não encontrado.", "error");
+      return;
+    }
     try {
-      const identificadorNormalizado = normalizarRM(identificacao);
       const payload = {
+        // ID da Transação (Control)
+        id: idControlToClose,
+
+        // 💡 CAMPO OBRIGATÓRIO (Identificador, já corrigido anteriormente)
         identificador: identificadorNormalizado,
+
+        // 💡 CORREÇÃO FINAL: Incluir o ID do item devolvido
+        ...(idLabsToClose && { id_labs: idLabsToClose }), // Adiciona id_labs se houver
+        ...(idEquipToClose && { id_equip: idEquipToClose }), // Adiciona id_equip se houver
+
+        // Dados de fechamento
+        data_fim: new Date(),
+        status: "fechado",
       };
-      if (tipo === "chave" && labSelecionado) {
-        payload.id_labs = labSelecionado.id;
-      } else if (tipo === "equipamento" && equipSelecionado) {
-        payload.id_equip = equipSelecionado.id;
-      } else {
-        Swal.fire("Atenção", "Selecione um item válido para devolver!", "warning");
-        return;
-      }
 
       //DE TESTE E DEPOIS REMOVE
       console.log("📤 Enviando para backend:", {
         original: identificacao,
         normalizado: identificadorNormalizado,
+        payload: payload
       });
 
       const response = await api.put("/control/devolucao", payload);
@@ -177,7 +203,7 @@ function RetiradaDevolucao() {
         })
         .catch(() => {
           setProfessor(null);
-          setErro("Professor não encontrado");
+          setErro("Usuário não encontrado");
         });
     } else {
       setProfessor(null);
@@ -189,52 +215,79 @@ function RetiradaDevolucao() {
   const [todosLabs, setTodosLabs] = useState([]);
   const [todosEquipamentos, setTodosEquipamentos] = useState([]);
 
-  // Buscar laboratórios e equipamentos quando tipo muda
+  // Buscar laboratórios e equipamentos quando tipo e ação mudam
   useEffect(() => {
+    // Garante que o professor esteja identificado se a ação for devolução
+    if (acao === "devolucao" && !professor) {
+      setTodosLabs([]);
+      setTodosEquipamentos([]);
+      return;
+    }
+
     const carregarDados = async () => {
       try {
-        if (tipo === "chave") {
-          const response = await api.get("/labs");
-          const labsData = response.data.data || [];
-          setTodosLabs(labsData);
-          setFiltroLabs([]);
-        } else if (tipo === "equipamento") {
-          const response = await api.get("/equipamento");
-          const equipData = response.data.data || [];
-          setTodosEquipamentos(equipData);
-          setFiltroEquip([]);
+        if (acao === "retirada") {
+          // FLUXO DE RETIRADA: Carrega TODOS os itens disponíveis
+          if (tipo === "chave") {
+            const response = await api.get("/labs");
+            setTodosLabs(response.data.data || []);
+          } else if (tipo === "equipamento") {
+            const response = await api.get("/equipamento");
+            setTodosEquipamentos(response.data.data || []);
+          }
+
+        } else if (acao === "devolucao" && professor) {
+          // FLUXO DE DEVOLUÇÃO: Carrega APENAS os itens em posse do professor.
+          const identificadorNormalizado = normalizarRM(identificacao);
+
+          // Endpoint que busca todos os itens abertos do professor
+          const response = await api.get(`/control/professor/${identificadorNormalizado}`);
+          const itensEmPosse = response.data.data || [];
+
+          console.log("▶️ Itens em posse (Retorno da API):", itensEmPosse);
+
+          if (tipo === "chave") {
+            // Filtra chaves (labs) em posse
+            const labsEmPosse = itensEmPosse
+              .filter(item => item.id_labs && item.status === "aberto" && item.laboratorio)
+              .map(item => ({
+                // Mapeia o ID da TRANSAÇÃO (Control) para a devolução
+                id_control: item.id,
+                // Mapeia o ID e nome do Laboratório para a exibição
+                id: item.laboratorio.id,
+                nome_lab: item.laboratorio.nome_lab,
+                desc_lab: item.laboratorio.desc_lab,
+              }));
+
+            setTodosLabs(labsEmPosse);
+            setTodosEquipamentos([]);
+          } else if (tipo === "equipamento") {
+            // Filtra equipamentos em posse
+            const equipamentosEmPosse = itensEmPosse
+              .filter(item => item.id_equip && item.status === "aberto" && item.equipamento)
+              .map(item => ({
+                // Mapeia o ID da TRANSAÇÃO (Control) para a devolução
+                id_control: item.id,
+                // Mapeia o ID e descrição do Equipamento para a exibição
+                id: item.equipamento.id,
+                desc_equip: item.equipamento.desc_equip,
+                tipo: item.equipamento.tipo
+              }));
+
+            setTodosEquipamentos(equipamentosEmPosse);
+            setTodosLabs([]);
+          }
         }
       } catch (err) {
-        console.error(`Erro ao carregar ${tipo}: `, err);
+        console.error(`Erro ao carregar dados para ${acao}: `, err);
+        setTodosLabs([]);
+        setTodosEquipamentos([]);
       }
     };
+
     if (tipo) {
       carregarDados();
     }
-    // if (tipo === "chave") {
-    //   api
-    //     .get("/labs")
-    //     .then((res) =>  {
-    //       const todosLabs = res.data.data || [];
-    //       setTodosLabs(todosLabs);
-    //       //Filtra apenas os livres para seleção
-    //       const labsLivres = todosLabs.filter(lab => lab.status === "livre")
-    //       setLabs(labsLivres);
-    //     })
-    //     .catch((err) => console.error("Erro ao carregar labs:", err));
-    // } else if (tipo === "equipamento") {
-    //   api
-    //     .get("/equipamento")
-    //     .then((res) => {
-    //       const todosEquip = res.data.data || []
-    //       setTodosEquipamentos(todosEquip);
-    //       //Filtra apenas os livres para seleção
-    //       const equipLivres = todosEquip.filter(equip => equip.status === "livre")
-    //       setEquipamentos(equipLivres);
-    //     })
-    //     .catch((err) => console.error("Erro ao carregar equipamentos:", err));
-    // }
-
     // Limpa campos e sugestões ao trocar tipo
     setCodigo("");
     setLabSelecionado(null);
@@ -243,7 +296,7 @@ function RetiradaDevolucao() {
     setFiltroEquip([]);
     setMostrarSugestoesLabs(false);
     setMostrarSugestoesEquip(false);
-  }, [tipo]);
+  }, [tipo, acao, professor, identificacao]);
 
   // Filtrar laboratórios ou equipamentos conforme digita
   const handleCodigoChange = (e) => {
@@ -284,8 +337,8 @@ function RetiradaDevolucao() {
 
   // Seleção de lab ou equipamento
   const handleSelecionarLab = (lab) => {
-    //Só permite selecionar se estiver livre
-    if (lab.status === "livre") {
+    //Só permite selecionar se estiver livre OU se a ação for DEVOLUÇÃO (pois ele só vê os que tem posse)
+    if (lab.status === "livre" || acao === "devolucao") {
       setCodigo(`${lab.nome_lab} - ${lab.desc_lab}`);
       setLabSelecionado(lab);
       setMostrarSugestoesLabs(false);
@@ -293,8 +346,8 @@ function RetiradaDevolucao() {
   };
 
   const handleSelecionarEquip = (equip) => {
-    //Só permite selecionar se estiver livre
-    if (equip.status === "livre") {
+    //Só permite selecionar se estiver livre OU se a ação for DEVOLUÇÃO
+    if (equip.status === "livre" || acao === "devolucao") {
       setCodigo(`${equip.tipo?.desc_tipo} - ${equip.desc_equip}`);
       setEquipSelecionado(equip);
       setMostrarSugestoesEquip(false);
@@ -305,12 +358,20 @@ function RetiradaDevolucao() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!professor) {
-      alert("Professor não identificado!");
+      Swal.fire("Atenção", "Usuário não identificado! Por favor, insira um RM ou CPF válido.", "warning");
       return;
     }
     if (!tipo) {
-      alert("Selecione se é chave ou equipamento!");
+      Swal.fire("Atenção", "Selecione se é Chave ou Equipamento!", "warning");
       return;
+    }
+    if (acao === 'retirada') {
+      handleRetirar();
+    } else if (acao === 'devolucao') {
+      handleDevolver();
+    } else {
+      // Caso o 'acao' (Retirada/Devolução) não esteja selecionado (embora deva ter um valor padrão)
+      Swal.fire("Erro", "Selecione a Ação (Retirada ou Devolução).", "error");
     }
 
     console.log("✅ Retirada/Devolução registrada:");
@@ -343,7 +404,7 @@ function RetiradaDevolucao() {
           )}
           {erro && <p className="erro">{erro}</p>}
 
-          {/* Tipo */}
+          {/* Tipo: Chave / Equipamento */}
           <div className="opcoes">
             <label className="radio-label">
               <input
@@ -367,8 +428,33 @@ function RetiradaDevolucao() {
             </label>
           </div>
 
-          {/* Código / Autocomplete */}
-          {tipo && (
+          {/* Ações: Retirada / Devolução (NOVO POSICIONAMENTO) */}
+          <div className="opcoes acao-opcoes">
+            <label className="radio-label">
+              <input
+                type="radio"
+                name="acao"
+                value="retirada"
+                checked={acao === "retirada"}
+                onChange={(e) => setAcao(e.target.value)}
+              />
+              <span className="custom-radio"></span> Retirada
+            </label>
+            <label className="radio-label">
+              <input
+                type="radio"
+                name="acao"
+                value="devolucao"
+                checked={acao === "devolucao"}
+                onChange={(e) => setAcao(e.target.value)}
+              />
+              <span className="custom-radio"></span> Devolução
+            </label>
+          </div>
+
+          {/* Conteúdo Dinâmico (Código ou Tabela) */}
+          {tipo && acao === "retirada" && (
+            // FLUXO DE RETIRADA: Input de Código e Autocomplete (como estava)
             <>
               <label htmlFor="codigo" className="form-label">
                 {tipo === "chave"
@@ -395,57 +481,85 @@ function RetiradaDevolucao() {
                     <li
                       key={lab.id}
                       onClick={() => handleSelecionarLab(lab)}
-                      className={`opcao-lab ${lab.status === "livre" ? "livre" : "ocupado"
-                        }`}
+                      className={`opcao-lab ${lab.status === "livre" ? "livre" : "ocupado"}`}
                     >
                       {lab.nome_lab} - {lab.desc_lab}
                       {lab.status !== "livre" && " (Ocupado)"}
                     </li>
                   ))}
                   {filtroLabs.length === 0 && (
-                    <li className="opcao-lab vazio">
-                      Nenhum laboratório encontrado
-                    </li>
+                    <li className="opcao-lab vazio">Nenhum laboratório encontrado</li>
                   )}
                 </ul>
               )}
+
               {tipo === "equipamento" && mostrarSugestoesEquip && (
                 <ul className="lista-sugestoes">
                   {filtroEquip.map((equip) => (
                     <li
                       key={equip.id}
                       onClick={() => handleSelecionarEquip(equip)}
-                      className={`opcao-equip ${equip.status === "livre" ? "livre" : "ocupado"
-                        }`}
+                      className={`opcao-equip ${equip.status === "livre" ? "livre" : "ocupado"}`}
                     >
                       {equip.tipo?.desc_tipo} - {equip.desc_equip}
                       {equip.status !== "livre" && " (Ocupado)"}
                     </li>
                   ))}
                   {filtroEquip.length === 0 && (
-                    <li className="opcao-equip vazio">
-                      Nenhum equipamento encontrado
-                    </li>
+                    <li className="opcao-equip vazio">Nenhum equipamento encontrado</li>
                   )}
                 </ul>
               )}
             </>
           )}
 
+          {tipo && acao === "devolucao" && professor && (
+            //Renderiza a tabela SOMENTE se houver labs OU equipamentos em posse.
+            (todosLabs.length > 0 || todosEquipamentos.length > 0) ? (
+              <>
+                <p className="form-label">Itens em sua posse (Selecione para Devolver):</p>
+                <ul className="lista-sugestoes">
+                  {tipo === "chave" && todosLabs.length > 0 && (
+                    todosLabs.map((lab) => (
+                      <li
+                        key={lab.id_control} //ID do controle para a chave
+                        onClick={() => handleSelecionarLab(lab)} // Ação de seleção
+                        className={`opcao-lab ${labSelecionado?.id_control === lab.id_control ? 'selecionado' : ''}`}
+                      >
+                        {lab.nome_lab} - {lab.desc_lab}
+                        <span className="status-posse"> (Em Posse)</span>
+                      </li>
+                    ))
+                  )}
+
+                  {/* Mapeamento para EQUIPAMENTOS */}
+                  {tipo === "equipamento" && todosEquipamentos.length > 0 && (
+                    todosEquipamentos.map((equip) => (
+                      <li
+                        key={equip.id_control} // Use o ID do controle para a chave
+                        onClick={() => handleSelecionarEquip(equip)} // Ação de seleção
+                        className={`opcao-equip ${equipSelecionado?.id_control === equip.id_control ? 'selecionado' : ''}`}
+                      >
+                        {equip.tipo?.desc_tipo} - {equip.desc_equip}
+                        {/* Adicione um ícone ou texto para indicar "Em Posse" se desejar */}
+                        <span className="status-posse"> (Em Posse)</span>
+                        {/* O rádio button é opcional, a classe 'selecionado' já indica */}
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </>
+            ) : (
+              <p className="tabela-vazia-mensagem">Nenhum item em sua posse.</p>
+            )
+          )}
+          {/* Botão de Confirmação */}
           <div className="buttons">
             <button
-              type="button"
-              className="btn-retirar"
-              onClick={handleRetirar}
+              type="submit"
+              className={`btn-${acao}`}
             >
-              Retirar
-            </button>
-            <button
-              type="button"
-              className="btn-devolver"
-              onClick={handleDevolver}
-            >
-              Devolver
+              {acao === 'retirada' ? 'Confirmar Retirada' : 'Confirmar Devolução'}
             </button>
           </div>
         </form>

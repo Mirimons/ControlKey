@@ -34,7 +34,7 @@ body {
 /* Labels dos inputs */
 .form-label {
   display: block;
-  text-align: left;
+  text-align: center;
   font-weight: 600;
   margin-bottom: 8px;
   color: #333;
@@ -43,9 +43,9 @@ body {
 /* Input de RM/CPF e código */
 .input-identificacao,
 .input-codigo {
-  width: 100%;
+  width: 90%;
   padding: 12px 15px;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   border: 1.5px solid #ccc;
   border-radius: 25px;
   font-size: 16px;
@@ -64,6 +64,7 @@ body {
   display: flex;
   justify-content: space-around;
   margin-bottom: 30px;
+  gap: 30px;
 }
 
 /* Label dos radios */
@@ -76,7 +77,7 @@ body {
   user-select: none;
   color: #555;
   transition: color 0.3s ease;
-}
+} 
 
 .radio-label:hover {
   color: #4da6ff;
@@ -111,41 +112,19 @@ body {
   left: 3px;
 }
 
-/* Botões Retirar e Devolver */
-.btn-retirar,
-.btn-devolver {
-  background-color: #4da6ff;
-  color: white;
-  border: none;
-  padding: 12px 25px;
-  font-size: 16px;
-  border-radius: 25px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-retirar:hover,
-.btn-devolver:hover {
-  background: #3479be;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-/* Container dos botões */
-.buttons {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-}
-
 .lista-sugestoes {
   border: 1px solid #ccc;
   background: white;
-  max-height: 180px;
+  max-height: 200px;
+  /* Ajuste a altura máxima conforme necessário */
   overflow-y: auto;
   border-radius: 8px;
   margin-top: 4px;
   padding: 0;
   list-style: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  /* Um pouco de sombra para destacar */
+  margin-bottom: 25px;
 }
 
 /* Itens livres (clicáveis) */
@@ -184,11 +163,138 @@ body {
 /* Indicador para os livres */
 .opcao-lab.livre::before,
 .opcao-equip.livre::before {
-  /* content: "✅ "; */
+  content: "✅ "; 
   margin-right: 5px;
 }
 
+.opcao-lab,
+.opcao-equip {
+    padding: 10px 12px; /* Mais padding para maior área de clique */
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-left 0.2s ease;
+    border-bottom: 1px solid #f0f0f0; /* Linha divisória suave */
+    text-align: left; /* Alinha o texto à esquerda */
+    display: flex; /* Para alinhar o texto e o status */
+    justify-content: space-between; /* Espaça nome e status */
+    align-items: center;
+}
+
+.opcao-lab:hover,
+.opcao-equip:hover {
+    background-color: #e6f7ff; /* Fundo mais claro ao passar o mouse */
+}
+
+.opcao-lab:last-child,
+.opcao-equip:last-child {
+    border-bottom: none; /* Remove a borda do último item */
+}
+
+.opcao-lab.selecionado,
+.opcao-equip.selecionado {
+    /* Fundo forte e diferente do hover */
+    background-color: #d0e9ff; 
+    
+    /* Texto em negrito e cor escura */
+    font-weight: 600; 
+    color: #2c3e50; 
+    
+    /* Remova o hover do item selecionado para não "piscar" */
+    pointer-events: none; /* Impede novos cliques no item já selecionado */
+}
+
+.status-posse {
+    font-size: 0.9em;
+    color: #007bff; /* Azul vibrante */
+    background-color: #e0f2ff;
+    padding: 4px 8px;
+    border-radius: 12px;
+    margin-left: 10px;
+    font-weight: normal; /* Para não competir com o nome do item */
+}
+
+.tabela-vazia-mensagem {
+    text-align: center;
+    color: #777;
+    padding: 15px;
+    border: 1px dashed #ccc; /* Uma borda tracejada para diferenciar */
+    background-color: #fcfcfc;
+    border-radius: 8px;
+    margin-top: 15px;
+    font-style: italic;
+}
+
 .input-codigo {
-  width: 100%;
+  width: 90%;
   margin-top: 6px;
+}
+
+/* Para alinhar as opções de Ação (Retirada/Devolução) */
+.acao-opcoes {
+  margin-top: 15px;
+  margin-bottom: 25px;
+  /* Adiciona espaçamento entre as opções e o botão de confirmação */
+}
+
+.buttons button[type="submit"] {
+    /* Largura - ajustada para o container */
+    width: 80%; 
+    /* Padding para deixar maior */
+    padding: 10px 15px; 
+    /* Borda e raio (mais quadrado, como no exemplo) */
+    border: none;
+    border-radius: 8px; 
+    /* Fontes e cursor */
+    font-size: 1.1rem;
+    font-weight: 500; /* Um pouco mais de peso */
+    cursor: pointer;
+    /* Transições para suavizar os efeitos */
+    transition: background-color 0.3s ease, transform 0.2s, box-shadow 0.3s ease;
+}
+
+/* 2. ESTILO ESPECÍFICO: RETIRADA (Mantendo o tom azul) */
+.buttons .btn-retirada {
+    background-color: #1a2a48; /* Azul escuro, mais profissional que o #7BBDE8 */
+    color: #fff; /* Texto branco para contraste */
+}
+
+/* 3. ESTILO ESPECÍFICO: DEVOLUÇÃO (Mantendo o tom verde) */
+.buttons .btn-devolucao {
+    background-color: #1a2a48; /* Verde padrão */
+    color: white;
+}
+
+/* 4. EFEITO HOVER (Para todos os botões no container .buttons) */
+.buttons button[type="submit"]:hover {
+    /* Leve crescimento */
+    transform: scale(1.01); 
+    
+    /* Sombra suave para dar profundidade */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); 
+    
+    /* Não mudamos o background aqui, faremos isso por classe específica para escurecer */
+}
+
+/* 5. EFEITO HOVER: ESCURECIMENTO (Ação de Retirada) */
+.buttons .btn-retirada:hover {
+    background-color: #08324c; /* Tom de azul ainda mais escuro para o hover */
+}
+
+/* 6. EFEITO HOVER: ESCURECIMENTO (Ação de Devolução) */
+.buttons .btn-devolucao:hover {
+    background-color: #08324c; /* Verde escuro */
+}
+
+.professor-encontrado {
+  /* Centraliza o texto */
+  text-align: center;
+  /* Aumenta a fonte */
+  font-size: 1.1rem;
+  /* Deixa o nome mais visível */
+  font-weight: bold;
+  /* Cor de destaque (verde ou azul) */
+  color: #3498db;
+  margin-top: -15px;
+  /* Puxa para mais perto do input */
+  margin-bottom: 25px;
+  /* Espaço para o próximo elemento */
 }
