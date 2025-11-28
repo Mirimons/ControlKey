@@ -1,4 +1,4 @@
-import express from "express";
+import express, { response } from "express";
 import controlService from "../services/controlService.js";
 import { ControlRequestDTO } from "../DTOs/index.js";
 import { getErrorMessage } from "../helpers/errorHandler.js";
@@ -53,20 +53,20 @@ function handleControlError(response, error) {
 
 route.get("/professor/:identificador", async (request, response) => {
   try {
-    const { identificador } = request.params
-    const controles = await controlService.getControlsByUsuario(identificador)
+    const { identificador } = request.params;
+    const controles = await controlService.getControlsByUsuario(identificador);
 
     return response.status(200).json({
       sucess: true,
       data: controles,
-      message: "Controles do usuário recuperados com sucesso"
+      message: "Controles do usuário recuperados com sucesso",
     });
   } catch (error) {
-    console.error("Erro ao buscar controles do usuário: ", error)
+    console.error("Erro ao buscar controles do usuário: ", error);
     return response.status(500).json({
       sucess: false,
       data: [],
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -99,6 +99,40 @@ route.get("/", validateGetControls, async (request, response) => {
     return response.status(500).json({
       response: "Erro interno no servidor.",
       error: getErrorMessage(error),
+    });
+  }
+});
+
+//GET POR PERÍODO
+route.get("/periodo", async (request, response) => {
+  try {
+    const { data_inicio, data_fim } = request.query;
+
+    if (!data_inicio && !data_fim) {
+      return response.status(400).json({
+        success: false,
+        message: "Data de início e data de fim são obrigatórias.",
+      });
+    }
+
+    const filtros = {
+      data_inicio: data_inicio,
+      data_fim: data_fim,
+    };
+
+    const periodo = await controlService.getControls(filtros);
+
+    return response.status(200).json({
+      success: true,
+      data: periodo,
+      message: "Controles do período recuperados com sucesso.",
+    });
+  } catch (error) {
+    console.error("Erro ao buscar controles por período: ", error);
+    return response.status(500).json({
+      success: false,
+      data: [],
+      message: error.message,
     });
   }
 });
@@ -166,44 +200,39 @@ route.put("/devolucao", validateClose, async (request, response) => {
 });
 
 //Rota para admins fecharem qualquer contorle
-route.put(
-  "/admin/devolucao",
-  // authenticateToken,
-  validateAdminClose,
-  async (request, response) => {
-    try {
-      const { id_control } = request.body;
+route.put("/admin/devolucao", validateAdminClose, async (request, response) => {
+  try {
+    const { id_control } = request.body;
 
-      if (!id_control) {
-        return response.status(400).json({
-          success: false,
-          message: "ID do controle é obrigatório",
-        });
-      }
-
-      const result = await controlService.closeControlAsAdmin(id_control);
-
-      return response.status(200).json(result);
-    } catch (error) {
-      console.error("Erro ao fechar controle como admin: ", error);
-
-      if (
-        error.message.includes("não encontrado") ||
-        error.message.includes("já está fechado")
-      ) {
-        return response.status(400).json({
-          success: false,
-          message: error.message,
-        });
-      }
-
-      return response.status(500).json({
+    if (!id_control) {
+      return response.status(400).json({
         success: false,
-        message: "Erro interno ao fechar controle.",
+        message: "ID do controle é obrigatório",
       });
     }
+
+    const result = await controlService.closeControlAsAdmin(id_control);
+
+    return response.status(200).json(result);
+  } catch (error) {
+    console.error("Erro ao fechar controle como admin: ", error);
+
+    if (
+      error.message.includes("não encontrado") ||
+      error.message.includes("já está fechado")
+    ) {
+      return response.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return response.status(500).json({
+      success: false,
+      message: "Erro interno ao fechar controle.",
+    });
   }
-);
+});
 
 //Ciente
 route.patch("/ciente/:id", validateCiente, async (request, response) => {

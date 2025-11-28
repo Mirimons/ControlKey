@@ -11,7 +11,7 @@ class TipoUsuarioService {
 
   async getTipoById(id) {
     return await tipoUsuarioRepository.findOne({
-      where: {id, deletedAt:IsNull()}
+      where: { id, deletedAt: IsNull() },
     });
   }
 
@@ -37,7 +37,7 @@ class TipoUsuarioService {
     const { desc_tipo } = tipoUsuarioData;
 
     await tipoUsuarioRepository.update(
-      { id: Number(id)},
+      { id: Number(id) },
       {
         desc_tipo: desc_tipo,
       }
@@ -47,6 +47,24 @@ class TipoUsuarioService {
   }
 
   async deleteTipoUsuario(id) {
+    //Verificar se existe
+    const tipoUsuario = await this.getTipoById(id);
+    if (!tipoUsuario) {
+      throw new Error("Tipo de usuário não encontrado.");
+    }
+
+    //Verifica se existem usuários ativos com este tipo
+    const usuariosAtivos = await AppDataSource.getRepository("Usuario")
+      .createQueryBuilder("usuario")
+      .where("usuario.id_tipo = :id", { id })
+      .andWhere("usuario.deletedAt IS NULL")
+      .getCount();
+
+    if(usuariosAtivos > 0) {
+      throw new Error("Não é possível desativar este tipo de usuário pois existem usuários ativos vinculados a ele.")
+    } 
+
+    //Se não houver dependências, faz o Soft Delete
     await tipoUsuarioRepository.update(
       { id: Number(id) },
       {

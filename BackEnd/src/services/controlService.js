@@ -113,7 +113,7 @@ class ControlService {
           {
             usuario_cad: { matricula: identificador },
             deletedAt: IsNull(),
-          }
+          },
         ],
         relations: ["usuario_cad"],
       });
@@ -138,7 +138,7 @@ class ControlService {
 
       return controles;
     } catch (error) {
-      throw new Error(`Erro ao buscar controles do usuário: ${error.message}`)
+      throw new Error(`Erro ao buscar controles do usuário: ${error.message}`);
     }
   }
 
@@ -172,8 +172,8 @@ class ControlService {
       await equipamentoRepository.update(
         { id: id_equip },
         { status: "ocupado", updatedAt: new Date() }
-      )
-      console.log(`Equipamento ${id_equip} marcado como OCUPADO`)
+      );
+      console.log(`Equipamento ${id_equip} marcado como OCUPADO`);
     }
 
     return await controlRepository.findOne({
@@ -188,11 +188,11 @@ class ControlService {
     //Busca o controle atual para pegar o id_labs antes de atualizar
     const currentControl = await controlRepository.findOne({
       where: { id },
-      relations: ["laboratorio", "equipamento"]
+      relations: ["laboratorio", "equipamento"],
     });
 
     if (!currentControl) {
-      throw new Error("Controle não encontrado")
+      throw new Error("Controle não encontrado");
     }
 
     const id_labs = currentControl.id_labs;
@@ -213,8 +213,8 @@ class ControlService {
       await labsRepository.update(
         { id: id_labs },
         { status: "livre", updatedAt: new Date() }
-      )
-      console.log(`Laboratório ${id_labs} marcado como LIVRE`)
+      );
+      console.log(`Laboratório ${id_labs} marcado como LIVRE`);
     }
 
     //Atualiza status do equipamento
@@ -222,8 +222,8 @@ class ControlService {
       await equipamentoRepository.update(
         { id: id_equip },
         { status: "livre", updatedAt: new Date() }
-      )
-      console.log(`Equipamento ${id_equip} marcado como LIVRE`)
+      );
+      console.log(`Equipamento ${id_equip} marcado como LIVRE`);
     }
 
     return await controlRepository.findOne({
@@ -289,11 +289,11 @@ class ControlService {
   //Status: pendente
   async autoCloseControl() {
     try {
-      console.log("🕐 Executando fechamento automático diário...")
+      console.log("🕐 Executando fechamento automático diário...");
 
-      const hoje = new Date()
-      const inicioDia = new Date(hoje)
-      inicioDia.setHours(0, 0, 0, 0)
+      const hoje = new Date();
+      const inicioDia = new Date(hoje);
+      inicioDia.setHours(0, 0, 0, 0);
 
       // const fimDia = new Date(hoje)
       // fimDia.setHours(23,59,59,999)
@@ -311,13 +311,13 @@ class ControlService {
       );
 
       if (controlsToClose.length === 0) {
-        return { update: 0, message: "Nenhum controle para atualizar" }
+        return { update: 0, message: "Nenhum controle para atualizar" };
       }
 
       //Atualiza os labs para "livre" antes de mudar os controles
       const labsIdsToFree = controlsToClose
-        .map(control => control.id_labs)
-        .filter(id => id !== null)
+        .map((control) => control.id_labs)
+        .filter((id) => id !== null);
 
       if (labsIdsToFree.length > 0) {
         await labsRepository
@@ -325,15 +325,15 @@ class ControlService {
           .update(Labs)
           .set({ status: "livre", updatedAt: new Date() })
           .where("id IN (:...ids)", { ids: labsIdsToFree })
-          .execute()
+          .execute();
 
         console.log(`${labsIdsToFree.length} laboratórios marcados como LIVRE`);
       }
 
       //Atualiza os equipamentos para "livre" antes de mudar os controles
       const equipIdsToFree = controlsToClose
-        .map(control => control.id_equip)
-        .filter(id => id !== null)
+        .map((control) => control.id_equip)
+        .filter((id) => id !== null);
 
       if (equipIdsToFree.length > 0) {
         await equipamentoRepository
@@ -341,7 +341,7 @@ class ControlService {
           .update(Equipamento)
           .set({ status: "livre", updatedAt: new Date() })
           .where("id IN (:...ids)", { ids: equipIdsToFree })
-          .execute()
+          .execute();
 
         console.log(
           `${equipIdsToFree.length} equipamentos marcados como LIVRE`
@@ -356,7 +356,7 @@ class ControlService {
         .update(Control)
         .set({
           status: "pendente",
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         .where("id IN (:...ids)", { ids })
         .execute();
@@ -370,8 +370,8 @@ class ControlService {
         message: `${controlsToClose.length} controles marcados como pendente`,
       };
     } catch (error) {
-      console.error("Erro no fechamento automático: ", error)
-      throw new Error(`Erro no fechamento automático: ${error.message}`)
+      console.error("Erro no fechamento automático: ", error);
+      throw new Error(`Erro no fechamento automático: ${error.message}`);
     }
   }
 

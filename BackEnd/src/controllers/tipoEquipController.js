@@ -1,7 +1,9 @@
-import express from "express";
+import express, { response } from "express";
 import tipoEquipService from "../services/tipoEquipService.js";
 import validationMiddleware from "../middleware/validationMiddleware.js";
 import { TipoEquipRequestDTO } from "../DTOs/index.js";
+import equipamento from "../entities/equipamento.js";
+import { getErrorMessage } from "../helpers/errorHandler.js";
 
 const route = express.Router();
 
@@ -36,6 +38,27 @@ route.get("/:descricao", async (request, response) => {
   } catch (error) {
     console.error("Erro ao buscar tipos por descrição: ", error);
     return response.status(500).json({ error: error.message });
+  }
+});
+
+route.get("/id", async (request, response) => {
+  try {
+    const { id } = request.params;
+    const tipoEquip = await tipoEquipService.getTipoById(id);
+
+    if (!tipoEquip) {
+      return response
+        .status(404)
+        .json({ response: "Tipo de Equipamento não encontrado." });
+    }
+
+    return response.status(200).json(equipamento);
+  } catch (error) {
+    console.error("Erro ao buscar tipo de equipamento: ", error);
+    return response.status(500).json({
+      response: "Erro interno no servidor.",
+      error: getErrorMessage(error),
+    });
   }
 });
 
