@@ -60,9 +60,11 @@ class TipoUsuarioService {
       .andWhere("usuario.deletedAt IS NULL")
       .getCount();
 
-    if(usuariosAtivos > 0) {
-      throw new Error("Não é possível desativar este tipo de usuário pois existem usuários ativos vinculados a ele.")
-    } 
+    if (usuariosAtivos > 0) {
+      throw new Error(
+        "Não é possível desativar este tipo de usuário, pois existem usuários ativos vinculados a ele."
+      );
+    }
 
     //Se não houver dependências, faz o Soft Delete
     await tipoUsuarioRepository.update(

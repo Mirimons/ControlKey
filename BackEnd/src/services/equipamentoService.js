@@ -108,16 +108,29 @@ class EquipService {
   }
 
   async deleteEquip(id) {
-    if (isNaN(Number(id))) {
-      throw new Error("O id precisa ser numérico.");
-    }
-
+    //Verifica se existe
     const equip = await this.getEquipById(id);
     if (!equip) {
       throw new Error("Equipamento não encontrado.");
     }
 
-    await equipamentoRepository.update({ id }, { deletedAt: new Date() });
+    //Verifica se existem dependências
+    const controlsAtivos = await AppDataSource.getRepository("Control")
+      .createQueryBuilder("control")
+      .where("control.id_equip = :id", { id })
+      .andWhere("control.deletedAt IS NULL")
+      .getCount();
+
+    if (controlsAtivos > 0) {
+      throw new Error(
+        "Não é possível desativar este equipamento, pois existem controles ativos vinculados a ele."
+      );
+    }
+
+    await equipamentoRepository.update(
+      { id: Number(id) },
+      { deletedAt: new Date() }
+    );
     return true;
   }
 

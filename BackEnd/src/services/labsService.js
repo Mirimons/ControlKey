@@ -106,16 +106,43 @@ class LabsService {
   }
 
   async deleteLabs(id) {
-    if (isNaN(Number(id))) {
-      throw new Error("O id precisa ser numérico.");
-    }
-
+    //Verifica se existe
     const lab = await this.getLabById(id);
     if (!lab) {
       throw new Error("Laboratório não encontrado.");
     }
 
-    await labsRepository.update({ id }, { deletedAt: new Date() });
+    //Verifica se existem dependências
+    const controlsAtivos = await AppDataSource.getRepository("Control")
+      .createQueryBuilder("control")
+      .where("control.id_labs = :id", { id })
+      .andWhere("control.deletedAt IS NULL")
+      .getCount();
+
+    if (controlsAtivos > 0) {
+      throw new Error(
+        "Não é possível desativar este Laboratório, pois existem controles ativos vinculados a ele."
+      );
+    }
+
+    const agendamentosAtivos = await AppDataSource.getRepository("Agendamento")
+      .createQueryBuilder("agendamento")
+      .where("agendamento.id_labs = :id", { id })
+      .andWhere("agendamento.deletedAt IS NULL")
+      .getCount();
+
+    if (agendamentosAtivos > 0) {
+      throw new Error(
+        "Não foi possível desativar este Laboratório, pois existem agendamentos ativos vinculados a ele."
+      );
+    }
+
+    await labsRepository.update(
+      {
+        id: Number(id),
+      },
+      { deletedAt: new Date() }
+    );
     return true;
   }
 

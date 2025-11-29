@@ -46,19 +46,21 @@ class TipoEquipService {
   async deleteTipoEquip(id) {
     //Verificar se existe
     const tipoEquip = await this.getTipoById(id);
-    if(!tipoEquip) {
-        throw new Error("Tipo de equipamento não encontrado.")
+    if (!tipoEquip) {
+      throw new Error("Tipo de equipamento não encontrado.");
     }
 
     //Verifica se existem dependências
     const equipamentosAtivos = await AppDataSource.getRepository("Equipamento")
-    .createQueryBuilder("equipamento")
-    .where("equipamento.id_tipo = :id", {id})
-    .andWhere("equipamento.deletedAt IS NULL")
-    .getCount();
+      .createQueryBuilder("equipamento")
+      .where("equipamento.id_tipo = :id", { id })
+      .andWhere("equipamento.deletedAt IS NULL")
+      .getCount();
 
-    if(equipamentosAtivos > 0) {
-        throw new Error("Não é possível desativar este tipo de equipamento pois existem equipamentos ativos vinculados a ele.")
+    if (equipamentosAtivos > 0) {
+      throw new Error(
+        "Não é possível desativar este tipo de equipamento, pois existem equipamentos ativos vinculados a ele."
+      );
     }
 
     await tipoEquipRepository.update(
