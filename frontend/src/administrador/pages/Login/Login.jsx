@@ -21,12 +21,6 @@ export default function Login() {
         senha: senha,
       })
       .then((response) => {
-        console.log("✅ ESTRUTURA COMPLETA:", response.data);
-        console.log(
-          "✅ PROPRIEDADES DO USUÁRIO:",
-          Object.keys(response.data.usuario)
-        );
-
         console.log("Login bem-sucedido: ", response.data);
 
         sessionStorage.setItem("token", response.data.token);
