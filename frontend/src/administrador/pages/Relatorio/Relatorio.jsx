@@ -12,6 +12,7 @@ function Relatorio() {
     equipamento: "",
     status: "",
     dataInicio: "",
+    dataFim: "", // Adicionado
   });
   const [loading, setLoading] = useState(false);
 
@@ -19,7 +20,7 @@ function Relatorio() {
     carregarRelatorios();
   }, []);
 
-  //Mapeamento dos status para exibição
+  // Mapeamento dos status para exibição
   const mapeamentoStatus = {
     aberto: "Retirado",
     fechado: "Devolvido",
@@ -52,23 +53,23 @@ function Relatorio() {
 
         const lista = Array.isArray(dados)
           ? dados.map((item, i) => ({
-              id: item.id || i,
-              usuario: item.usuario?.nome || "--",
-              laboratorio: item.laboratorio?.nome_lab || "--",
-              equipamento: item.equipamento?.desc_equip || "--",
-              dataInicio: item.data_inicio || item.dataInicio,
-              dataFim: item.data_fim || item.dataFim,
-              status: item.status || "--",
-              //Aplica o mapeamento para exibição
-              statusDisplay:
-                mapeamentoStatus[item.status] || item.status || "--",
-              ciente: item.ciente ? "Sim" : "Não",
+            id: item.id || i,
+            usuario: item.usuario?.nome || "--",
+            laboratorio: item.laboratorio?.nome_lab || "--",
+            equipamento: item.equipamento?.desc_equip || "--",
+            dataInicio: item.data_inicio || item.dataInicio,
+            dataFim: item.data_fim || item.dataFim,
+            status: item.status || "--",
+            // Aplica o mapeamento para exibição
+            statusDisplay:
+              mapeamentoStatus[item.status] || item.status || "--",
+            ciente: item.ciente ? "Sim" : "Não",
 
-              id_control: item.id,
-              id_usuario: item.usuario?.id || item.id_usuario,
-              id_lab: item.laboratorio?.id || item.id_labs,
-              id_equip: item.equipamento?.id || item.id_equip,
-            }))
+            id_control: item.id,
+            id_usuario: item.usuario?.id || item.id_usuario,
+            id_lab: item.laboratorio?.id || item.id_labs,
+            id_equip: item.equipamento?.id || item.id_equip,
+          }))
           : [];
 
         setRelatorios(lista);
@@ -92,7 +93,7 @@ function Relatorio() {
       return;
     }
 
-    //Confirmação antes de fechar
+    // Confirmação antes de fechar
     const result = await Swal.fire({
       title: "Confirmar Devolução",
       text: "Tem certeza que deseja marcar este item como devolvido?",
@@ -104,7 +105,7 @@ function Relatorio() {
       cancelButtonText: "Cancelar",
     });
 
-    if(!result.isConfirmed) {
+    if (!result.isConfirmed) {
       return;
     }
 
@@ -119,7 +120,7 @@ function Relatorio() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      //Recarrega a lista
+      // Recarrega a lista
       carregarRelatorios();
 
       Swal.fire({
@@ -132,9 +133,9 @@ function Relatorio() {
     } catch (err) {
       console.error("Erro ao fechar controle: ", err);
 
-      let errorMessage = "Não foi possível registrar a devolução"
-      if( err.response?.data?.message) {
-        errorMessage = err.response.data.message
+      let errorMessage = "Não foi possível registrar a devolução";
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
       }
 
       Swal.fire({
@@ -145,18 +146,7 @@ function Relatorio() {
     }
   };
 
-  // //Função para formatar data
-  // const formatarData = (dataString) => {
-  //   if(!dataString) return "--";
-  //   try {
-  //     const data = new Date(dataString)
-  //     return data.toLocaleDateString("pt-BR")
-  //   }catch(error) {
-  //     return "Data inválida";
-  //   }
-  // }
-
-  //Função para formatarhora
+  // Função para formatar hora
   const formatarHora = (dataString) => {
     if (!dataString) return "--";
     try {
@@ -173,6 +163,15 @@ function Relatorio() {
 
   // Filtra os relatórios com base nos inputs
   const relatoriosFiltrados = relatorios.filter((r) => {
+    // Converte datas para objetos Date, ignorando a hora (pega apenas a parte YYYY-MM-DD)
+    const dataRegistro = r.dataInicio ? new Date(r.dataInicio.split('T')[0]) : null;
+    const dataInicioFiltro = filtros.dataInicio ? new Date(filtros.dataInicio) : null;
+    const dataFimFiltro = filtros.dataFim ? new Date(filtros.dataFim) : null;
+
+    // Lógica de filtro de data
+    const filtroDataInicioPassa = !dataInicioFiltro || (dataRegistro && dataRegistro >= dataInicioFiltro);
+    const filtroDataFimPassa = !dataFimFiltro || (dataRegistro && dataRegistro <= dataFimFiltro);
+
     return (
       (!filtros.nomeUsuario ||
         r.usuario.toLowerCase().includes(filtros.nomeUsuario.toLowerCase())) &&
@@ -186,8 +185,8 @@ function Relatorio() {
           .includes(filtros.equipamento.toLowerCase())) &&
       (!filtros.status ||
         r.status.toLowerCase() === filtros.status.toLowerCase()) &&
-      (!filtros.dataInicio ||
-        (r.dataInicio && r.dataInicio.includes(filtros.dataInicio)))
+      filtroDataInicioPassa &&
+      filtroDataFimPassa
     );
   });
 
@@ -198,6 +197,7 @@ function Relatorio() {
           <h2>Relatórios</h2>
         </header>
 
+        {/* FILTROS (MANTIDO ACIMA DA TABELA) */}
         <div className="filtros-container">
           <div className="campo">
             <label>Nome do Usuário:</label>
@@ -246,6 +246,9 @@ function Relatorio() {
             </select>
           </div>
 
+          {/* DIV AUXILIAR PARA FORÇAR QUEBRA DE LINHA NO CSS */}
+          <div className="quebra-linha"></div>
+
           <div className="campo">
             <label>Data de Início:</label>
             <input
@@ -255,8 +258,19 @@ function Relatorio() {
               onChange={handleChange}
             />
           </div>
+
+          <div className="campo">
+            <label>Data Final:</label>
+            <input
+              type="date"
+              name="dataFim"
+              value={filtros.dataFim}
+              onChange={handleChange}
+            />
+          </div>
         </div>
 
+        {/* TABELA */}
         <div className="tabela-container">
           <table className="relatorio-tabela">
             <thead>

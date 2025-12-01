@@ -89,7 +89,7 @@ const SelectPesquisavel = ({
 };
 
 function Equipaments() {
-  
+
   const [modalAberto, setModalAberto] = useState(false);
   const [tipoEquip, setTipoEquip] = useState("");
   const [descEquip, setDescEquip] = useState("");
@@ -97,32 +97,32 @@ function Equipaments() {
   const [equipamentos, setEquipamentos] = useState([]);
   const [tipoEquipamentos, setTiposEquip] = useState([]);
 
-const fetchTiposEquip = () => {
-  const token = sessionStorage.getItem("token");
-  if (!token) return;
+  const fetchTiposEquip = () => {
+    const token = sessionStorage.getItem("token");
+    if (!token) return;
 
-  api
-    .get("/tipo_equip", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then((res) => {
-      const lista =
-        res.data?.data ||
-        res.data?.tipos ||
-        res.data ||
-        [];
+    api
+      .get("/tipo_equip", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const lista =
+          res.data?.data ||
+          res.data?.tipos ||
+          res.data ||
+          [];
 
-      if (Array.isArray(lista)) {
-        setTiposEquip(lista);
-      } else {
-        console.warn("Resposta inesperada do backend /tipo_equip:", res.data);
-        setTiposEquip([]);
-      }
-    })
-    .catch((err) => {
-      console.error("Erro ao buscar tipos de equipamento:", err);
-    });
-};
+        if (Array.isArray(lista)) {
+          setTiposEquip(lista);
+        } else {
+          console.warn("Resposta inesperada do backend /tipo_equip:", res.data);
+          setTiposEquip([]);
+        }
+      })
+      .catch((err) => {
+        console.error("Erro ao buscar tipos de equipamento:", err);
+      });
+  };
 
   const [filtros, setFiltros] = useState({
     equipamento: "",
@@ -405,9 +405,6 @@ const fetchTiposEquip = () => {
               <option value="ocupado">Ocupado</option>
             </select>
           </div>
-        </div>
-
-        <div className="btn-add-container">
           <button className="btn-add" type="button" onClick={abrirModal}>
             Adicionar Equipamento
           </button>
@@ -472,14 +469,14 @@ const fetchTiposEquip = () => {
                 {!editando && (
                   <>
                     <label>Tipo de equipamento:</label>
-                      <SelectPesquisavel
-                        options={opcoesTipoEquipamento}
-                        placeholder="Digite o tipo do equipamento"
-                        value={tipoEquip}
-                        onChange={setTipoEquip}
-                        required
-                        className={errosValidacao.tipo ? 'input-error' : ''}
-                      />
+                    <SelectPesquisavel
+                      options={opcoesTipoEquipamento}
+                      placeholder="Digite o tipo do equipamento"
+                      value={tipoEquip}
+                      onChange={setTipoEquip}
+                      required
+                      className={errosValidacao.tipo ? 'input-error' : ''}
+                    />
                     {errosValidacao.tipo && (
                       <div className="erro-validacao">
                         {errosValidacao.tipo}
@@ -495,9 +492,9 @@ const fetchTiposEquip = () => {
                   value={descEquip}
                   onChange={(e) => setDescEquip(e.target.value)}
                   required
-                  className={errosValidacao.desc_equip ? 'input-error' : ''} 
+                  className={errosValidacao.desc_equip ? 'input-error' : ''}
                 />
-                {errosValidacao.desc_equip && ( 
+                {errosValidacao.desc_equip && (
                   <div className="erro-validacao">
                     {errosValidacao.desc_equip}
                   </div>
