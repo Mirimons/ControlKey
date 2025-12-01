@@ -7,12 +7,122 @@ import { toast } from "react-toastify";
 import { handleApiError } from "../../../helpers/errorHelper";
 import Swal from "sweetalert2";
 
+const SelectPesquisavel = ({
+  options,
+  value,
+  onChange,
+  placeholder,
+  required,
+  className,
+}) => {
+  const [inputValue, setInputValue] = useState("");
+
+
+  const [mostrarOpcoes, setMostrarOpcoes] = useState(false);
+  const containerRef = useRef(null);
+
+  const selectedOption = options.find(
+    (opt) => String(opt.value) === String(value)
+  );
+
+  useEffect(() => {
+    if (selectedOption) setInputValue(selectedOption.label);
+    else setInputValue("");
+  }, [selectedOption]);
+
+  const opcoesFiltradas = options.filter((option) =>
+    option.label.toLowerCase().includes(inputValue.toLowerCase())
+  );
+
+  const handleSelect = (option) => {
+    onChange(option.value);
+    setInputValue(option.label);
+    setMostrarOpcoes(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
+        setMostrarOpcoes(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="select-pesquisavel" ref={containerRef}>
+      <input
+        type="text"
+        value={inputValue}
+        onChange={(e) => {
+          setInputValue(e.target.value);
+          setMostrarOpcoes(true);
+        }}
+        onFocus={() => setMostrarOpcoes(true)}
+        placeholder={placeholder}
+        required={required}
+        className={className}
+      />
+      {mostrarOpcoes && (
+        <div className="opcoes-lista">
+          {opcoesFiltradas.length > 0 ? (
+            opcoesFiltradas.map((option) => (
+              <div
+                key={option.value}
+                className="opcao"
+                onClick={() => handleSelect(option)}
+              >
+                {option.label}
+              </div>
+            ))
+          ) : (
+            <div className="opcao opcao-vazia">Nenhuma opção encontrada</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 function Equipaments() {
+  
   const [modalAberto, setModalAberto] = useState(false);
   const [tipoEquip, setTipoEquip] = useState("");
   const [descEquip, setDescEquip] = useState("");
   const [status, setStatus] = useState("livre");
   const [equipamentos, setEquipamentos] = useState([]);
+  const [tipoEquipamentos, setTiposEquip] = useState([]);
+
+const fetchTiposEquip = () => {
+  const token = sessionStorage.getItem("token");
+  if (!token) return;
+
+  api
+    .get("/tipo_equip", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      const lista =
+        res.data?.data ||
+        res.data?.tipos ||
+        res.data ||
+        [];
+
+      if (Array.isArray(lista)) {
+        setTiposEquip(lista);
+      } else {
+        console.warn("Resposta inesperada do backend /tipo_equip:", res.data);
+        setTiposEquip([]);
+      }
+    })
+    .catch((err) => {
+      console.error("Erro ao buscar tipos de equipamento:", err);
+    });
+};
 
   const [filtros, setFiltros] = useState({
     equipamento: "",
@@ -44,6 +154,7 @@ function Equipaments() {
     setErrosValidacao({});
     setStatus("livre");
   };
+
   const deleteEquipamento = async () => {
     const result = await Swal.fire({
       title: "Você tem certeza?",
@@ -120,6 +231,7 @@ function Equipaments() {
 
   useEffect(() => {
     fetchEquipamentos();
+    fetchTiposEquip();
   }, []);
 
   //Mudança nos filtros
@@ -130,7 +242,10 @@ function Equipaments() {
       [name]: value,
     }));
   };
-
+  const opcoesTipoEquipamento = tipoEquipamentos.map((tipo) => ({
+    value: tipo.desc_tipo,
+    label: tipo.desc_tipo,
+  }));
   //Filtrar equipamentos
   const equipamentosFiltrados = equipamentos.filter((equip) => {
     const tipo = equip.tipo?.desc_tipo || "Sem tipo";
@@ -357,15 +472,15 @@ function Equipaments() {
                 {!editando && (
                   <>
                     <label>Tipo de equipamento:</label>
-                    <input
-                      type="text"
-                      placeholder="Digite o tipo do equipamento"
-                      value={tipoEquip}
-                      onChange={(e) => setTipoEquip(e.target.value)}
-                      required
-                      className={errosValidacao.tipo ? 'input-error' : ''} // 🚨 Corrigido: 'tipo'
-                    />
-                    {errosValidacao.tipo && ( // 🚨 Corrigido: 'tipo'
+                      <SelectPesquisavel
+                        options={opcoesTipoEquipamento}
+                        placeholder="Digite o tipo do equipamento"
+                        value={tipoEquip}
+                        onChange={setTipoEquip}
+                        required
+                        className={errosValidacao.tipo ? 'input-error' : ''}
+                      />
+                    {errosValidacao.tipo && (
                       <div className="erro-validacao">
                         {errosValidacao.tipo}
                       </div>
@@ -380,9 +495,9 @@ function Equipaments() {
                   value={descEquip}
                   onChange={(e) => setDescEquip(e.target.value)}
                   required
-                  className={errosValidacao.desc_equip ? 'input-error' : ''} // 🚨 Corrigido: 'desc_equip'
+                  className={errosValidacao.desc_equip ? 'input-error' : ''} 
                 />
-                {errosValidacao.desc_equip && ( // 🚨 Corrigido: 'desc_equip'
+                {errosValidacao.desc_equip && ( 
                   <div className="erro-validacao">
                     {errosValidacao.desc_equip}
                   </div>
@@ -392,7 +507,7 @@ function Equipaments() {
                 <select value={status}
                   onChange={(e) => setStatus(e.target.value)}
                   required
-                  className={errosValidacao.status ? 'input-error' : ''} // 🚨 Adicionado verificação de status (caso o BE valide)
+                  className={errosValidacao.status ? 'input-error' : ''} // Adicionado verificação de status (caso o BE valide)
                 >
                   <option value="livre">Livre</option>
                   <option value="ocupado">Ocupado</option>

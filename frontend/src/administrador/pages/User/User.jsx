@@ -8,6 +8,87 @@ import { handleApiError } from "../../../helpers/errorHelper";
 import { redirect } from "react-router-dom";
 import Swal from "sweetalert2";
 
+const SelectPesquisavel = ({
+  options,
+  value,
+  onChange,
+  placeholder,
+  required,
+  className,
+}) => {
+  const [inputValue, setInputValue] = useState("");
+
+
+  const [mostrarOpcoes, setMostrarOpcoes] = useState(false);
+  const containerRef = useRef(null);
+
+  const selectedOption = options.find(
+    (opt) => String(opt.value) === String(value)
+  );
+
+  useEffect(() => {
+    if (selectedOption) setInputValue(selectedOption.label);
+    else setInputValue("");
+  }, [selectedOption]);
+
+  const opcoesFiltradas = options.filter((option) =>
+    option.label.toLowerCase().includes(inputValue.toLowerCase())
+  );
+
+  const handleSelect = (option) => {
+    onChange(option.value);
+    setInputValue(option.label);
+    setMostrarOpcoes(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
+        setMostrarOpcoes(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="select-pesquisavel" ref={containerRef}>
+      <input
+        type="text"
+        value={inputValue}
+        onChange={(e) => {
+          setInputValue(e.target.value);
+          setMostrarOpcoes(true);
+        }}
+        onFocus={() => setMostrarOpcoes(true)}
+        placeholder={placeholder}
+        required={required}
+        className={className}
+      />
+      {mostrarOpcoes && (
+        <div className="opcoes-lista">
+          {opcoesFiltradas.length > 0 ? (
+            opcoesFiltradas.map((option) => (
+              <div
+                key={option.value}
+                className="opcao"
+                onClick={() => handleSelect(option)}
+              >
+                {option.label}
+              </div>
+            ))
+          ) : (
+            <div className="opcao opcao-vazia">Nenhuma opção encontrada</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 function User() {
   const [modalAberto, setModalAberto] = useState(false);
   const [tipo, setTipo] = useState("");
@@ -19,6 +100,36 @@ function User() {
   const [data_nasc, setData_nasc] = useState("");
   const [senha, setSenha] = useState("");
 
+  const [tipoUsuario, setTipoUsuario] = useState([]);
+
+  const fetchTipoUsuario = () => {
+    const token = sessionStorage.getItem("token");
+    if (!token) return;
+  
+
+  api
+    .get("/tipo_usuario", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      const lista = res.data?.data || res.data?.tipos || res.data ||[];
+
+    if (Array.isArray(lista)) {
+      setTipoUsuario(lista);
+    } else {
+      console.warn("Resposta inesperada do backend /tipo_usuario", res.data);
+      setTipoUsuario([]);
+    }
+    })
+    .catch((err) => {
+      handleApiError(err, "Erro ao buscar tipos de usuário.", err);
+    });
+  };
+
+  const opcoesTipoUsuario = tipoUsuario.map((tipo) => ({
+    value: tipo.desc_tipo,
+    label: tipo.desc_tipo,
+  }));
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
   const [filtroNome, setFiltroNome] = useState("");
@@ -498,6 +609,7 @@ function User() {
 
   //Para fazer a busca inicial automática
   useEffect(() => {
+    fetchTipoUsuario();
     if (!modalAberto) return;
 
     const handleClickFora = (event) => {
@@ -541,7 +653,7 @@ function User() {
 
         <div className="usuarios-filtros">
           <div>
-            <h3>Nome completo</h3>
+            <h3>Nome completo:</h3>
             <input
               type="text"
               placeholder="Nome completo"
@@ -638,19 +750,16 @@ function User() {
 
                 <div className="form-group-campo">
                   <label>Tipo de usuário:</label>
-                  <select
+                  <SelectPesquisavel
+                    options={opcoesTipoUsuario}
+                    placegolder="Selecione o tipo de usuário"
                     value={tipo}
-                    onChange={(e) => setTipo(e.target.value)}
+                    onChange={(valor) => {
+                      setTipo(valor); // aqui `valor` vira o ID do tipo
+                    }}
                     required
                     className={erros.tipo ? "input-error" : ""}
-                  >
-                    <option value="" disabled hidden>
-                      Selecione o tipo de usuário
-                    </option>
-                    <option value="Administrador">Administrador</option>
-                    <option value="Comum">Comum</option>
-                    <option value="Terceiro">Terceiro</option>
-                  </select>
+                  />
                   {erros.tipo && (
                     <div className="erro-validacao">{erros.tipo}</div>
                   )}
