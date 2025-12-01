@@ -675,7 +675,7 @@ function User() {
               <option value="Administrador">Administrador</option>
               <option value="Comum">Comum</option>
               <option value="Terceiro">Terceiro</option>
-              <option value="Desabilitado">Desabilitado</option>
+              <option value="Desabilitado">Desativados</option>
             </select>
           </div>
           <button className="btn-add" type="button" onClick={abrirModalNovo}>

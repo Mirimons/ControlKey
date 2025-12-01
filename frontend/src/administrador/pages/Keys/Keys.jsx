@@ -23,6 +23,9 @@ function Keys() {
   const [editando, setEditando] = useState(false);
   const [chaveSelecionada, setChaveSelecionada] = useState(null);
 
+  const [filtroTipo, setFiltroTipo] = useState("");
+  
+
   const [errosValidacao, setErrosValidacao] = useState({});
 
   const modalRef = useRef();
@@ -304,6 +307,7 @@ function Keys() {
               <option value="">Todos</option>
               <option value="livre">Livre</option>
               <option value="ocupado">Ocupado</option>
+              <option value="desabilitado">Desativados</option>
             </select>
           </div>
           <button className="btn-add" type="button" onClick={abrirModalNovo}>
@@ -334,14 +338,27 @@ function Keys() {
                         {chave.status}
                       </span>
                     </td>
-                    <td>
-                      <button
-                        className="editar-btn"
-                        onClick={() => abrirModalEditar(chave)}
-                      >
-                        ✏️
-                      </button>
-                    </td>
+                    {filtroTipo !== "Desabilitado" ? (
+                      <td>
+                        <button
+                          className="editar-btn"
+                          onClick={() => abrirModalEditar(user)}
+                        >
+                          ✏️
+                        </button>
+                      </td>
+                    ) : null}
+                    {filtroTipo === "Desabilitado" ? (
+                      <td>
+                        <button
+                          className="editar-btn"
+                          onClick={() => reativarUsuario(user)}
+                          title="Reativar usuário"
+                        >
+                          <FaCheck />
+                        </button>
+                      </td>
+                    ) : null}
                   </tr>
                 ))
               ) : (
