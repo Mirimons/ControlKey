@@ -3,6 +3,7 @@ import "./Relatorio.css";
 import Navbar from "../../../components/navbar";
 import api from "../../../services/api";
 import Swal from "sweetalert2";
+import * as XLSX from "xlsx";
 
 function Relatorio() {
   const [relatorios, setRelatorios] = useState([]);
@@ -190,6 +191,64 @@ function Relatorio() {
     );
   });
 
+  // ... código existente (handleChange, handleFecharControl, formatarHora) ...
+
+  // Função para exportar os dados filtrados para XLSX (Excel)
+  const exportarParaExcel = () => {
+    if (relatoriosFiltrados.length === 0) {
+      Swal.fire({
+        icon: "info",
+        title: "Atenção",
+        text: "Não há dados para exportar.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    // 1. Mapear e preparar os dados
+    const dadosParaExportar = relatoriosFiltrados.map((r) => ({
+      Usuário: r.usuario,
+      Laboratório: r.laboratorio,
+      Equipamento: r.equipamento,
+      Data: r.dataInicio // Manter o formato ISO para o XLSX lidar com a data
+        ? new Date(r.dataInicio).toLocaleDateString("pt-BR")
+        : "--",
+      "Hora Retirada": formatarHora(r.dataInicio),
+      "Hora Devolução": formatarHora(r.dataFim),
+      Status: r.statusDisplay,
+      Ciente: r.ciente,
+    }));
+
+    // 2. Criar a planilha (Worksheet) a partir do JSON
+    const ws = XLSX.utils.json_to_sheet(dadosParaExportar);
+
+    // 3. Adicionar as informações de data corretas para o Excel
+    // O XLSX usa números para datas. Vamos formatar a coluna "Data" (coluna D = 3)
+    const dataColIndex = 3;
+    const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/; // Regex para encontrar datas (DD/MM/YYYY)
+
+    // Itera sobre todas as células da coluna D, a partir da segunda linha (dados)
+    for (let R = 1; R < dadosParaExportar.length + 1; ++R) {
+      const cellAddress = XLSX.utils.encode_cell({ c: dataColIndex, r: R });
+      if (ws[cellAddress] && dateRegex.test(ws[cellAddress].v)) {
+        // Converte DD/MM/YYYY para o formato Date nativo do JS
+        const parts = ws[cellAddress].v.split('/');
+        const jsDate = new Date(parts[2], parts[1] - 1, parts[0]);
+        ws[cellAddress].v = jsDate; // Define o valor como um objeto Date
+        ws[cellAddress].t = 'd';   // Define o tipo como Data
+        ws[cellAddress].z = 'dd/mm/yyyy'; // Define o formato de exibição
+      }
+    }
+
+    // 4. Criar o Livro de Trabalho (Workbook)
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Relatório de Controle");
+
+    // 5. Gerar e salvar o arquivo XLSX
+    XLSX.writeFile(wb, `relatorio_laboratorio_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
   return (
     <div className="relatorio-page">
       <div className="relatorio-container">
@@ -197,7 +256,6 @@ function Relatorio() {
           <h2>Relatórios</h2>
         </header>
 
-        {/* FILTROS (MANTIDO ACIMA DA TABELA) */}
         <div className="filtros-container">
           <div className="campo">
             <label>Nome do Usuário:</label>
@@ -267,6 +325,12 @@ function Relatorio() {
               value={filtros.dataFim}
               onChange={handleChange}
             />
+          </div>
+
+          <div className="campo-acao">
+            <button className="btn-exportar" onClick={exportarParaExcel}>
+              Exportar para XLSX
+            </button>
           </div>
         </div>
 
