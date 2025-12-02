@@ -609,7 +609,7 @@ function Reservation() {
                   className={errosValidacao.status ? "input-error" : ""}
                 >
                   <option value="agendado">Agendado</option>
-                  <option value="concluído">Concluído</option>
+                  <option value="finalizado">Finalizado</option>
                   <option value="cancelado">Cancelado</option>
                 </select>
                 {errosValidacao.status && (

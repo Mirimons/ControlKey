@@ -359,3 +359,19 @@ opcoes-lista {
   box-sizing: border-box;
   /* Garante que padding e borda não aumentem o width total */
 }
+
+.status-agendado {
+  color: #cc9900;
+  font-weight: bold;
+}
+
+.status-finalizado {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.status-cancelado {
+  color: #dc3545;
+  font-weight: bold;
+}
+

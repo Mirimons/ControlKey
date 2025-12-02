@@ -242,3 +242,13 @@ body {
   box-sizing: border-box;
   /* Garante que padding e borda não aumentem o width total */
 }
+
+.status-livre {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.status-ocupado {
+  color: #dc3545;
+  font-weight: bold;
+}
