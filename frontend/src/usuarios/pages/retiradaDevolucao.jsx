@@ -9,7 +9,7 @@ function RetiradaDevolucao() {
   const [codigo, setCodigo] = useState("");
   const [professor, setProfessor] = useState(null);
   const [erro, setErro] = useState("");
-  const [acao, setAcao] = useState([]);
+  const [acao, setAcao] = useState("");
 
   // Chaves
   const [labs, setLabs] = useState([]);
@@ -23,18 +23,70 @@ function RetiradaDevolucao() {
   const [equipSelecionado, setEquipSelecionado] = useState(null);
   const [mostrarSugestoesEquip, setMostrarSugestoesEquip] = useState(false);
 
+  //Verifica se é cpf
+  const isCPF = (identificador) => {
+    if (!identificador) return false;
+
+    const apenasNumeros = identificador.replace(/\D/g, "");
+
+    if (apenasNumeros.length > 6) {
+      return true;
+    }
+
+    if (identificador.includes(".") || identificador.includes("-")) {
+      return true;
+    }
+
+    return false;
+  };
+
+  //Máscara do cpf
+  const formatarCPF = (input) => {
+    if (!input) return "";
+
+    let cpf = input.replace(/\D/g, "");
+
+    //Se tiver mais de 7 dígitos aplica a máscara progressiva
+    if (cpf.length >= 7) {
+      if (cpf.length <= 3) {
+        return cpf;
+      } else if (cpf.length <= 6) {
+        return cpf.replace(/(\d{3})(\d{0,3})/, "$1.$2");
+      } else if (cpf.length <= 9) {
+        return cpf.replace(/(\d{3})(\d{3})(\d{0,3})/, "$1.$2.$3");
+      } else {
+        return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, "$1.$2.$3-$4");
+      }
+    }
+    //Se tiver menos de 7 dígitos, retorna sem formatação (pode ser RM)
+    return cpf;
+  };
+
   const normalizarRM = (identificador) => {
     if (!identificador) return identificador;
 
     const identificadorTrim = identificador.trim();
 
-    //Se for CPF, retorna como está
-    if (identificadorTrim.length !== 5 && identificadorTrim.length !== 6) {
-      return identificadorTrim;
-    }
+    // Remove formatação do CPF para o backend
+  const apenasNumeros = identificadorTrim.replace(/\D/g, "");
+  
+  // Se tem 11 dígitos, é CPF
+  if (apenasNumeros.length === 11) {
+    return apenasNumeros;
+  }
+  
+  // Se tem mais de 6 dígitos mas menos de 11, ainda é CPF (incompleto)
+  // Mas o backend vai validar
+  if (apenasNumeros.length > 6) {
+    return apenasNumeros;
+  }
 
-    //Remove tudo que não é numero
-    const apenasNum = identificadorTrim.replace(/\D/g, "");
+  // Código original para RM (5 ou 6 dígitos)
+  if (identificadorTrim.length !== 5 && identificadorTrim.length !== 6) {
+    return identificadorTrim;
+  }
+
+  const apenasNum = identificadorTrim.replace(/\D/g, "");
 
     //Regras de normalização
     if (apenasNum.length === 5) {
@@ -50,6 +102,20 @@ function RetiradaDevolucao() {
     return identificadorTrim;
   };
 
+  const handleIdentificacaoChange = (value) => {
+  // Remove caracteres não numéricos para contar
+  const apenasNumeros = value.replace(/\D/g, "");
+  
+  // Se tiver mais de 6 dígitos OU já tiver pontos/traço, aplica máscara de CPF
+  if (apenasNumeros.length > 6 || value.includes(".") || value.includes("-")) {
+    const valorFormatado = formatarCPF(value);
+    setIdentificacao(valorFormatado);
+  } else {
+    // Se tiver 6 ou menos dígitos, não formata (pode ser RM)
+    setIdentificacao(value);
+  }
+};
+
   const resetarFormulario = () => {
     setIdentificacao("");
     setTipo("");
@@ -62,12 +128,159 @@ function RetiradaDevolucao() {
     setFiltroEquip([]);
     setMostrarSugestoesLabs(false);
     setMostrarSugestoesEquip(false);
+    setAcao("");
+  };
+
+  //Função para verificar se há labs em aberto sem ciente
+  const verificarLabsAbertosSemCiente = async (identificadorNormalizado) => {
+    try {
+      const response = await api.get(
+        `/control/professor/${identificadorNormalizado}`
+      );
+      const controlesAbertos = response.data.data || [];
+
+      const labsAbertosSemCiente = controlesAbertos.filter(
+        (controle) =>
+          controle.id_labs &&
+          controle.ciente === false &&
+          controle.status === "aberto"
+      );
+      return labsAbertosSemCiente;
+    } catch (error) {
+      console.error("Erro ao verificar laboratórios abertos: ", error);
+      return [];
+    }
+  };
+
+  //Função para fazer retirada
+  const fazerRetirada = async (payload) => {
+    try {
+      const response = await api.post("/control/retirada", payload);
+
+      Swal.fire({
+        icon: "success",
+        title: "Retirada Registrada!",
+        text: `${
+          tipo === "chave" ? "Laboratório" : "Equipamento"
+        } retirado com sucesso!`,
+        timer: 2500,
+        showConfirmButton: false,
+      });
+      console.log("Retirada registrada: ", response.data);
+
+      resetarFormulario();
+    } catch (err) {
+      console.error("Erro ao retirar: ", err);
+
+      //Verifica se é erro específico do backend
+      if (
+        err.response?.data?.response?.includes(
+          "já tem este laboratório em aberto"
+        )
+      ) {
+        Swal.fire({
+          icon: "warning",
+          title: "Laboratório já em uso",
+          text: "Este laboratório já está em aberto em seu nome.",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Erro na Retirada",
+          text:
+            err.response?.data?.response ||
+            "Não foi possível registrar a retirada.",
+        });
+      }
+    }
+  };
+
+  //Função fechar labs anteriores
+  const fecharLabsAnteriores = async (labsAbertos, novoPayload) => {
+    try {
+      Swal.fire({
+        title: "Fechando laboratório anterior...",
+        text: "Por favor, aguarde",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      // Fecha todos os labs anteriores
+      for (const lab of labsAbertos) {
+        const closePayload = {
+          identificador: normalizarRM(identificacao),
+          id: lab.id,
+          id_labs: lab.id_labs,
+          data_fim: new Date(),
+          status: "fechado",
+        };
+
+        await api.put("/control/devolucao", closePayload);
+      }
+
+      Swal.close();
+
+      //Após fechar o lab anterior, faz a nova retirada
+      await fazerRetirada(novoPayload);
+    } catch (error) {
+      console.error("Erro ao fechar laboratório anterior:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Erro",
+        html: `
+          Não foi possível fechar o laboratório anterior.<br>
+          <small>${error.response?.data?.response || error.message}</small>
+        `,
+      });
+    }
+  };
+
+  const marcarLabsComoCienteEContinuar = async (labsAbertos, novoPayload) => {
+    try {
+      Swal.fire({
+        title: "Processando...",
+        text: "Registrando confirmação",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      // Marca todos os labs anteriores como ciente
+      for (const lab of labsAbertos) {
+        await api.patch(`/control/ciente/${lab.id}`, {
+          ciente: true,
+        });
+      }
+
+      Swal.close();
+      // Faz a nova retirada
+      await fazerRetirada(novoPayload);
+    } catch (error) {
+      console.error("Erro ao marcar laboratório como ciente:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Erro",
+        html: `
+          Não foi possível confirmar o laboratório anterior.<br>
+          <small>${error.response?.data?.response || error.message}</small>
+        `,
+      });
+    }
   };
 
   // Função para retirar
   const handleRetirar = async () => {
-    if (!professor) return Swal.fire("Atenção", "Usuário não identificado!", "warning");;
-    if (!tipo) return Swal.fire("Atenção", "Selecione se é chave ou equipamento!", "warning");
+    if (!professor)
+      return Swal.fire("Atenção", "Usuário não identificado!", "warning");
+    if (!tipo)
+      return Swal.fire(
+        "Atenção",
+        "Selecione se é chave ou equipamento!",
+        "warning"
+      );
 
     try {
       //Normaliza a identificação antes de enviar
@@ -82,30 +295,115 @@ function RetiradaDevolucao() {
       } else if (tipo === "equipamento" && equipSelecionado) {
         payload.id_equip = equipSelecionado.id;
       } else {
-        Swal.fire("Atenção", "Selecione um item válido para retirar!", "warning");
+        Swal.fire(
+          "Atenção",
+          "Selecione um item válido para retirar!",
+          "warning"
+        );
         return;
       }
 
-      //PRA VER SE DEU CERTO E DEPOIS APAGA
-      console.log("📤 Enviando para backend:", {
-        original: identificacao,
-        normalizado: identificadorNormalizado,
-      });
+      if (tipo === "chave") {
+        const labsAbertosSemCiente = await verificarLabsAbertosSemCiente(
+          identificadorNormalizado
+        );
 
-      //Usando a rota da control no back
-      const response = await api.post("/control/retirada", payload);
+        //Se houver labs em aberto sem ciente, mostra o aviso
+        if (labsAbertosSemCiente.length > 0) {
+          const labsHTML = labsAbertosSemCiente
+            .map((lab) => {
+              const dataFormatada = new Date(lab.data_inicio).toLocaleString(
+                "pt-BR"
+              );
 
-      Swal.fire({
-        icon: "success",
-        title: "Retirada Registrada!",
-        text: `${tipo === "chave" ? "Laboratório" : "Equipamento"} retirado com sucesso!`,
-        timer: 2500,
-        showConfirmButton: false
-      });
-      console.log("Retirada registrada:", response.data);
+              return `
+           <div class="lab-item" style="margin-bottom: 10px; padding: 8px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
+              <strong>${lab.laboratorio?.nome_lab || "Laboratório"}</strong><br>
+              <small>${lab.laboratorio?.desc_lab || ""}</small><br>
+              <small><i>Desde: ${dataFormatada}</i></small>
+            </div>
+          `;
+            })
+            .join("");
+
+          //Novo laboratório que está tentando retirar
+          const novoLabNome = labSelecionado?.nome_lab;
+          const novoLabDesc = labSelecionado?.desc_lab;
+
+          //Mostra o SweetAlert apenas para labs
+          const { value: opcao } = await Swal.fire({
+            title: `<strong style="color: #856404">Atenção!</strong>`,
+            html: `
+                <div style ="text-align: left;">
+                  <p>Você já possui <strong>${labsAbertosSemCiente.length} laboratório(s)</strong> em aberto.</p>
+                  <div style="background: #e8f5e9; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #4caf50;">
+                    <strong>Novo laboratório a retirar: </strong> <br>
+                    <strong>${novoLabNome}</strong> - ${novoLabDesc}
+                  </div>             
+
+                  <p><strong>Laboratórios atualmente em aberto:</strong></p>
+                  ${labsHTML}
+
+                  <p style="margin-top: 15px; color: #666; font-size: 0.9em;">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Importante:</strong> Você não pode ter dois laboratórios simultaneamente.<br>
+                      Escolha uma opção:
+                    </p>
+                </div>
+              `,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-times"></i> Fechar anterior',
+            cancelButtonText:
+              '<i class="fas fa-check"></i> Cancelar',
+            showDenyButton: true,
+            denyButtonText: '<i class="fas fa-ban"></i> Continuar mesmo assim',
+            confirmButtonColor: "#28a745",
+            cancelButtonColor: "#dc3545",
+            denyButtonColor: "#6c757d",
+            reverseButtons: true,
+            width: "600px",
+            customClass: {
+              popup: "sweet-alert-multiplas-retiradas",
+            },
+            buttonsStyling: true,
+            allowOutsideClick: false,
+          });
+
+          //Lida com a opção escolhida
+          if (opcao === true) {
+            //Usuário clicou em "Fechar anterior"
+            await fecharLabsAnteriores(labsAbertosSemCiente, payload);
+            return;
+          } else if (opcao === false) {
+            //Usuário clicou em "Continuar mesmo assim"
+            await marcarLabsComoCienteEContinuar(labsAbertosSemCiente, payload);
+            return;
+          }
+          //Se for undefined (cancelar), não faz nada
+          return;
+        }
+      }
+
+      //Se for equipamento ou se não houver labs abertos, faz a retirada normalmente
+      await fazerRetirada(payload);
+
+      // //Usando a rota da control no back
+      // const response = await api.post("/control/retirada", payload);
+
+      // Swal.fire({
+      //   icon: "success",
+      //   title: "Retirada Registrada!",
+      //   text: `${
+      //     tipo === "chave" ? "Laboratório" : "Equipamento"
+      //   } retirado com sucesso!`,
+      //   timer: 2500,
+      //   showConfirmButton: false,
+      // });
+      // console.log("Retirada registrada:", response.data);
 
       // Reseta o formulário após sucesso
-      resetarFormulario();
+      // resetarFormulario();
     } catch (err) {
       console.error("Erro ao retirar:", err);
       Swal.fire({
@@ -118,8 +416,14 @@ function RetiradaDevolucao() {
 
   // Função para devolver
   const handleDevolver = async () => {
-    if (!professor) return Swal.fire("Atenção", "Usuário não identificado!", "warning");
-    if (!tipo) return Swal.fire("Atenção", "Selecione se é chave ou equipamento!", "warning");
+    if (!professor)
+      return Swal.fire("Atenção", "Usuário não identificado!", "warning");
+    if (!tipo)
+      return Swal.fire(
+        "Atenção",
+        "Selecione se é chave ou equipamento!",
+        "warning"
+      );
 
     const identificadorNormalizado = normalizarRM(identificacao);
     let idControlToClose = null;
@@ -134,7 +438,11 @@ function RetiradaDevolucao() {
       idControlToClose = equipSelecionado.id_control;
       idEquipToClose = equipSelecionado.id;
     } else {
-      Swal.fire("Atenção", "Selecione um item válido para devolver!", "warning");
+      Swal.fire(
+        "Atenção",
+        "Selecione um item válido para devolver!",
+        "warning"
+      );
       return;
     }
 
@@ -163,7 +471,7 @@ function RetiradaDevolucao() {
       console.log("📤 Enviando para backend:", {
         original: identificacao,
         normalizado: identificadorNormalizado,
-        payload: payload
+        payload: payload,
       });
 
       const response = await api.put("/control/devolucao", payload);
@@ -171,9 +479,11 @@ function RetiradaDevolucao() {
       Swal.fire({
         icon: "success",
         title: "Devolução Registrada!",
-        text: `${tipo === "chave" ? "Laboratório" : "Equipamento"} devolvido com sucesso!`,
+        text: `${
+          tipo === "chave" ? "Laboratório" : "Equipamento"
+        } devolvido com sucesso!`,
         timer: 2500,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
 
       console.log("Devolução registrada:", response.data);
@@ -235,13 +545,14 @@ function RetiradaDevolucao() {
             const response = await api.get("/equipamento");
             setTodosEquipamentos(response.data.data || []);
           }
-
         } else if (acao === "devolucao" && professor) {
           // FLUXO DE DEVOLUÇÃO: Carrega APENAS os itens em posse do professor.
           const identificadorNormalizado = normalizarRM(identificacao);
 
           // Endpoint que busca todos os itens abertos do professor
-          const response = await api.get(`/control/professor/${identificadorNormalizado}`);
+          const response = await api.get(
+            `/control/professor/${identificadorNormalizado}`
+          );
           const itensEmPosse = response.data.data || [];
 
           console.log("▶️ Itens em posse (Retorno da API):", itensEmPosse);
@@ -249,8 +560,11 @@ function RetiradaDevolucao() {
           if (tipo === "chave") {
             // Filtra chaves (labs) em posse
             const labsEmPosse = itensEmPosse
-              .filter(item => item.id_labs && item.status === "aberto" && item.laboratorio)
-              .map(item => ({
+              .filter(
+                (item) =>
+                  item.id_labs && item.status === "aberto" && item.laboratorio
+              )
+              .map((item) => ({
                 // Mapeia o ID da TRANSAÇÃO (Control) para a devolução
                 id_control: item.id,
                 // Mapeia o ID e nome do Laboratório para a exibição
@@ -264,14 +578,17 @@ function RetiradaDevolucao() {
           } else if (tipo === "equipamento") {
             // Filtra equipamentos em posse
             const equipamentosEmPosse = itensEmPosse
-              .filter(item => item.id_equip && item.status === "aberto" && item.equipamento)
-              .map(item => ({
+              .filter(
+                (item) =>
+                  item.id_equip && item.status === "aberto" && item.equipamento
+              )
+              .map((item) => ({
                 // Mapeia o ID da TRANSAÇÃO (Control) para a devolução
                 id_control: item.id,
                 // Mapeia o ID e descrição do Equipamento para a exibição
                 id: item.equipamento.id,
                 desc_equip: item.equipamento.desc_equip,
-                tipo: item.equipamento.tipo
+                tipo: item.equipamento.tipo,
               }));
 
             setTodosEquipamentos(equipamentosEmPosse);
@@ -358,16 +675,20 @@ function RetiradaDevolucao() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!professor) {
-      Swal.fire("Atenção", "Usuário não identificado! Por favor, insira um RM ou CPF válido.", "warning");
+      Swal.fire(
+        "Atenção",
+        "Usuário não identificado! Por favor, insira um RM ou CPF válido.",
+        "warning"
+      );
       return;
     }
     if (!tipo) {
       Swal.fire("Atenção", "Selecione se é Chave ou Equipamento!", "warning");
       return;
     }
-    if (acao === 'retirada') {
+    if (acao === "retirada") {
       handleRetirar();
-    } else if (acao === 'devolucao') {
+    } else if (acao === "devolucao") {
       handleDevolver();
     } else {
       // Caso o 'acao' (Retirada/Devolução) não esteja selecionado (embora deva ter um valor padrão)
@@ -396,37 +717,14 @@ function RetiradaDevolucao() {
             type="text"
             placeholder="Digite seu RM ou CPF"
             value={identificacao}
-            onChange={(e) => setIdentificacao(e.target.value)}
+            onChange={(e) => handleIdentificacaoChange(e.target.value)}
             className="input-identificacao"
+            maxLength={14}
           />
           {professor && (
             <p className="professor-encontrado">Olá, {professor.nome}!</p>
           )}
           {erro && <p className="erro">{erro}</p>}
-
-          {/* Tipo: Chave / Equipamento */}
-          <div className="opcoes">
-            <label className="radio-label">
-              <input
-                type="radio"
-                name="tipo"
-                value="chave"
-                checked={tipo === "chave"}
-                onChange={(e) => setTipo(e.target.value)}
-              />
-              <span className="custom-radio"></span> Chave
-            </label>
-            <label className="radio-label">
-              <input
-                type="radio"
-                name="tipo"
-                value="equipamento"
-                checked={tipo === "equipamento"}
-                onChange={(e) => setTipo(e.target.value)}
-              />
-              <span className="custom-radio"></span> Equipamento
-            </label>
-          </div>
 
           {/* Ações: Retirada / Devolução (NOVO POSICIONAMENTO) */}
           <div className="opcoes acao-opcoes">
@@ -449,6 +747,30 @@ function RetiradaDevolucao() {
                 onChange={(e) => setAcao(e.target.value)}
               />
               <span className="custom-radio"></span> Devolução
+            </label>
+          </div>
+
+          {/* Tipo: Chave / Equipamento */}
+          <div className="opcoes">
+            <label className="radio-label">
+              <input
+                type="radio"
+                name="tipo"
+                value="chave"
+                checked={tipo === "chave"}
+                onChange={(e) => setTipo(e.target.value)}
+              />
+              <span className="custom-radio"></span> Chave
+            </label>
+            <label className="radio-label">
+              <input
+                type="radio"
+                name="tipo"
+                value="equipamento"
+                checked={tipo === "equipamento"}
+                onChange={(e) => setTipo(e.target.value)}
+              />
+              <span className="custom-radio"></span> Equipamento
             </label>
           </div>
 
@@ -481,14 +803,18 @@ function RetiradaDevolucao() {
                     <li
                       key={lab.id}
                       onClick={() => handleSelecionarLab(lab)}
-                      className={`opcao-lab ${lab.status === "livre" ? "livre" : "ocupado"}`}
+                      className={`opcao-lab ${
+                        lab.status === "livre" ? "livre" : "ocupado"
+                      }`}
                     >
                       {lab.nome_lab} - {lab.desc_lab}
                       {lab.status !== "livre" && " (Ocupado)"}
                     </li>
                   ))}
                   {filtroLabs.length === 0 && (
-                    <li className="opcao-lab vazio">Nenhum laboratório encontrado</li>
+                    <li className="opcao-lab vazio">
+                      Nenhum laboratório encontrado
+                    </li>
                   )}
                 </ul>
               )}
@@ -499,67 +825,81 @@ function RetiradaDevolucao() {
                     <li
                       key={equip.id}
                       onClick={() => handleSelecionarEquip(equip)}
-                      className={`opcao-equip ${equip.status === "livre" ? "livre" : "ocupado"}`}
+                      className={`opcao-equip ${
+                        equip.status === "livre" ? "livre" : "ocupado"
+                      }`}
                     >
                       {equip.tipo?.desc_tipo} - {equip.desc_equip}
                       {equip.status !== "livre" && " (Ocupado)"}
                     </li>
                   ))}
                   {filtroEquip.length === 0 && (
-                    <li className="opcao-equip vazio">Nenhum equipamento encontrado</li>
+                    <li className="opcao-equip vazio">
+                      Nenhum equipamento encontrado
+                    </li>
                   )}
                 </ul>
               )}
             </>
           )}
 
-          {tipo && acao === "devolucao" && professor && (
+          {tipo &&
+            acao === "devolucao" &&
+            professor &&
             //Renderiza a tabela SOMENTE se houver labs OU equipamentos em posse.
-            (todosLabs.length > 0 || todosEquipamentos.length > 0) ? (
+            (todosLabs.length > 0 || todosEquipamentos.length > 0 ? (
               <>
-                <p className="form-label">Itens em sua posse (Selecione para Devolver):</p>
+                <p className="form-label">
+                  Itens em sua posse (Selecione para Devolver):
+                </p>
                 <ul className="lista-sugestoes">
-                  {tipo === "chave" && todosLabs.length > 0 && (
+                  {tipo === "chave" &&
+                    todosLabs.length > 0 &&
                     todosLabs.map((lab) => (
                       <li
                         key={lab.id_control} //ID do controle para a chave
                         onClick={() => handleSelecionarLab(lab)} // Ação de seleção
-                        className={`opcao-lab ${labSelecionado?.id_control === lab.id_control ? 'selecionado' : ''}`}
+                        className={`opcao-lab ${
+                          labSelecionado?.id_control === lab.id_control
+                            ? "selecionado"
+                            : ""
+                        }`}
                       >
                         {lab.nome_lab} - {lab.desc_lab}
                         <span className="status-posse"> (Em Posse)</span>
                       </li>
-                    ))
-                  )}
+                    ))}
 
                   {/* Mapeamento para EQUIPAMENTOS */}
-                  {tipo === "equipamento" && todosEquipamentos.length > 0 && (
+                  {tipo === "equipamento" &&
+                    todosEquipamentos.length > 0 &&
                     todosEquipamentos.map((equip) => (
                       <li
                         key={equip.id_control} // Use o ID do controle para a chave
                         onClick={() => handleSelecionarEquip(equip)} // Ação de seleção
-                        className={`opcao-equip ${equipSelecionado?.id_control === equip.id_control ? 'selecionado' : ''}`}
+                        className={`opcao-equip ${
+                          equipSelecionado?.id_control === equip.id_control
+                            ? "selecionado"
+                            : ""
+                        }`}
                       >
                         {equip.tipo?.desc_tipo} - {equip.desc_equip}
                         {/* Adicione um ícone ou texto para indicar "Em Posse" se desejar */}
                         <span className="status-posse"> (Em Posse)</span>
                         {/* O rádio button é opcional, a classe 'selecionado' já indica */}
                       </li>
-                    ))
-                  )}
+                    ))}
                 </ul>
               </>
             ) : (
               <p className="tabela-vazia-mensagem">Nenhum item em sua posse.</p>
-            )
-          )}
+            ))}
           {/* Botão de Confirmação */}
           <div className="buttons">
-            <button
-              type="submit"
-              className={`btn-${acao}`}
-            >
-              {acao === 'retirada' ? 'Confirmar Retirada' : 'Confirmar Devolução'}
+            <button type="submit" className={`btn-${acao}`}>
+              {acao === "retirada"
+                ? "Confirmar Retirada"
+                : "Confirmar Devolução"}
             </button>
           </div>
         </form>
