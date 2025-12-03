@@ -4,10 +4,10 @@ body {
 
 .equipamentos-container {
   background-color: #e6f2f7;
-  margin-left: 150px;
-  padding-left: 90px;
+  margin-left: 200px;
+  padding-left: 10px;
   padding-top: 90px;
-  padding-right: 0px;
+  padding-right: 10px;
   background: transparent;
   flex: 1;
   /* padding-bottom: 40px; */

@@ -346,8 +346,8 @@ function RetiradaDevolucao() {
 
                   <p style="margin-top: 15px; color: #666; font-size: 0.9em;">
                     <i class="fas fa-info-circle"></i>
-                    <strong>Importante:</strong> Você não pode ter dois laboratórios simultaneamente.<br>
-                      Escolha uma opção:
+                    <strong>Importante:</strong> Você tem certeza que deseja pegar duas chaves simultâneamente?<br>
+                     <strong> Escolha uma opção:</strong>
                     </p>
                 </div>
               `,
@@ -357,8 +357,8 @@ function RetiradaDevolucao() {
             cancelButtonText:
               '<i class="fas fa-check"></i> Cancelar',
             showDenyButton: true,
-            denyButtonText: '<i class="fas fa-ban"></i> Continuar mesmo assim',
-            confirmButtonColor: "#28a745",
+            denyButtonText: '<i class="fas fa-ban"></i> Continuar',
+            confirmButtonColor: "#5ca9da",
             cancelButtonColor: "#dc3545",
             denyButtonColor: "#6c757d",
             reverseButtons: true,

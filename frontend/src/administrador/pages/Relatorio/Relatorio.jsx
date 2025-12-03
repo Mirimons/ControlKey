@@ -13,7 +13,8 @@ function Relatorio() {
     equipamento: "",
     status: "",
     dataInicio: "",
-    dataFim: "", // Adicionado
+    dataFim: "",
+    periodo: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -36,8 +37,18 @@ function Relatorio() {
     }
     setLoading(true);
 
+    const params = {};
+
+    if (filtros.periodo) params.periodo = filtros.periodo;
+    if (filtros.status) params.status = filtros.status;
+    if (filtros.dataInicio) params.data_inicio = filtros.dataInicio;
+    if (filtros.dataFim) params.data_fim = filtros.dataFim;
+
     api
-      .get("/control", { headers: { Authorization: `Bearer ${token}` } })
+      .get("/control", {
+        headers: { Authorization: `Bearer ${token}` },
+        params,
+      })
       .then((response) => {
         let dados = [];
 
@@ -54,23 +65,23 @@ function Relatorio() {
 
         const lista = Array.isArray(dados)
           ? dados.map((item, i) => ({
-            id: item.id || i,
-            usuario: item.usuario?.nome || "--",
-            laboratorio: item.laboratorio?.nome_lab || "--",
-            equipamento: item.equipamento?.desc_equip || "--",
-            dataInicio: item.data_inicio || item.dataInicio,
-            dataFim: item.data_fim || item.dataFim,
-            status: item.status || "--",
-            // Aplica o mapeamento para exibição
-            statusDisplay:
-              mapeamentoStatus[item.status] || item.status || "--",
-            ciente: item.ciente ? "Sim" : "Não",
+              id: item.id || i,
+              usuario: item.usuario?.nome || "--",
+              laboratorio: item.laboratorio?.nome_lab || "--",
+              equipamento: item.equipamento?.desc_equip || "--",
+              dataInicio: item.data_inicio || item.dataInicio,
+              dataFim: item.data_fim || item.dataFim,
+              status: item.status || "--",
+              // Aplica o mapeamento para exibição
+              statusDisplay:
+                mapeamentoStatus[item.status] || item.status || "--",
+              ciente: item.ciente ? "Sim" : "Não",
 
-            id_control: item.id,
-            id_usuario: item.usuario?.id || item.id_usuario,
-            id_lab: item.laboratorio?.id || item.id_labs,
-            id_equip: item.equipamento?.id || item.id_equip,
-          }))
+              id_control: item.id,
+              id_usuario: item.usuario?.id || item.id_usuario,
+              id_lab: item.laboratorio?.id || item.id_labs,
+              id_equip: item.equipamento?.id || item.id_equip,
+            }))
           : [];
 
         setRelatorios(lista);
@@ -85,6 +96,10 @@ function Relatorio() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFiltros({ ...filtros, [name]: value });
+
+    setTimeout(() => {
+      carregarRelatorios();
+    }, 500);
   };
 
   const handleFecharControl = async (controlId) => {
@@ -165,13 +180,19 @@ function Relatorio() {
   // Filtra os relatórios com base nos inputs
   const relatoriosFiltrados = relatorios.filter((r) => {
     // Converte datas para objetos Date, ignorando a hora (pega apenas a parte YYYY-MM-DD)
-    const dataRegistro = r.dataInicio ? new Date(r.dataInicio.split('T')[0]) : null;
-    const dataInicioFiltro = filtros.dataInicio ? new Date(filtros.dataInicio) : null;
+    const dataRegistro = r.dataInicio
+      ? new Date(r.dataInicio.split("T")[0])
+      : null;
+    const dataInicioFiltro = filtros.dataInicio
+      ? new Date(filtros.dataInicio)
+      : null;
     const dataFimFiltro = filtros.dataFim ? new Date(filtros.dataFim) : null;
 
     // Lógica de filtro de data
-    const filtroDataInicioPassa = !dataInicioFiltro || (dataRegistro && dataRegistro >= dataInicioFiltro);
-    const filtroDataFimPassa = !dataFimFiltro || (dataRegistro && dataRegistro <= dataFimFiltro);
+    const filtroDataInicioPassa =
+      !dataInicioFiltro || (dataRegistro && dataRegistro >= dataInicioFiltro);
+    const filtroDataFimPassa =
+      !dataFimFiltro || (dataRegistro && dataRegistro <= dataFimFiltro);
 
     return (
       (!filtros.nomeUsuario ||
@@ -233,11 +254,11 @@ function Relatorio() {
       const cellAddress = XLSX.utils.encode_cell({ c: dataColIndex, r: R });
       if (ws[cellAddress] && dateRegex.test(ws[cellAddress].v)) {
         // Converte DD/MM/YYYY para o formato Date nativo do JS
-        const parts = ws[cellAddress].v.split('/');
+        const parts = ws[cellAddress].v.split("/");
         const jsDate = new Date(parts[2], parts[1] - 1, parts[0]);
         ws[cellAddress].v = jsDate; // Define o valor como um objeto Date
-        ws[cellAddress].t = 'd';   // Define o tipo como Data
-        ws[cellAddress].z = 'dd/mm/yyyy'; // Define o formato de exibição
+        ws[cellAddress].t = "d"; // Define o tipo como Data
+        ws[cellAddress].z = "dd/mm/yyyy"; // Define o formato de exibição
       }
     }
 
@@ -246,7 +267,10 @@ function Relatorio() {
     XLSX.utils.book_append_sheet(wb, ws, "Relatório de Controle");
 
     // 5. Gerar e salvar o arquivo XLSX
-    XLSX.writeFile(wb, `relatorio_laboratorio_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    XLSX.writeFile(
+      wb,
+      `relatorio_laboratorio_${new Date().toISOString().slice(0, 10)}.xlsx`
+    );
   };
 
   return (
@@ -325,6 +349,20 @@ function Relatorio() {
               value={filtros.dataFim}
               onChange={handleChange}
             />
+          </div>
+
+          <div className="campo">
+            <label>Período:</label>
+            <select
+              name="periodo"
+              value={filtros.periodo}
+              onChange={handleChange}
+            >
+              <option value="">Todos os horários</option>
+              <option value="manha">Manhã (06:00 - 11:59)</option>
+              <option value="tarde">Tarde (12:00 - 16:59)</option>
+              <option value="noite">Noite (17:00 - 22:59)</option>
+            </select>
           </div>
 
           <div className="campo-acao">
