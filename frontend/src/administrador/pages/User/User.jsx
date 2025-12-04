@@ -647,7 +647,7 @@ function User() {
   return (
     <div className="usuarios-page">
       <div className="usuarios-container">
-        <header className="usuarios-header">
+        <header className="chaves-header">
           <h1>Usuários</h1>
         </header>
 

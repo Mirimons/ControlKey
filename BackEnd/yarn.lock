@@ -869,9 +869,9 @@ node-gyp-build@^4.8.4:
   integrity sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==
 
 nodemailer@^7.0.5:
-  version "7.0.10"
-  resolved "https://registry.npmjs.org/nodemailer/-/nodemailer-7.0.10.tgz"
-  integrity sha512-Us/Se1WtT0ylXgNFfyFSx4LElllVLJXQjWi2Xz17xWw7amDKO2MLtFnVp1WACy7GkVGs+oBlRopVNUzlrGSw1w==
+  version "7.0.11"
+  resolved "https://registry.npmjs.org/nodemailer/-/nodemailer-7.0.11.tgz"
+  integrity sha512-gnXhNRE0FNhD7wPSCGhdNh46Hs6nm+uTyg+Kq0cZukNQiYdnCsoQjodNP9BQVG9XrcK/v6/MgpAPBUFyzh9pvw==
 
 nodemon@^3.1.10:
   version "3.1.10"

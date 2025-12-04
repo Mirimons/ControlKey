@@ -12,7 +12,7 @@ body {
   padding-top: 90px;
   padding-right: 10px;
   /* Reduza o padding lateral para ganhar espaço */
-  background: transparent;
+  /* background: transparent; */
   flex: 1;
 }
 

@@ -22,7 +22,7 @@ body {
 
 
 /* ---------- CABEÇALHO ---------- */
-.relatorio-container header {
+/* .relatorio-container header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -35,7 +35,7 @@ body {
   display: flex;
   align-items: center;
   color: #072355;
-}
+} */
 
 /* ---------- FILTROS (Ajuste para quebrar linha) ---------- */
 .filtros-container {
@@ -131,9 +131,8 @@ body {
 /* ---------- TABELA ---------- */
 .tabela-container {
   width: 80%;
-  height: 240px;
+  height: 500px;
   overflow-y: auto;
-
   border-radius: 10px;
   background-color: white;
   border: 1px solid #e5ecfe;

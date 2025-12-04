@@ -276,13 +276,13 @@ function Relatorio() {
   return (
     <div className="relatorio-page">
       <div className="relatorio-container">
-        <header>
-          <h2>Relatórios</h2>
+        <header className="chaves-header">
+          <h1>Relatórios</h1>
         </header>
 
         <div className="filtros-container">
           <div className="campo">
-            <label>Nome do Usuário:</label>
+            <h3>Nome do Usuário:</h3>
             <input
               type="text"
               name="nomeUsuario"
@@ -293,7 +293,7 @@ function Relatorio() {
           </div>
 
           <div className="campo">
-            <label>Laboratório:</label>
+            <h3>Laboratório:</h3>
             <input
               type="text"
               name="laboratorio"
@@ -304,7 +304,7 @@ function Relatorio() {
           </div>
 
           <div className="campo">
-            <label>Equipamento:</label>
+            <h3>Equipamento:</h3>
             <input
               type="text"
               name="equipamento"
@@ -315,7 +315,7 @@ function Relatorio() {
           </div>
 
           <div className="campo">
-            <label>Status:</label>
+            <h3>Status:</h3>
             <select
               name="status"
               value={filtros.status}
@@ -329,10 +329,10 @@ function Relatorio() {
           </div>
 
           {/* DIV AUXILIAR PARA FORÇAR QUEBRA DE LINHA NO CSS */}
-          <div className="quebra-linha"></div>
+
 
           <div className="campo">
-            <label>Data de Início:</label>
+            <h3>Data de Início:</h3>
             <input
               type="date"
               name="dataInicio"
@@ -342,7 +342,7 @@ function Relatorio() {
           </div>
 
           <div className="campo">
-            <label>Data Final:</label>
+            <h3>Data Final:</h3>
             <input
               type="date"
               name="dataFim"
@@ -352,7 +352,7 @@ function Relatorio() {
           </div>
 
           <div className="campo">
-            <label>Período:</label>
+            <h3>Período:</h3>
             <select
               name="periodo"
               value={filtros.periodo}

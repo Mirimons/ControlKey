@@ -365,11 +365,11 @@ function Equipaments() {
   return (
     <div className="equipamentos-page">
       <div className="equipamentos-container">
-        <header className="equipamentos-header">
+        <header className="chaves-header">
           <h1>Equipamentos</h1>
         </header>
 
-        <div className="equipamentos-filtros">
+        <div className="usuarios-filtros">
           <div>
             <h3>Equipamento:</h3>
             <input

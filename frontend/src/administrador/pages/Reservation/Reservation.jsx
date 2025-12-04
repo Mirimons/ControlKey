@@ -424,7 +424,7 @@ function Reservation() {
   return (
     <div className="reservation-page">
       <div className="reservas-container">
-        <header>
+        <header className="chaves-header">
           <h1>Reservas</h1>
         </header>
 
