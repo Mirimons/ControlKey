@@ -101,31 +101,47 @@ body {
 
 /* NOVO: Estilização do botão de exportar */
 .btn-exportar {
+  padding: 10px 15px;
   background-color: #072355;
-  color: white;
   border: none;
-  padding: 0px 0px;
-  /* Ajuste o padding para focar apenas no texto */
   border-radius: 6px;
+  color: white;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  letter-spacing: 0.5px;
-  transition: background-color 0.3s, transform 0.1s;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-  height: 30px;
+  font-weight: bold;
+  height: 42px;
+  /* Alinha com altura dos inputs */
+  margin-top: 10px;
+  margin-right: 240px;
+  /* Desce o botão para alinhar com a base dos inputs */
+  transition: background 0.3s;
+
+  /* CONFIG ANTIGA DO BTN-EXPORTAR */
+  /* background-color: #072355; */
+  /* color: white; */
+  /* margin-top: 14px; */
+  /* margin-right: 240px; */
+  /* border: none; */
+  /* padding: 10px 15px; */
+  /* Ajuste o padding para focar apenas no texto */
+  /* border-radius: 6px; */
+  /* cursor: pointer; */
+  /* font-weight: bold; */
+  /* letter-spacing: 0.5px; */
+  /* transition: background-color 0.3s, transform 0.1s; */
+  /* box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1); */
+  /* height: 42px; */
   /* Manter a altura para alinhar com os inputs */
-  display: flex;
+  /* display: flex; */
   /* Adiciona flexbox */
-  align-items: center;
+  /* align-items: center; */
   /* Centraliza o texto verticalmente */
-  justify-content: center;
+  /* justify-content: center; */
   /* Centraliza o texto horizontalmente */
 }
 
 .btn-exportar:hover {
-  /* background-color: #0c3672; */
-  transform: translateY(-1px);
+  background-color: #0c3672;
+  /* transform: translateY(-1px); */
 }
 
 /* ---------- TABELA ---------- */

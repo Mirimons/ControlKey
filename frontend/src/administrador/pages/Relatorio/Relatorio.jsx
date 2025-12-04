@@ -278,6 +278,9 @@ function Relatorio() {
       <div className="relatorio-container">
         <header className="chaves-header">
           <h1>Relatórios</h1>
+          <button className="btn-exportar" onClick={exportarParaExcel}>
+          Exportar para XLSX
+          </button>
         </header>
 
         <div className="filtros-container">
@@ -329,6 +332,7 @@ function Relatorio() {
           </div>
 
           {/* DIV AUXILIAR PARA FORÇAR QUEBRA DE LINHA NO CSS */}
+          <div className="quebra-linha"></div>
 
 
           <div className="campo">
@@ -363,12 +367,6 @@ function Relatorio() {
               <option value="tarde">Tarde (12:00 - 16:59)</option>
               <option value="noite">Noite (17:00 - 22:59)</option>
             </select>
-          </div>
-
-          <div className="campo-acao">
-            <button className="btn-exportar" onClick={exportarParaExcel}>
-              Exportar para XLSX
-            </button>
           </div>
         </div>
 

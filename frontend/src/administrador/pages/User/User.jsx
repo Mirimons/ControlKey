@@ -649,6 +649,9 @@ function User() {
       <div className="usuarios-container">
         <header className="chaves-header">
           <h1>Usuários</h1>
+          <button className="btn-add" type="button" onClick={abrirModalNovo}>
+          Adicionar Usuário
+          </button>
         </header>
 
         <div className="usuarios-filtros">
@@ -678,9 +681,7 @@ function User() {
               <option value="Desabilitado">Desativados</option>
             </select>
           </div>
-          <button className="btn-add" type="button" onClick={abrirModalNovo}>
-            Adicionar Usuário
-          </button>
+
         </div>
 
         <div className="tabela-container">

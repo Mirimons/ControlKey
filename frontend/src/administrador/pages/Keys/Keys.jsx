@@ -271,6 +271,9 @@ function Keys() {
       <div className="chaves-container">
         <header className="chaves-header">
           <h1>Chaves</h1>
+          <button className="btn-add" type="button" onClick={abrirModalNovo}>
+          Adicionar Chave
+          </button>
         </header>
 
 
@@ -310,9 +313,6 @@ function Keys() {
               <option value="desabilitado">Desativados</option>
             </select>
           </div>
-          <button className="btn-add" type="button" onClick={abrirModalNovo}>
-            Adicionar Chave
-          </button>
         </div>
 
         <div className="tabela-container">

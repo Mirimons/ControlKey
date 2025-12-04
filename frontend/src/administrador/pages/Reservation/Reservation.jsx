@@ -426,6 +426,9 @@ function Reservation() {
       <div className="reservas-container">
         <header className="chaves-header">
           <h1>Reservas</h1>
+          <button className="btn-add" type="button" onClick={abrirModalNovo}>
+          Reservar
+          </button>
         </header>
 
         <div className="reservas-filtros">
@@ -447,9 +450,7 @@ function Reservation() {
               onChange={(e) => setFiltroAmbiente(e.target.value)}
             />
           </div>
-          <button className="btn-add" type="button" onClick={abrirModalNovo}>
-            Reservar
-          </button>
+
         </div>
 
         <div className="tabela-container">

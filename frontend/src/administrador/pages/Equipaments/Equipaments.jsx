@@ -367,6 +367,9 @@ function Equipaments() {
       <div className="equipamentos-container">
         <header className="chaves-header">
           <h1>Equipamentos</h1>
+          <button className="btn-add" type="button" onClick={abrirModal}>
+          Adicionar Equipamento
+          </button>
         </header>
 
         <div className="usuarios-filtros">
@@ -405,9 +408,6 @@ function Equipaments() {
               <option value="ocupado">Ocupado</option>
             </select>
           </div>
-          <button className="btn-add" type="button" onClick={abrirModal}>
-            Adicionar Equipamento
-          </button>
         </div>
 
         <div className="tabela-container">
