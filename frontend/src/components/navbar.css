@@ -5,9 +5,13 @@
   color: black;
   padding: 0 20px;
   position: fixed;
+  top: 0;
+  left: 0;
   display: flex;
   align-items: center;
-  box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+  /* justify-content: space-between; */
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 100;
 }
 
 .navbar-logo {
@@ -17,7 +21,7 @@
   margin-right: 130px;
 }
 
-.navbar-menu { 
+.navbar-menu {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -29,6 +33,7 @@
   margin: 0;
   padding: 0;
   gap: 80px;
+  flex-wrap: wrap;
 }
 
 .navbar-menu ul li {
@@ -47,7 +52,8 @@
   color: black;
   display: flex;
   align-items: center;
-  gap: 6px; /* espaço entre ícone e texto */
+  gap: 6px;
+  /* espaço entre ícone e texto */
   font-size: 18px;
 }
 
@@ -60,3 +66,65 @@
   width: auto;
   margin-left: 50px;
 }
+
+/* ========================= RESPONSIVIDADE DO NAVBAR ========================= */
+
+/* Telas menores que 1024px (Notebooks/Telas médias) */
+@media (max-width: 1024px) {
+  .navbar-menu ul {
+    gap: 25px;
+    /* Reduz mais o espaço entre os itens do menu */
+    justify-content: flex-start;
+  }
+}
+
+/* Telas menores que 768px (TABLET) */
+@media (max-width: 768px) {
+  .navbar {
+    height: 60px;
+    /* Levemente menor no tablet */
+    padding: 0 15px;
+  }
+
+  .navbar-logo {
+    height: 40px;
+  }
+
+  .navbar-menu {
+    /* Escondemos o menu principal para evitar que quebre 
+           (Aqui o ideal seria implementar um menu Hamburger com JS) */
+    display: none;
+  }
+
+  /* Alternativa para dispositivos móveis: Se você quiser que os itens apareçam empilhados
+       ou que usem toda a largura, você precisará de um menu toggle (fora do escopo do CSS).
+       Por enquanto, vamos garantir que o logo e o logout apareçam bem. */
+
+  .navbar {
+    /* Alinhamento no mobile: Logo à esquerda, Logout à direita. */
+    justify-content: space-between;
+  }
+
+  .logout {
+    margin-left: auto;
+    /* Garante que o logout fique bem à direita */
+  }
+}
+
+/* Telas menores que 480px (CELULAR) */
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0 10px;
+  }
+
+  .navbar-logo {
+    height: 35px;
+    /* Logo menor */
+  }
+
+  .logout {
+    height: 30px;
+    /* Ícone de logout menor */
+    margin-left: 10px;
+  }
+} 
