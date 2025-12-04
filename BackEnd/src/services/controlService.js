@@ -85,23 +85,42 @@ class ControlService {
         query.andWhere("control.data_inicio <= :end", { end: data_fim });
       }
 
-      const periodos =  {
-        manha: {inicio: '06:00', fim: '11:59'},
-        tarde: {inicio: '12:00', fim: '16:59'},
-        noite: {inicio: '17:00', fim: '22:59'}
+      const periodos = {
+        manha: { inicio: "06:00", fim: "11:59" },
+        tarde: { inicio: "12:00", fim: "16:59" },
+        noite: { inicio: "17:00", fim: "22:59" },
+      };
+
+      console.log("Período recebido para filtro: ", periodo);
+
+      const horario = periodos[periodo];
+      if (horario) {
+        console.log(
+          `Aplicando filtro de período: ${periodo} (${horario.inicio} - ${horario.fim})`
+        );
+
+        //Converte horários para objetos Date do JavaScript para comparação
+        const [inicioHora, inicioMinuto] = horario.inicio
+          .split(":")
+          .map(Number);
+        const [fimHora, fimMinuto] = horario.fim.split(":").map(Number);
+
+        //Usando EXTRACT para MYSQL
+        query.andWhere(
+          `(EXTRACT(HOUR FROM control.data_inicio) > :inicioHora OR
+            (EXTRACT(HOUR FROM control.data_inicio) = :inicioHora AND EXTRACT(MINUTE FROM control.data_inicio) >= :inicioMinuto))
+            AND
+          (EXTRACT(HOUR FROM control.data_inicio) < :fimHora OR
+            (EXTRACT(HOUR FROM control.data_inicio) = :fimHora AND EXTRACT(MINUTE FROM control.data_inicio) <= :fimMinuto))`,
+          {
+            inicioHora,
+            inicioMinuto,
+            fimHora,
+            fimMinuto,
+          }
+        );
       }
 
-      const horario = periodos[periodo]
-      if(horario) {
-        query.andWhere(
-          `TIME(control.data_inicio) >= :horaInicio AND TIME(control.data_inicio) <= :horaFim`,
-          {
-            horaInicio: horario.inicio,
-            horaFim: horario.fim
-          }
-        )
-      }
-      
       //Paginação:
       // const skip = (page - 1) * limit;
       // query.skip(skip).take(limit);

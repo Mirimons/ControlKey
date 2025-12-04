@@ -6,7 +6,7 @@ body {
   background-color: #e6f2f7;
   margin-left: 200px;
   padding-left: 10px;
-  padding-top: 90px;
+  padding-top: 80px;
   padding-right: 10px;
   background: transparent;
   flex: 1;
@@ -34,6 +34,7 @@ body {
   margin-bottom: 25px;
   margin-top: 0px;
   align-items: flex-end ;
+  margin-top: -30px;
 }
 
 .equipamentos-filtros input,
@@ -42,6 +43,7 @@ body {
   width: 250px;
   border: 1px solid #ccc;
   border-radius: 6px;
+  margin-top: -10px;
 }
 
 .btn-add {

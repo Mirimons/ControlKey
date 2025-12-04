@@ -9,7 +9,7 @@ body {
   margin-left: 200px;
   padding-left: 10px;
   /* Reduza o padding lateral para ganhar espaço */
-  padding-top: 90px;
+  padding-top: 80px;
   padding-right: 10px;
   /* Reduza o padding lateral para ganhar espaço */
   /* background: transparent; */
@@ -38,6 +38,7 @@ body {
   gap: 20px;
   margin-bottom: 20px;
   flex-wrap: wrap;
+  margin-top: -30px;
 }
 
 .usuarios-filtros input,
@@ -47,6 +48,7 @@ body {
   border: 1px solid #ccc;
   border-radius: 6px;
   box-sizing: border-box;
+  margin-top:  -20px;
 }
 
 /* Botão de adicionar usuário dentro dos filtros */

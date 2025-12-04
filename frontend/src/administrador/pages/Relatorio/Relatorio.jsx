@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import "./Relatorio.css";
 import Navbar from "../../../components/navbar";
 import api from "../../../services/api";
@@ -29,7 +29,7 @@ function Relatorio() {
     pendente: "Pendente",
   };
 
-  const carregarRelatorios = () => {
+  const carregarRelatorios = useCallback(async () => {
     const token = sessionStorage.getItem("token");
     if (!token) {
       console.error("Token não encontrado");
@@ -39,6 +39,7 @@ function Relatorio() {
 
     const params = {};
 
+    // Adiciona apenas os parâmetros que não estão vazios
     if (filtros.periodo) params.periodo = filtros.periodo;
     if (filtros.status) params.status = filtros.status;
     if (filtros.dataInicio) params.data_inicio = filtros.dataInicio;
@@ -91,15 +92,23 @@ function Relatorio() {
         setRelatorios([]);
       })
       .finally(() => setLoading(false));
-  };
+  }, [filtros]);
+
+  useEffect(() => {
+    console.log("🔄 useEffect detectou mudança nos filtros");
+    console.log("Filtros atuais:", filtros);
+
+    // Debounce para evitar muitas requisições rápidas
+    const timer = setTimeout(() => {
+      carregarRelatorios();
+    }, 300); // 300ms de delay
+
+    return () => clearTimeout(timer);
+  }, [filtros, carregarRelatorios]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFiltros({ ...filtros, [name]: value });
-
-    setTimeout(() => {
-      carregarRelatorios();
-    }, 500);
   };
 
   const handleFecharControl = async (controlId) => {
@@ -162,6 +171,22 @@ function Relatorio() {
     }
   };
 
+  //Função para formatar data
+  const formatarData = (dataString) => {
+    if (!dataString) return "--";
+    try {
+      const data = new Date(dataString);
+      // Usa UTC para evitar problemas de fuso horário
+      const dia = String(data.getUTCDate()).padStart(2, "0");
+      const mes = String(data.getUTCMonth() + 1).padStart(2, "0");
+      const ano = data.getUTCFullYear();
+      return `${dia}/${mes}/${ano}`;
+    } catch (error) {
+      console.error("Erro ao formatar data:", error);
+      return "Data inválida";
+    }
+  };
+
   // Função para formatar hora
   const formatarHora = (dataString) => {
     if (!dataString) return "--";
@@ -179,21 +204,6 @@ function Relatorio() {
 
   // Filtra os relatórios com base nos inputs
   const relatoriosFiltrados = relatorios.filter((r) => {
-    // Converte datas para objetos Date, ignorando a hora (pega apenas a parte YYYY-MM-DD)
-    const dataRegistro = r.dataInicio
-      ? new Date(r.dataInicio.split("T")[0])
-      : null;
-    const dataInicioFiltro = filtros.dataInicio
-      ? new Date(filtros.dataInicio)
-      : null;
-    const dataFimFiltro = filtros.dataFim ? new Date(filtros.dataFim) : null;
-
-    // Lógica de filtro de data
-    const filtroDataInicioPassa =
-      !dataInicioFiltro || (dataRegistro && dataRegistro >= dataInicioFiltro);
-    const filtroDataFimPassa =
-      !dataFimFiltro || (dataRegistro && dataRegistro <= dataFimFiltro);
-
     return (
       (!filtros.nomeUsuario ||
         r.usuario.toLowerCase().includes(filtros.nomeUsuario.toLowerCase())) &&
@@ -202,13 +212,7 @@ function Relatorio() {
           .toLowerCase()
           .includes(filtros.laboratorio.toLowerCase())) &&
       (!filtros.equipamento ||
-        r.equipamento
-          .toLowerCase()
-          .includes(filtros.equipamento.toLowerCase())) &&
-      (!filtros.status ||
-        r.status.toLowerCase() === filtros.status.toLowerCase()) &&
-      filtroDataInicioPassa &&
-      filtroDataFimPassa
+        r.equipamento.toLowerCase().includes(filtros.equipamento.toLowerCase()))
     );
   });
 
@@ -228,39 +232,53 @@ function Relatorio() {
     }
 
     // 1. Mapear e preparar os dados
-    const dadosParaExportar = relatoriosFiltrados.map((r) => ({
-      Usuário: r.usuario,
-      Laboratório: r.laboratorio,
-      Equipamento: r.equipamento,
-      Data: r.dataInicio // Manter o formato ISO para o XLSX lidar com a data
-        ? new Date(r.dataInicio).toLocaleDateString("pt-BR")
-        : "--",
-      "Hora Retirada": formatarHora(r.dataInicio),
-      "Hora Devolução": formatarHora(r.dataFim),
-      Status: r.statusDisplay,
-      Ciente: r.ciente,
-    }));
+    const dadosParaExportar = relatoriosFiltrados.map((r) => {
+      let dataFormatada = "--";
+      if (r.dataInicio) {
+        const data = new Date(r.dataInicio);
+
+        dataFormatada =
+          String(data.getUTCDate()).padStart(2, "0") +
+          "/" +
+          String(data.getUTCMonth() + 1).padStart(2, "0") +
+          "/" +
+          data.getUTCFullYear();
+      }
+
+      return {
+        Usuário: r.usuario,
+        Laboratório: r.laboratorio,
+        Equipamento: r.equipamento,
+        Data: r.dataInicio // Manter o formato ISO para o XLSX lidar com a data
+          ? new Date(r.dataInicio).toLocaleDateString("pt-BR")
+          : "--",
+        "Hora Retirada": formatarHora(r.dataInicio),
+        "Hora Devolução": formatarHora(r.dataFim),
+        Status: r.statusDisplay,
+        Ciente: r.ciente,
+      };
+    });
 
     // 2. Criar a planilha (Worksheet) a partir do JSON
     const ws = XLSX.utils.json_to_sheet(dadosParaExportar);
 
     // 3. Adicionar as informações de data corretas para o Excel
     // O XLSX usa números para datas. Vamos formatar a coluna "Data" (coluna D = 3)
-    const dataColIndex = 3;
-    const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/; // Regex para encontrar datas (DD/MM/YYYY)
+    // const dataColIndex = 3;
+    // const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/; // Regex para encontrar datas (DD/MM/YYYY)
 
-    // Itera sobre todas as células da coluna D, a partir da segunda linha (dados)
-    for (let R = 1; R < dadosParaExportar.length + 1; ++R) {
-      const cellAddress = XLSX.utils.encode_cell({ c: dataColIndex, r: R });
-      if (ws[cellAddress] && dateRegex.test(ws[cellAddress].v)) {
-        // Converte DD/MM/YYYY para o formato Date nativo do JS
-        const parts = ws[cellAddress].v.split("/");
-        const jsDate = new Date(parts[2], parts[1] - 1, parts[0]);
-        ws[cellAddress].v = jsDate; // Define o valor como um objeto Date
-        ws[cellAddress].t = "d"; // Define o tipo como Data
-        ws[cellAddress].z = "dd/mm/yyyy"; // Define o formato de exibição
-      }
-    }
+    // // Itera sobre todas as células da coluna D, a partir da segunda linha (dados)
+    // for (let R = 1; R < dadosParaExportar.length + 1; ++R) {
+    //   const cellAddress = XLSX.utils.encode_cell({ c: dataColIndex, r: R });
+    //   if (ws[cellAddress] && dateRegex.test(ws[cellAddress].v)) {
+    //     // Converte DD/MM/YYYY para o formato Date nativo do JS
+    //     const parts = ws[cellAddress].v.split("/");
+    //     const jsDate = new Date(parts[2], parts[1] - 1, parts[0]);
+    //     ws[cellAddress].v = jsDate; // Define o valor como um objeto Date
+    //     ws[cellAddress].t = "d"; // Define o tipo como Data
+    //     ws[cellAddress].z = "dd/mm/yyyy"; // Define o formato de exibição
+    //   }
+    // }
 
     // 4. Criar o Livro de Trabalho (Workbook)
     const wb = XLSX.utils.book_new();
@@ -279,7 +297,7 @@ function Relatorio() {
         <header className="chaves-header">
           <h1>Relatórios</h1>
           <button className="btn-exportar" onClick={exportarParaExcel}>
-          Exportar para XLSX
+            Exportar para XLSX
           </button>
         </header>
 
@@ -331,10 +349,6 @@ function Relatorio() {
             </select>
           </div>
 
-          {/* DIV AUXILIAR PARA FORÇAR QUEBRA DE LINHA NO CSS */}
-          <div className="quebra-linha"></div>
-
-
           <div className="campo">
             <h3>Data de Início:</h3>
             <input
@@ -359,8 +373,16 @@ function Relatorio() {
             <h3>Período:</h3>
             <select
               name="periodo"
-              value={filtros.periodo}
-              onChange={handleChange}
+              value={filtros.periodo || ""}
+              onChange={(e) => {
+                const selectedValue = e.target.value;
+                // Atualiza o estado
+                setFiltros((prev) => {
+                  console.log("Estado anterior:", prev.periodo);
+                  console.log("Novo estado:", selectedValue);
+                  return { ...prev, periodo: selectedValue };
+                });
+              }}
             >
               <option value="">Todos os horários</option>
               <option value="manha">Manhã (06:00 - 11:59)</option>
@@ -371,7 +393,7 @@ function Relatorio() {
         </div>
 
         {/* TABELA */}
-        <div className="tabela-container">
+        <div className="tabela-container-ofc">
           <table className="relatorio-tabela">
             <thead>
               <tr>
