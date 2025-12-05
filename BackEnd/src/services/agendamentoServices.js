@@ -27,13 +27,13 @@ class AgendamentoService {
         .addOrderBy("agendamento.hora_inicio", "ASC");
 
       if (nomeProfessor) {
-        query.andWhere("usuario.nome ILIKE :nome", {
+        query.andWhere("usuario.nome LIKE :nome", {
           nome: `%${nomeProfessor.trim()}%`,
         });
       }
 
       if (laboratorio) {
-        query.andWhere("laboratorio.nome_lab ILIKE :lab", {
+        query.andWhere("laboratorio.nome_lab LIKE :lab", {
           lab: `%${laboratorio.trim()}%`,
         });
       }
@@ -94,7 +94,6 @@ class AgendamentoService {
         throw new Error("Agendamento não encontrado");
       }
 
-      
       return agendamento;
     } catch (error) {
       throw new Error(`Erro ao buscar agendamento: ${error.message}`);
@@ -164,45 +163,57 @@ class AgendamentoService {
   //Para mudar status dos agendamentos:
   async putStatusAuto() {
     try {
-      const agora = new Date()
-      const dataAtual = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate())
+      const agora = new Date();
+      const dataAtual = new Date(
+        agora.getFullYear(),
+        agora.getMonth(),
+        agora.getDate()
+      );
 
-      console.log(`Verificando agendamentos com data anterior a: ${dataAtual.toISOString().split('T')[0]}`)
+      console.log(
+        `Verificando agendamentos com data anterior a: ${
+          dataAtual.toISOString().split("T")[0]
+        }`
+      );
 
       //Busca agendamentos que precisam da atualização
       const agendamentosToPut = await agendamentoRepository
-      .createQueryBuilder('agendamento')
-      .where('agendamento.data_utilizacao < :dataAtual', {dataAtual})
-      .andWhere('agendamento.status = :status', {status: 'agendado'})
-      .andWhere('agendamento.deletedAt IS NULL')
-      .getMany();
+        .createQueryBuilder("agendamento")
+        .where("agendamento.data_utilizacao < :dataAtual", { dataAtual })
+        .andWhere("agendamento.status = :status", { status: "agendado" })
+        .andWhere("agendamento.deletedAt IS NULL")
+        .getMany();
 
-      console.log(`${agendamentosToPut.length} agendamentos encontrados para atualização`)
+      console.log(
+        `${agendamentosToPut.length} agendamentos encontrados para atualização`
+      );
 
-      if(agendamentosToPut.length === 0) {
-        return 0
+      if (agendamentosToPut.length === 0) {
+        return 0;
       }
 
       const resultado = await agendamentoRepository
-      .createQueryBuilder()
-      .update(Agendamento)
-      .set({
-        status: 'finalizado',
-        updatedAt: new Date()
-      })
-      .where('id IN (:...ids)', {
-        ids: agendamentosToPut.map(a => a.id)
-      })
-      .execute()
+        .createQueryBuilder()
+        .update(Agendamento)
+        .set({
+          status: "finalizado",
+          updatedAt: new Date(),
+        })
+        .where("id IN (:...ids)", {
+          ids: agendamentosToPut.map((a) => a.id),
+        })
+        .execute();
 
-      agendamentosToPut.forEach(agendamento => {
-        console.log(`Agendamento ${agendamento.id} (${agendamento.data_utilizacao}): agendado -> finalizado`)
+      agendamentosToPut.forEach((agendamento) => {
+        console.log(
+          `Agendamento ${agendamento.id} (${agendamento.data_utilizacao}): agendado -> finalizado`
+        );
       });
 
-      return resultado.affected || 0
-    }catch(error) {
-      console.error('Erro ao atualizar status dos agendamentos: ', error)
-      throw new Error(`Erro ao atualizar status automático: ${error.message}`)
+      return resultado.affected || 0;
+    } catch (error) {
+      console.error("Erro ao atualizar status dos agendamentos: ", error);
+      throw new Error(`Erro ao atualizar status automático: ${error.message}`);
     }
   }
 
@@ -217,6 +228,57 @@ class AgendamentoService {
     } catch (error) {
       throw new Error(`Erro ao excluir agendamento: ${error.message}`);
     }
+  }
+
+  //MÉTODOS PARA ATIVAÇÃO/REATIVAÇÃO
+  //Get apenas com os inativos
+  async getInactiveAgend() {
+    const queryBuilder = agendamentoRepository
+    .createQueryBuilder("agendamento")
+    .leftJoinAndSelect("agendamento.laboratorio", "laboratorio")
+    .leftJoinAndSelect("agendamento.usuario", "usuario")
+    .withDeleted()
+    .where("agendamento.deletedAt IS NOT NULL");
+
+  queryBuilder.orderBy("agendamento.deletedAt", "DESC");
+
+  const [agendamentos, total] = await queryBuilder.getManyAndCount();
+
+  return {
+    data: agendamentos,  
+    total,
+  };
+  }
+
+  //Get que inclui os inativos
+  async getAgendByIdIncludingInactive(id) {
+    return await agendamentoRepository.findOne({
+      where: { id: Number(id) },
+      relations: ["laboratorio", "usuario"],
+      withDeleted: true,
+    });
+  }
+
+  //Função para reativar agendamento
+  async activateAgend(id) {
+    if (isNaN(Number(id))) {
+      throw new Error("O id precisa ser um valor numérico.");
+    }
+
+    const agendInativo = await this.getAgendByIdIncludingInactive(id);
+    if (!agendInativo) {
+      throw new Error("Agendamento não encontrado.");
+    }
+    if (agendInativo.deletedAt === null) {
+      throw new Error("Este agendamento já está ativo.");
+    }
+
+    await agendamentoRepository.update(
+      { id: Number(id) },
+      { deletedAt: null, updatedAt: new Date() }
+    );
+
+    return await this.getAgendamentoById(id);
   }
 }
 

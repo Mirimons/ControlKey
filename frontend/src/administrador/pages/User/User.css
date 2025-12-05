@@ -9,10 +9,10 @@ body {
   margin-left: 200px;
   padding-left: 10px;
   /* Reduza o padding lateral para ganhar espaço */
-  padding-top: 90px;
+  padding-top: 80px;
   padding-right: 10px;
   /* Reduza o padding lateral para ganhar espaço */
-  background: transparent;
+  /* background: transparent; */
   flex: 1;
 }
 
@@ -37,6 +37,8 @@ body {
   display: flex;
   gap: 20px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
+  margin-top: -30px;
 }
 
 .usuarios-filtros input,
@@ -45,6 +47,8 @@ body {
   width: 250px;
   border: 1px solid #ccc;
   border-radius: 6px;
+  box-sizing: border-box;
+  margin-top:  -20px;
 }
 
 /* Botão de adicionar usuário dentro dos filtros */
@@ -58,9 +62,10 @@ body {
   font-weight: bold;
   height: 42px;
   /* Alinha com altura dos inputs */
-  margin-top: 60px;
+  /* margin-top: 60px; */
   /* Desce o botão para alinhar com a base dos inputs */
   transition: background 0.3s;
+  align-self: flex-start;
 }
 
 .btn-add:hover {
@@ -419,4 +424,98 @@ select:disabled {
   border-radius: 4px;
   box-sizing: border-box;
   /* Garante que padding e borda não aumentem o width total */
+}
+
+@media (max-width: 1024px) {
+  .usuarios-container {
+    /* Diminui a margem lateral para ganhar espaço */
+    margin-left: 100px; 
+    padding: 90px 15px 15px 15px; /* Ajuste no padding para telas menores */
+  }
+
+  .usuarios-filtros {
+    /* Centraliza os filtros no container flex */
+    justify-content: center; 
+  }
+
+  .usuarios-filtros input,
+  .usuarios-filtros select {
+    width: 220px; /* Diminui a largura dos campos */
+  }
+
+  .btn-add {
+    /* Alinhamento ajustado se estiver no mesmo container flex dos inputs */
+    align-self: flex-start; 
+  }
+}
+
+/* Telas menores que 768px (TABLET) */
+@media (max-width: 768px) {
+  .usuarios-container {
+    margin-left: 0; /* Remove a margem lateral */
+    padding: 70px 20px 20px 20px; /* Padding geral para celular */
+  }
+
+  .usuarios-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .usuarios-filtros {
+    flex-direction: column; /* Faz com que os itens fiquem um abaixo do outro */
+    gap: 15px; /* Espaço maior entre os itens na coluna */
+    align-items: stretch; /* Estica os itens para ocupar 100% da largura */
+    width: 100%;
+  }
+
+  .usuarios-filtros input,
+  .usuarios-filtros select {
+    width: 100%; /* Ocupa 100% da largura disponível */
+  }
+  
+  /* Ajusta o espaçamento dos elementos do filtro para melhor visualização */
+  .usuarios-filtros > * { 
+      margin-bottom: 0; /* Remove margem extra */
+  }
+
+  .btn-add {
+    width: 100%; /* Ocupa 100% da largura */
+    margin-top: 0;
+    align-self: auto; /* Deixa o alinhamento padrão */
+  }
+
+  /* Tabela com scroll lateral */
+  .tabela-container {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .usuarios-tabela {
+    min-width: 650px; /* Aumentei para evitar quebrar dados como o telefone/edição */
+  }
+  
+  /* Modal em tela de tablet/celular */
+  .modal-conteudo {
+    width: 95%; /* Ocupa um pouco mais de espaço */
+    max-width: none; /* Permite que o width: 95% funcione */
+    max-height: 90vh;
+  }
+}
+
+/* Telas menores que 480px (CELULAR) */
+@media (max-width: 480px) {
+  h2 {
+    font-size: 20px; /* Título um pouco menor */
+  }
+
+  .usuarios-container {
+    padding: 10px; /* Padding ainda menor */
+  }
+
+  .usuarios-tabela th,
+  .usuarios-tabela td {
+    padding: 6px; /* Padding reduzido na tabela */
+    font-size: 13px;
+  }
 }

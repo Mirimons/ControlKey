@@ -8,8 +8,8 @@ body {
 .chaves-container {
   margin-left: 200px;
   padding-left: 10px;
-  padding-top: 90px;
-  padding-right: 0px;
+  padding-top: 80px;
+  padding-right: 10px;
   flex: 1;
   /* display: block; */
   /* overflow: visible; */
@@ -34,6 +34,7 @@ body {
   display: flex;
   gap: 20px;
   margin-bottom: 20px;
+  margin-top: -30px;
 }
 
 .chaves-filtros input,
@@ -42,6 +43,7 @@ body {
   width: 250px;
   border: 1px solid #ccc;
   border-radius: 6px;
+  margin-top: -20px;
 }
 
 .btn-add {
@@ -241,4 +243,14 @@ body {
   border-radius: 4px;
   box-sizing: border-box;
   /* Garante que padding e borda não aumentem o width total */
+}
+
+.status-livre {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.status-ocupado {
+  color: #dc3545;
+  font-weight: bold;
 }

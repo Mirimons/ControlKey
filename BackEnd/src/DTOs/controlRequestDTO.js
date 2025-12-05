@@ -28,6 +28,7 @@ class ControlRequestDTO extends BaseDTO {
       ciente,
       data_inicio,
       data_fim,
+      periodo,
       // page,
       // limit,
     } = data;
@@ -139,6 +140,15 @@ class ControlRequestDTO extends BaseDTO {
         );
         return false;
       }
+    }
+
+    if (periodo !== undefined && periodo !== null && periodo !== "") {
+      const periodosValidos = ["manha", "tarde", "noite"];
+      if (!periodosValidos.includes(periodo)) {
+        this.addError("periodo", "Período deve ser: manha, tarde ou noite");
+        return false;
+      }
+      this.validatedData.periodo = periodo;
     }
 
     return this.isValid();

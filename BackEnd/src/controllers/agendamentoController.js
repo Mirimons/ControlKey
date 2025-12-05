@@ -1,7 +1,8 @@
 import express from "express";
 import agendamentoService from "../services/agendamentoServices.js";
 import validationMiddleware from "../middleware/validationMiddleware.js";
-import {AgendamentoRequestDTO} from "../DTOs/index.js";
+import { AgendamentoRequestDTO } from "../DTOs/index.js";
+import { getErrorMessage } from "../helpers/errorHandler.js";
 
 const route = express.Router();
 
@@ -37,11 +38,11 @@ route.get("/", validateGetAgendamentos, async (request, response) => {
 
 route.get("/:id", async (request, response) => {
   try {
-    const {id} = request.params
+    const { id } = request.params;
 
-     if (!id && isNaN(Number(id))) {
-      return response.status(400).json({ 
-        response: "ID do agendamento é obrigatório e deve ser numérico" 
+    if (!id && isNaN(Number(id))) {
+      return response.status(400).json({
+        response: "ID do agendamento é obrigatório e deve ser numérico",
       });
     }
     const agendamento = await agendamentoService.getAgendamentoById(Number(id));
@@ -52,6 +53,44 @@ route.get("/:id", async (request, response) => {
       return response.status(404).json({ response: error.message });
     }
     return response.status(400).json({ response: error.message });
+  }
+});
+
+//NOVAS ROTAS PARA AGENDAMENTOS DESATIVADOS
+//Listar apenas os agendamentos inativos
+route.get("/inativos/listar", async (request, response) => {
+   try {
+    const agendInativos = await agendamentoService.getInactiveAgend();
+    return response.status(200).json(agendInativos);
+  } catch (error) {
+    console.error("Erro ao listar agendamentos inativos: ", error);
+    return response.status(500).json({
+      response: "Erro interno no servidor.",
+      error: getErrorMessage(error),
+    });
+  }
+});
+
+//Listar por ID todos (ativos e inativos)
+route.get("/:id/inativo", async (request, response) => {
+  try {
+    const { id } = request.params;
+    const agendamento = await agendamentoService.getAgendByIdIncludingInactive(
+      id
+    );
+
+    if (!agendamento) {
+      return response
+        .status(404)
+        .json({ response: "Agendamento não encontrado." });
+    }
+    return response.status(200).json(agendamento);
+  } catch (error) {
+    console.error("Erro ao buscar agendamento (incluindo inativo): ", error);
+    return response.status(500).json({
+      response: "Erro interno no servidor.",
+      error: getErrorMessage(error),
+    });
   }
 });
 
@@ -95,7 +134,26 @@ route.put("/:id", validateUpdate, async (request, response) => {
   }
 });
 
-route.delete("/:id",validateDelete, async (request, response) => {
+//Reativar agendamento
+route.patch("/:id/reativar", async (request, response) => {
+  try {
+    const { id } = request.params;
+    const agendReativado = await agendamentoService.activateAgend(id);
+
+    return response.status(200).json({
+      response: "Agendamento reativado com sucesso!",
+      data: agendReativado,
+    });
+  } catch (error) {
+    console.error("Erro ao reativar agendamento: ", error);
+    if (error.message.includes("não encontrado")) {
+      return response.status(404).json({ error: error.message });
+    }
+    return response.status(400).json({ error: error.message });
+  }
+});
+
+route.delete("/:id", validateDelete, async (request, response) => {
   try {
     await agendamentoService.deleteAgendamento(request.validatedData.id);
     return response.status(200).json({

@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaTrash } from "react-icons/fa";
+import { FaTrash, FaCheck } from "react-icons/fa";
 import "./Reservation.css";
 import Navbar from "../../../components/navbar";
 import api from "../../../services/api";
 import { toast } from "react-toastify";
-import { SiRarible } from "react-icons/si";
 import Swal from "sweetalert2";
 import { handleApiError } from "../../../helpers/errorHelper";
 
@@ -101,6 +100,8 @@ function Reservation() {
   const [status, setStatus] = useState("agendado");
   const [finalidade, setFinalidade] = useState("");
 
+  const [filtroData, setFiltroData] = useState("");
+  const [filtroStatus, setFiltroStatus] = useState("");
   const [filtroFinalidade, setFiltroFinalidade] = useState("");
   const [filtroAmbiente, setFiltroAmbiente] = useState("");
   const [filtroSolicitante, setFiltroSolicitante] = useState("");
@@ -112,6 +113,49 @@ function Reservation() {
   const [errosValidacao, setErrosValidacao] = useState({});
 
   const modalRef = useRef();
+
+  const reativarAgendamento = async (agendamento) => {
+    const result = await Swal.fire({
+      title: "Você tem certeza?",
+      html: `Deseja reativar o agendamento de <strong>"${agendamento.nomeProfessor}"</strong> no ambiente "${agendamento.laboratorio}"?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Sim, Reativar!",
+      cancelButtonText: "Cancelar",
+    });
+    if (!result.isConfirmed) return;
+
+    try {
+      const token = sessionStorage.getItem("token");
+      if (!token) {
+        toast.error("Você precisa estar logado!", {
+          position: "top-right",
+          autoClose: 2000,
+          theme: "light",
+        });
+        return;
+      }
+      await api.patch(`/agendamento/${agendamento.id}/reativar`, null, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      toast.success("Agendamento reativado com sucesso!", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+      });
+
+      // Remove da lista de inativos
+      setReservas((prev) => prev.filter((r) => r.id !== agendamento.id));
+
+      // Se estiver no modal, fecha
+      if (modalAberto) setModalAberto(false);
+    } catch (err) {
+      handleApiError(err, "Erro ao reativar agendamento!");
+    }
+  };
 
   const deleteAgendamento = async () => {
     if (!editando || !reservaSelecionada) {
@@ -170,11 +214,11 @@ function Reservation() {
   };
 
   const formatarData = (dataString) => {
-    if (!dataString) return "N/A"
+    if (!dataString) return "N/A";
 
-    const [ano, mes, dia] = dataString.split('-')
-    return `${dia}/${mes}/${ano}`
-  }
+    const [ano, mes, dia] = dataString.split("-");
+    return `${dia}/${mes}/${ano}`;
+  };
 
   const abrirModalNovo = () => {
     setEditando(false);
@@ -212,8 +256,91 @@ function Reservation() {
     if (!token) return;
     setLoading(true); // Inicia o carregamento
 
+    if (filtroStatus === "desativado") {
+      api
+        .get("/agendamento/inativos/listar", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          let reservasData = response.data?.data || [];
+
+          // Se não encontrar em data, tenta outras estruturas (para compatibilidade)
+          if (!Array.isArray(reservasData) || reservasData.length === 0) {
+            if (Array.isArray(response.data?.agendamentos)) {
+              reservasData = response.data.agendamentos;
+            } else if (Array.isArray(response.data)) {
+              reservasData = response.data;
+            } else if (response.data?.reservas) {
+              reservasData = response.data.reservas;
+            }
+          }
+
+          console.log("Dados brutos de agendamentos inativos:", response.data);
+          console.log("ReservasData processado:", reservasData);
+          // Aplica filtros adicionais no frontend
+          let reservasFiltradas = reservasData;
+
+          if (filtroSolicitante) {
+            const filtroLower = filtroSolicitante.toLowerCase();
+            reservasFiltradas = reservasFiltradas.filter(
+              (r) =>
+                r.usuario?.nome?.toLowerCase().includes(filtroLower) ||
+                r.nomeProfessor?.toLowerCase().includes(filtroLower)
+            );
+          }
+
+          if (filtroAmbiente) {
+            const filtroLower = filtroAmbiente.toLowerCase();
+            reservasFiltradas = reservasFiltradas.filter(
+              (r) =>
+                r.laboratorio?.nome_lab?.toLowerCase().includes(filtroLower) ||
+                r.laboratorio?.toLowerCase().includes(filtroLower)
+            );
+          }
+
+          if (filtroData) {
+            reservasFiltradas = reservasFiltradas.filter(
+              (r) => r.data_utilizacao === filtroData
+            );
+          }
+          const reservasMapeadas = reservasFiltradas.map((reserva, index) => ({
+            id: reserva.id || `reserva-${index}`,
+            nomeProfessor: reserva.usuario?.nome || "N/A",
+            laboratorio: reserva.laboratorio?.nome_lab || "N/A",
+            dataUtilizacao: reserva.data_utilizacao,
+            horaInicio: reserva.hora_inicio,
+            horaFim: reserva.hora_fim,
+            finalidade: reserva.finalidade || "--",
+            status: "desativado",
+            id_usuario: reserva.id_usuario,
+            id_labs: reserva.id_labs,
+          }));
+
+          setReservas(reservasMapeadas);
+        })
+        .catch((err) => {
+          console.error("Erro ao buscar agendamentos inativos:", err);
+          toast.error("Erro ao carregar agendamentos desativados!");
+          setReservas([]);
+        })
+        .finally(() => setLoading(false));
+      return;
+    }
+
+    const params = {};
+    if (filtroSolicitante) params.nomeProfessor = filtroSolicitante;
+    if (filtroAmbiente) params.laboratorio = filtroAmbiente;
+    if (filtroData) params.data_utilizacao = filtroData;
+    if (filtroStatus && filtroStatus !== "" && filtroStatus !== "desativado") {
+      params.status = filtroStatus;
+    }
+    console.log("Parâmetros enviados para API:", params);
+
     api
-      .get("/agendamento", { headers: { Authorization: `Bearer ${token}` } })
+      .get("/agendamento", {
+        params,
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((response) => {
         let reservasData = [];
         if (response.data && Array.isArray(response.data.agendamentos))
@@ -316,8 +443,11 @@ function Reservation() {
     // Chama todas as funções para carregar dados iniciais
     carregarChaves();
     carregarSolicitantes();
-    carregarReservas();
   }, []);
+
+  useEffect(() => {
+    carregarReservas();
+  }, [filtroStatus, filtroData, filtroAmbiente, filtroSolicitante]);
 
   const handleSalvar = (e) => {
     e.preventDefault();
@@ -424,8 +554,11 @@ function Reservation() {
   return (
     <div className="reservation-page">
       <div className="reservas-container">
-        <header>
+        <header className="chaves-header">
           <h1>Reservas</h1>
+          <button className="btn-add" type="button" onClick={abrirModalNovo}>
+            Reservar
+          </button>
         </header>
 
         <div className="reservas-filtros">
@@ -447,9 +580,27 @@ function Reservation() {
               onChange={(e) => setFiltroAmbiente(e.target.value)}
             />
           </div>
-          <button className="btn-add" type="button" onClick={abrirModalNovo}>
-            Reservar
-          </button>
+          <div>
+            <h3>Data:</h3>
+            <input
+              type="date"
+              value={filtroData}
+              onChange={(e) => setFiltroData(e.target.value)}
+            />
+          </div>
+          <div>
+            <h3>Status:</h3>
+            <select
+              value={filtroStatus}
+              onChange={(e) => setFiltroStatus(e.target.value)}
+            >
+              <option value="">Todos</option>
+              <option value="agendado">Agendado</option>
+              <option value="finalizado">Finalizado</option>
+              <option value="cancelado">Cancelado</option>
+              <option value="desativado">Desativados</option>
+            </select>
+          </div>
         </div>
 
         <div className="tabela-container">
@@ -463,7 +614,8 @@ function Reservation() {
                 <th>Fim</th>
                 <th>Finalidade</th>
                 <th>Status</th>
-                <th>Editar</th>
+                {filtroStatus !== "desativado" ? <th>Editar</th> : null}
+                {filtroStatus === "desativado" ? <th>Ativar</th> : null}
               </tr>
             </thead>
             <tbody>
@@ -487,19 +639,42 @@ function Reservation() {
                         {r.status}
                       </span>
                     </td>
-                    <td>
-                      <button
-                        className="editar-btn"
-                        onClick={() => abrirModalEditar(r)}
-                      >
-                        ✏️
-                      </button>
-                    </td>
+                    {filtroStatus !== "desativado" ? (
+                      <td>
+                        <button
+                          className="editar-btn"
+                          onClick={() => abrirModalEditar(r)}
+                        >
+                          ✏️
+                        </button>
+                      </td>
+                    ) : null}
+
+                    {filtroStatus === "desativado" ? (
+                      <td>
+                        <button
+                          className="editar-btn"
+                          onClick={() => reativarAgendamento(r)}
+                          title="Reativar agendamento"
+                        >
+                          <FaCheck />
+                        </button>
+                      </td>
+                    ) : null}
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" style={{ textAlign: "center" }}>
+                  <td
+                    colSpan={
+                      filtroStatus !== "desativado"
+                        ? 8
+                        : filtroStatus === "desativado"
+                        ? 8
+                        : 7
+                    }
+                    style={{ textAlign: "center" }}
+                  >
                     Nenhuma reserva encontrada
                   </td>
                 </tr>
@@ -609,7 +784,7 @@ function Reservation() {
                   className={errosValidacao.status ? "input-error" : ""}
                 >
                   <option value="agendado">Agendado</option>
-                  <option value="concluído">Concluído</option>
+                  <option value="finalizado">Finalizado</option>
                   <option value="cancelado">Cancelado</option>
                 </select>
                 {errosValidacao.status && (
@@ -618,9 +793,23 @@ function Reservation() {
 
                 <div className="modal-botoes">
                   {editando && reservaSelecionada && (
-                    <button type="button" onClick={deleteAgendamento}>
-                      <FaTrash />
-                    </button>
+                    <>
+                      {filtroStatus === "desativado" ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            reativarAgendamento(reservaSelecionada)
+                          }
+                          style={{ backgroundColor: "#28a745" }}
+                        >
+                          <FaCheck /> Reativar
+                        </button>
+                      ) : (
+                        <button type="button" onClick={deleteAgendamento}>
+                          <FaTrash />
+                        </button>
+                      )}
+                    </>
                   )}
                   <button type="button" onClick={() => setModalAberto(false)}>
                     Cancelar

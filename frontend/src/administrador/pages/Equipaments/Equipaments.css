@@ -4,16 +4,16 @@ body {
 
 .equipamentos-container {
   background-color: #e6f2f7;
-  margin-left: 150px;
-  padding-left: 90px;
-  padding-top: 90px;
-  padding-right: 0px;
+  margin-left: 200px;
+  padding-left: 10px;
+  padding-top: 80px;
+  padding-right: 10px;
   background: transparent;
   flex: 1;
   /* padding-bottom: 40px; */
 }
 
-.equipamentos-header {
+.equipament os-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -34,6 +34,7 @@ body {
   margin-bottom: 25px;
   margin-top: 0px;
   align-items: flex-end ;
+  margin-top: -30px;
 }
 
 .equipamentos-filtros input,
@@ -42,6 +43,7 @@ body {
   width: 250px;
   border: 1px solid #ccc;
   border-radius: 6px;
+  margin-top: -10px;
 }
 
 .btn-add {
@@ -213,4 +215,15 @@ body {
   border-radius: 4px;
   box-sizing: border-box;
   /* Garante que padding e borda não aumentem o width total */
+}
+
+
+.status-livre {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.status-ocupado {
+  color: #dc3545;
+  font-weight: bold;
 }
