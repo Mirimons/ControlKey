@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { FaTrash } from "react-icons/fa";
+import { FaTrash, FaCheck } from "react-icons/fa";
 import "./Keys.css";
 import Navbar from "../../../components/navbar";
 import api from "../../../services/api";
@@ -24,7 +24,7 @@ function Keys() {
   const [chaveSelecionada, setChaveSelecionada] = useState(null);
 
   const [filtroTipo, setFiltroTipo] = useState("");
-  
+
 
   const [errosValidacao, setErrosValidacao] = useState({});
 
@@ -85,6 +85,104 @@ function Keys() {
     }
   };
 
+  const fetchChaves = () => {
+    const token = sessionStorage.getItem("token");
+    if (!token) return;
+
+    // Se escolher "desabilitado" → rota de inativos
+    if (filtros.status === "desabilitado") {
+      api
+        .get("/labs/inativos/listar", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          setChaves(res.data.data || []);
+        })
+        .catch((err) => {
+          handleApiError(err, "Erro ao buscar laboratórios desativados.");
+        });
+      return;
+    }
+
+    // Caso contrário → rota normal (ativos)
+    api
+      .get("/labs", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        if (res.data?.data) {
+          setChaves(res.data.data);
+        } else if (Array.isArray(res.data)) {
+          setChaves(res.data);
+        } else {
+          setChaves([]);
+        }
+      })
+      .catch((err) => {
+        console.error("Erro ao buscar laboratórios:", err);
+      });
+  };
+
+  useEffect(() => {
+    fetchChaves();
+  }, []);
+
+  useEffect(() => {
+    fetchChaves();
+  }, [filtros.status]);
+
+  const chavesFiltradas = chaves.filter((lab) => {
+    return (
+      (!filtros.ambiente ||
+        lab.nome_lab?.toLowerCase().includes(filtros.ambiente.toLowerCase())) &&
+      (!filtros.descricao ||
+        lab.desc_lab?.toLowerCase().includes(filtros.descricao.toLowerCase()))
+    );
+  });
+
+  const reativarLab = async (id) => {
+    try {
+      const token = sessionStorage.getItem("token");
+      if (!token) {
+        toast.error("Você precisa estar logada!", {
+          position: "top-right",
+          autoClose: 2000,
+        });
+        return;
+      }
+
+      const result = await Swal.fire({
+        title: "Reativar laboratório?",
+        text: "O laboratório voltará a aparecer como ativo.",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Sim, reativar",
+        cancelButtonText: "Cancelar",
+      });
+
+      if (!result.isConfirmed) return;
+
+      const response = await api.patch(
+        `/labs/${id}/reativar`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success("Laboratório reativado com sucesso!", {
+        position: "top-right",
+        autoClose: 2000,
+      });
+
+      fetchChaves(); // Atualiza a tabela
+    } catch (error) {
+      console.error("Erro ao reativar laboratório:", error);
+      handleApiError(error, "Erro ao reativar laboratório!");
+    }
+  };
+
+
   const abrirModalNovo = () => {
     setEditando(false);
     setChaveSelecionada(null);
@@ -115,45 +213,45 @@ function Keys() {
   };
 
   //Filtrar chaves:
-  const chavesFiltradas = chaves.filter((chaves) => {
-    return (
-      (!filtros.ambiente ||
-        chaves.nome_lab
-          .toLowerCase()
-          .includes(filtros.ambiente.toLowerCase())) &&
-      (!filtros.descricao ||
-        (chaves.desc_lab &&
-          chaves.desc_lab
-            .toLowerCase()
-            .includes(filtros.descricao.toLowerCase()))) &&
-      (!filtros.status ||
-        chaves.status.toLowerCase() === filtros.status.toLowerCase())
-    );
-  });
+  // const chavesFiltradas = chaves.filter((chaves) => {
+  //   return (
+  //     (!filtros.ambiente ||
+  //       chaves.nome_lab
+  //         .toLowerCase()
+  //         .includes(filtros.ambiente.toLowerCase())) &&
+  //     (!filtros.descricao ||
+  //       (chaves.desc_lab &&
+  //         chaves.desc_lab
+  //           .toLowerCase()
+  //           .includes(filtros.descricao.toLowerCase()))) &&
+  //     (!filtros.status ||
+  //       chaves.status.toLowerCase() === filtros.status.toLowerCase())
+  //   );
+  // });
 
-  const fetchChaves = () => {
-    const token = sessionStorage.getItem("token");
-    if (!token) return;
+  // const fetchChaves = () => {
+  //   const token = sessionStorage.getItem("token");
+  //   if (!token) return;
 
-    api
-      .get("/labs", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        if (response.data && response.data.data) {
-          setChaves(response.data.data);
-        } else if (Array.isArray(response.data)) {
-          setChaves(response.data);
-        } else {
-          setChaves([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Erro ao buscar chaves:", error);
-      });
-  };
+  //   api
+  //     .get("/labs", {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     })
+  //     .then((response) => {
+  //       if (response.data && response.data.data) {
+  //         setChaves(response.data.data);
+  //       } else if (Array.isArray(response.data)) {
+  //         setChaves(response.data);
+  //       } else {
+  //         setChaves([]);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error("Erro ao buscar chaves:", error);
+  //     });
+  // };
 
   const handleSalvar = (e) => {
     e.preventDefault();
@@ -323,7 +421,12 @@ function Keys() {
                 <th>Ambiente</th>
                 <th>Descrição</th>
                 <th>Status</th>
-                <th>Editar</th>
+                {filtros.status !== "desabilitado" ? (
+                  <th>Editar</th>
+                ) : null}
+                {filtros.status === "desabilitado" ? (
+                  <th>Ativar</th>
+                ) : null}
               </tr>
             </thead>
             <tbody>
@@ -338,22 +441,23 @@ function Keys() {
                         {chave.status}
                       </span>
                     </td>
-                    {filtroTipo !== "Desabilitado" ? (
+
+                    {filtros.status !== "desabilitado" ? (
                       <td>
                         <button
                           className="editar-btn"
-                          onClick={() => abrirModalEditar(user)}
+                          onClick={() => abrirModalEditar(chave)}
                         >
                           ✏️
                         </button>
                       </td>
                     ) : null}
-                    {filtroTipo === "Desabilitado" ? (
+                    {filtros.status === "desabilitado" ? (
                       <td>
                         <button
                           className="editar-btn"
-                          onClick={() => reativarUsuario(user)}
-                          title="Reativar usuário"
+                          onClick={() => reativarLab(chave.id)}
+                          title="Reativar ambiente"
                         >
                           <FaCheck />
                         </button>
@@ -363,15 +467,16 @@ function Keys() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="4" style={{ textAlign: "center" }}>
-                    {chaves.length === 0 ? "Nenhuma chave cadastrada" : "Nenhuma chave encontrada para os filtros aplicados"}
+                  <td colSpan="5" style={{ textAlign: "center" }}>
+                    {chaves.length === 0
+                      ? "Nenhuma chave cadastrada"
+                      : "Nenhuma chave encontrada com os filtros aplicados"}
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-
         {/* Modal */}
         {modalAberto && (
           <div className="modal-fundo">

@@ -365,11 +365,14 @@ function Equipaments() {
   return (
     <div className="equipamentos-page">
       <div className="equipamentos-container">
-        <header className="equipamentos-header">
+        <header className="chaves-header">
           <h1>Equipamentos</h1>
+          <button className="btn-add" type="button" onClick={abrirModal}>
+          Adicionar Equipamento
+          </button>
         </header>
 
-        <div className="equipamentos-filtros">
+        <div className="usuarios-filtros">
           <div>
             <h3>Equipamento:</h3>
             <input
@@ -405,9 +408,6 @@ function Equipaments() {
               <option value="ocupado">Ocupado</option>
             </select>
           </div>
-          <button className="btn-add" type="button" onClick={abrirModal}>
-            Adicionar Equipamento
-          </button>
         </div>
 
         <div className="tabela-container">
