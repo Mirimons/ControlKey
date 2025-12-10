@@ -39,12 +39,12 @@ function Keys() {
   const deleteLabs = async () => {
     const result = await Swal.fire({
       title: "Você tem certeza?",
-      html: `Você não poderá reverter a exclusão da chave <strong>"${chaveSelecionada.nome_lab}"</strong>!`,
+      html: `Você pode reativar a chave <strong>"${chaveSelecionada.nome_lab}"</strong> caso seja necessário!`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#dc3545", // Vermelho
       cancelButtonColor: "#6c757d", // Cinza
-      confirmButtonText: "Sim, Excluir!",
+      confirmButtonText: "Sim, desativar!",
       cancelButtonText: "Cancelar"
     });
 
@@ -55,7 +55,7 @@ function Keys() {
     try {
       const token = sessionStorage.getItem("token");
       if (!token) {
-        toast.error("Você precisa estar logado para excluir uma chave!", {
+        toast.error("Você precisa estar logado para desativar uma chave!", {
           position: "top-right",
           autoClose: 2000,
           theme: "light",
@@ -67,7 +67,7 @@ function Keys() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      toast.success("Chave excluída com sucesso!", {
+      toast.success("Chave desativada com sucesso!", {
         position: "top-right",
         autoClose: 2000,
         theme: "light",
@@ -76,8 +76,8 @@ function Keys() {
       fecharModal();
       fetchChaves(); // Atualiza a tabela
     } catch (error) {
-      console.error("Erro ao excluir chave:", error);
-      toast.error("Erro ao excluir chave!", {
+      console.error("Erro ao desativar chave:", error);
+      toast.error("Erro ao desativar chave!", {
         position: "top-right",
         autoClose: 2000,
         theme: "light",

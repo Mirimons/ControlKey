@@ -71,7 +71,8 @@ function Relatorio() {
               laboratorio: item.laboratorio?.nome_lab || "--",
               equipamento: item.equipamento?.desc_equip || "--",
               dataInicio: item.data_inicio || item.dataInicio,
-              dataFim: item.data_fim || item.dataFim,
+              // dataFim: item.data_fim || item.dataFim,
+              dataFim: item.dataFim,
               status: item.status || "--",
               // Aplica o mapeamento para exibição
               statusDisplay:

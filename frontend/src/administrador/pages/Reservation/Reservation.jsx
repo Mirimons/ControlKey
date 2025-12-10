@@ -159,7 +159,7 @@ function Reservation() {
 
   const deleteAgendamento = async () => {
     if (!editando || !reservaSelecionada) {
-      toast.error("Nenhum agendamento selecionado para exclusão!", {
+      toast.error("Nenhum agendamento selecionado para desativação!", {
         position: "top-right",
         autoClose: 2000,
         theme: "light",
@@ -169,12 +169,12 @@ function Reservation() {
 
     const result = await Swal.fire({
       title: "Tem certeza?",
-      text: `Deseja realmente excluir a reserva de "${reservaSelecionada.nomeProfessor}" no ambiente "${reservaSelecionada.laboratorio}"?`,
+      text: `Deseja realmente desativar a reserva de "${reservaSelecionada.nomeProfessor}" no ambiente "${reservaSelecionada.laboratorio}"?`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Sim, excluir!",
+      confirmButtonText: "Sim, desativar!",
       cancelButtonText: "Cancelar",
     });
 
@@ -182,7 +182,7 @@ function Reservation() {
 
     const token = sessionStorage.getItem("token");
     if (!token) {
-      toast.error("Você precisa estar logado para excluir uma reserva!", {
+      toast.error("Você precisa estar logado para desativar uma reserva!", {
         position: "top-right",
         autoClose: 2000,
         theme: "light",
@@ -195,7 +195,7 @@ function Reservation() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      toast.success("Reserva excluída com sucesso!", {
+      toast.success("Reserva desativada com sucesso!", {
         position: "top-right",
         autoClose: 2000,
         theme: "light",
@@ -204,8 +204,8 @@ function Reservation() {
       setModalAberto(false);
       carregarReservas(); // Atualiza a tabela
     } catch (error) {
-      console.error("Erro ao excluir reserva:", error);
-      toast.error("Erro ao excluir reserva!", {
+      console.error("Erro ao desativar reserva:", error);
+      toast.error("Erro ao desativar reserva!", {
         position: "top-right",
         autoClose: 2000,
         theme: "light",

@@ -31,7 +31,8 @@ class ControlService {
         // page = 1,
         // limit = 10,
       } = filtros;
-
+      console.log(">>> inicio", data_inicio)
+      console.log(">>> fim", data_fim)
       const query = controlRepository
         .createQueryBuilder("control")
         .leftJoinAndSelect("control.usuario", "usuario")
@@ -77,12 +78,12 @@ class ControlService {
       if (data_inicio && data_fim) {
         query.andWhere("control.data_inicio BETWEEN :start AND :end", {
           start: data_inicio,
-          end: data_fim,
+          end: `${data_fim} 23:59:00`,
         });
       } else if (data_inicio) {
         query.andWhere("control.data_inicio >= :start", { start: data_inicio });
       } else if (data_fim) {
-        query.andWhere("control.data_inicio <= :end", { end: data_fim });
+        query.andWhere("control.data_fim <= :end", { end: data_fim });
       }
 
       const periodos = {

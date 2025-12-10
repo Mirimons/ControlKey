@@ -158,12 +158,12 @@ function Equipaments() {
   const deleteEquipamento = async () => {
     const result = await Swal.fire({
       title: "Você tem certeza?",
-      html: `Você não poderá reverter a exclusão do equipamento <strong>"${equipamentoDescricao}"</strong>!`,
+      html: `Você pode reativar o equipamento <strong>"${equipamentoDescricao}"</strong> caso seja necessário!`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#dc3545", // Vermelho
-      cancelButtonColor: "#6c757d", // Cinza
-      confirmButtonText: "Sim, Excluir!",
+      confirmButtonColor: "#dc3545",
+      cancelButtonColor: "#6c757d", 
+      confirmButtonText: "Sim, desativar!",
       cancelButtonText: "Cancelar"
     });
 
@@ -188,7 +188,7 @@ function Equipaments() {
         },
       });
 
-      toast.success("Equipamento excluído com sucesso!", {
+      toast.success("Equipamento desativado com sucesso!", {
         position: "top-right",
         autoClose: 2000,
         theme: "light",
@@ -197,8 +197,16 @@ function Equipaments() {
       fecharModal();
       fetchEquipamentos(); // atualiza a lista
     } catch (error) {
-      console.error("Erro ao excluir equipamento:", error);
-      toast.error("Erro ao excluir equipamento!", {
+      console.error("Erro ao desativar equipamento:", error);
+
+      //Verifica se é um erro de depêndencias (controles ativos)
+      if(error.response && error.response.data) {
+        const errorMessage = error.response.data.message || error.response.data
+
+        if(errorMessage.includes("controles ativos vinculados") ||
+      errorMessage.includes)
+      }
+      toast.error("Erro ao desativar equipamento!", {
         position: "top-right",
         autoClose: 2000,
         theme: "light",

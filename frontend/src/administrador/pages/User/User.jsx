@@ -249,12 +249,12 @@ function User() {
   const deleteUsuario = async () => {
     const result = await Swal.fire({
       title: "Você tem certeza?",
-      html: `Você não poderá reverter a exclusão do usuário <strong>"${usuarioSelecionado.nome}"</strong>!`,
+      html: `Você pode reativar o usuário <strong>"${usuarioSelecionado.nome}"</strong> caso seja necessário!`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#dc3545", // Vermelho
       cancelButtonColor: "#6c757d", // Cinza
-      confirmButtonText: "Sim, Excluir!",
+      confirmButtonText: "Sim, desativar!",
       cancelButtonText: "Cancelar",
     });
 
@@ -282,7 +282,7 @@ function User() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      toast.success("Usuário excluído com sucesso!", {
+      toast.success("Usuário desativado com sucesso!", {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -298,9 +298,9 @@ function User() {
 
       fecharModal();
     } catch (err) {
-      handleApiError(err, "Erro ao excluir usuário!");
-      // console.error("Erro ao excluir usuário:", err);
-      // toast.error("Erro ao excluir usuário!", {
+      handleApiError(err, "Erro ao desativar usuário!");
+      // console.error("Erro ao desativar usuário:", err);
+      // toast.error("Erro ao desativar usuário!", {
       //   position: "top-right",
       //   autoClose: 2000,
       //   hideProgressBar: false,
