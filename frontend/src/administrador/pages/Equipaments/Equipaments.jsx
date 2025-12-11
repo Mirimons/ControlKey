@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./Equipaments.css";
-import { FaTrash } from "react-icons/fa";
-import Navbar from "../../../components/navbar";
+import { FaCheck, FaTrash } from "react-icons/fa";
 import api from "../../../services/api";
 import { toast } from "react-toastify";
 import { handleApiError } from "../../../helpers/errorHelper";
@@ -16,7 +15,6 @@ const SelectPesquisavel = ({
   className,
 }) => {
   const [inputValue, setInputValue] = useState("");
-
 
   const [mostrarOpcoes, setMostrarOpcoes] = useState(false);
   const containerRef = useRef(null);
@@ -89,40 +87,12 @@ const SelectPesquisavel = ({
 };
 
 function Equipaments() {
-
   const [modalAberto, setModalAberto] = useState(false);
   const [tipoEquip, setTipoEquip] = useState("");
   const [descEquip, setDescEquip] = useState("");
   const [status, setStatus] = useState("livre");
   const [equipamentos, setEquipamentos] = useState([]);
   const [tipoEquipamentos, setTiposEquip] = useState([]);
-
-  const fetchTiposEquip = () => {
-    const token = sessionStorage.getItem("token");
-    if (!token) return;
-
-    api
-      .get("/tipo_equip", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        const lista =
-          res.data?.data ||
-          res.data?.tipos ||
-          res.data ||
-          [];
-
-        if (Array.isArray(lista)) {
-          setTiposEquip(lista);
-        } else {
-          console.warn("Resposta inesperada do backend /tipo_equip:", res.data);
-          setTiposEquip([]);
-        }
-      })
-      .catch((err) => {
-        console.error("Erro ao buscar tipos de equipamento:", err);
-      });
-  };
 
   const [filtros, setFiltros] = useState({
     equipamento: "",
@@ -142,7 +112,7 @@ function Equipaments() {
   const abrirModal = () => {
     setErrosValidacao({});
     setModalAberto(true);
-  }
+  };
 
   const fecharModal = () => {
     setModalAberto(false);
@@ -155,6 +125,114 @@ function Equipaments() {
     setStatus("livre");
   };
 
+  const fetchTiposEquip = () => {
+    const token = sessionStorage.getItem("token");
+    if (!token) return;
+
+    api
+      .get("/tipo_equip", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const lista = res.data?.data || res.data?.tipos || res.data || [];
+
+        if (Array.isArray(lista)) {
+          setTiposEquip(lista);
+        } else {
+          console.warn("Resposta inesperada do backend /tipo_equip:", res.data);
+          setTiposEquip([]);
+        }
+      })
+      .catch((err) => {
+        console.error("Erro ao buscar tipos de equipamento:", err);
+      });
+  };
+
+  const fetchEquipamentos = () => {
+    const token = sessionStorage.getItem("token");
+    if (!token) return;
+
+    if (filtros.status === "desabilitado") {
+      api
+        .get("/equipamento/inativos/listar", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          setEquipamentos(res.data.data || []);
+        })
+        .catch((err) => {
+          console.error("Erro ao buscar equipamentos desativados: ", err);
+          toast.error("Erro ao buscar equipamentos desativados!", {
+            position: "top-right",
+            autoClose: 2000,
+            theme: "light",
+          });
+        });
+      return;
+    }
+
+    api
+      .get("/equipamento", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        if (response.data && response.data.data) {
+          setEquipamentos(response.data.data);
+        } else if (Array.isArray(response.data)) {
+          setEquipamentos(response.data);
+        } else {
+          setEquipamentos([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Erro ao buscar equipamentos:", error);
+        setEquipamentos([]);
+      });
+  };
+
+  //Função para reativar Equipamento
+  const reativarEquipamento = async (id) => {
+    try {
+      const token = sessionStorage.getItem("token");
+      if (!token) {
+        toast.error("Você precisa estar logado!", {
+          position: "top-right",
+          autoClose: 2000,
+        });
+        return;
+      }
+      const result = await Swal.fire({
+        title: "Reativar equipamento?",
+        text: "O equipamento voltará a aparecer como ativo.",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Sim, reativar",
+        cancelButtonText: "Cancelar",
+      });
+      if (!result.isConfirmed) return;
+
+      const response = await api.patch(
+        `/equipamento/${id}/reativar`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success("Equipamento reativado com sucesso!", {
+        position: "top-right",
+        autoClose: 2000,
+      });
+      setFiltros(prev => ({
+      ...prev,
+      status: ""}))
+    } catch (error) {
+      console.error("Erro ao reativar equipamento: ", error);
+      handleApiError(error, "Erro ao reativar equipamento!");
+    }
+  };
+
   const deleteEquipamento = async () => {
     const result = await Swal.fire({
       title: "Você tem certeza?",
@@ -162,9 +240,9 @@ function Equipaments() {
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#dc3545",
-      cancelButtonColor: "#6c757d", 
+      cancelButtonColor: "#6c757d",
       confirmButtonText: "Sim, desativar!",
-      cancelButtonText: "Cancelar"
+      cancelButtonText: "Cancelar",
     });
 
     if (!result.isConfirmed) {
@@ -199,13 +277,51 @@ function Equipaments() {
     } catch (error) {
       console.error("Erro ao desativar equipamento:", error);
 
-      //Verifica se é um erro de depêndencias (controles ativos)
-      if(error.response && error.response.data) {
-        const errorMessage = error.response.data.message || error.response.data
+      if (error.response && error.response.data) {
+        //Tratamento de erros para dependências
+        const errorData = error.response.data;
 
-        if(errorMessage.includes("controles ativos vinculados") ||
-      errorMessage.includes)
+        const errorMessage =
+          errorData.message ||
+          errorData.error ||
+          errorData.msg ||
+          errorData.detail ||
+          (typeof errorData === "string"
+            ? errorData
+            : JSON.stringify(errorData));
+
+        console.log("Mensagem de erro extraída:", errorMessage);
+
+        //Verifica se é um erro de depêndencias (controles ativos)
+        if (
+          typeof errorMessage === "string" &&
+          (errorMessage.includes("controles ativos vinculados") ||
+            errorMessage.includes("dependências") ||
+            errorMessage.includes("controles ativos") ||
+            errorMessage.includes("não é possível desativar") ||
+            errorMessage.includes("Control"))
+        ) {
+          //Mensagem específica para erro de dependências
+          Swal.fire({
+            title: "Não é possível desativar",
+            html: `
+        <div style="text-align: left;">
+              <p>O equipamento <strong>"${equipamentoDescricao}"</strong> não pode ser desativado porque:</p>
+              <ul>
+                <li>Existem dependências no Relatório vinculados a ele</li>
+                <li>Caso desative este equipamento, sua tabela de controle do Relatório ficará órfã de FK.</li>
+              </ul>
+              <p><small>Mensagem técnica: ${errorMessage}</small></p>
+            </div>
+        `,
+            icon: "error",
+            confirmButtonColor: "#3085d6",
+            confirmButtonText: "Entendi",
+          });
+          return;
+        }
       }
+
       toast.error("Erro ao desativar equipamento!", {
         position: "top-right",
         autoClose: 2000,
@@ -213,34 +329,16 @@ function Equipaments() {
       });
     }
   };
-  const fetchEquipamentos = () => {
-    const token = sessionStorage.getItem("token");
-    if (!token) return;
-    api
-      .get("/equipamento", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        if (response.data && response.data.data) {
-          setEquipamentos(response.data.data);
-        } else if (Array.isArray(response.data)) {
-          setEquipamentos(response.data);
-        } else {
-          setEquipamentos([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Erro ao buscar equipamentos:", error);
-        setEquipamentos([]);
-      });
-  };
 
   useEffect(() => {
     fetchEquipamentos();
     fetchTiposEquip();
   }, []);
+
+  //Atualiza a lista quando o filtro de status muda
+  useEffect(() => {
+    fetchEquipamentos();
+  }, [filtros.status]);
 
   //Mudança nos filtros
   const handleFiltroChange = (e) => {
@@ -263,9 +361,7 @@ function Equipaments() {
       (!filtros.equipamento ||
         tipo.toLowerCase().includes(filtros.equipamento.toLowerCase())) &&
       (!filtros.descricao ||
-        descricao.toLowerCase().includes(filtros.descricao.toLowerCase())) &&
-      (!filtros.status ||
-        equip.status?.toLowerCase() === filtros.status.toLowerCase())
+        descricao.toLowerCase().includes(filtros.descricao.toLowerCase()))
     );
   });
 
@@ -286,15 +382,15 @@ function Equipaments() {
     // corpo da requisição corrigido
     const payload = editando
       ? {
-        id: equipamentoId, // necessário pelo DTO de atualização
-        desc_equip: descEquip,
-        status: status,
-      }
+          id: equipamentoId, // necessário pelo DTO de atualização
+          desc_equip: descEquip,
+          status: status,
+        }
       : {
-        tipo: tipoEquip,
-        desc_equip: descEquip,
-        status: status,
-      };
+          tipo: tipoEquip,
+          desc_equip: descEquip,
+          status: status,
+        };
 
     try {
       if (editando) {
@@ -376,7 +472,7 @@ function Equipaments() {
         <header className="chaves-header">
           <h1>Equipamentos</h1>
           <button className="btn-add" type="button" onClick={abrirModal}>
-          Adicionar Equipamento
+            Adicionar Equipamento
           </button>
         </header>
 
@@ -414,6 +510,7 @@ function Equipaments() {
               <option value="">Todos</option>
               <option value="livre">Livre</option>
               <option value="ocupado">Ocupado</option>
+              <option value="desabilitado">Desativados</option>
             </select>
           </div>
         </div>
@@ -426,7 +523,12 @@ function Equipaments() {
                 <th>Equipamento</th>
                 <th>Descrição</th>
                 <th>Status</th>
-                <th>Editar</th>
+                {filtros.status !== "desabilitado" ? (
+                  <th>Editar</th>
+                ): null}
+                {filtros.status === "desabilitado" ? (
+                  <th>Ativar</th>
+                ): null}
               </tr>
             </thead>
             <tbody>
@@ -441,6 +543,7 @@ function Equipaments() {
                         {equip.status || "livre"}
                       </span>
                     </td>
+                    {filtros.status !== "desabilitado" ? (
                     <td>
                       <button
                         className="editar-btn"
@@ -449,15 +552,25 @@ function Equipaments() {
                         ✏️
                       </button>
                     </td>
+                    ): null}
+                    {filtros.status === "desabilitado" ? (
+                      <td>
+                        <button
+                        className="editar-btn"
+                        onClick={() => reativarEquipamento(equip.id)}
+                        title="Reativar equipamento">
+                          <FaCheck />
+                        </button>
+                      </td>
+                    ): null}
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: "center" }}>
+                  <td colSpan={filtros.status === "desabilitado" ? "5" : "5"} style={{ textAlign: "center" }}>
                     {equipamentos.length === 0
                       ? "Nenhum equipamento cadastrado"
-                      : "Nenhum equipamento encontrado para os filtros aplicados"
-                    }
+                      : "Nenhum equipamento encontrado para os filtros aplicados"}
                   </td>
                 </tr>
               )}
@@ -483,7 +596,7 @@ function Equipaments() {
                       value={tipoEquip}
                       onChange={setTipoEquip}
                       required
-                      className={errosValidacao.tipo ? 'input-error' : ''}
+                      className={errosValidacao.tipo ? "input-error" : ""}
                     />
                     {errosValidacao.tipo && (
                       <div className="erro-validacao">
@@ -500,7 +613,7 @@ function Equipaments() {
                   value={descEquip}
                   onChange={(e) => setDescEquip(e.target.value)}
                   required
-                  className={errosValidacao.desc_equip ? 'input-error' : ''}
+                  className={errosValidacao.desc_equip ? "input-error" : ""}
                 />
                 {errosValidacao.desc_equip && (
                   <div className="erro-validacao">
@@ -509,22 +622,21 @@ function Equipaments() {
                 )}
 
                 <label>Status:</label>
-                <select value={status}
+                <select
+                  value={status}
                   onChange={(e) => setStatus(e.target.value)}
                   required
-                  className={errosValidacao.status ? 'input-error' : ''} // Adicionado verificação de status (caso o BE valide)
+                  className={errosValidacao.status ? "input-error" : ""} // Adicionado verificação de status (caso o BE valide)
                 >
                   <option value="livre">Livre</option>
                   <option value="ocupado">Ocupado</option>
                 </select>
                 {errosValidacao.status && (
-                  <div className="erro-validacao">
-                    {errosValidacao.status}
-                  </div>
+                  <div className="erro-validacao">{errosValidacao.status}</div>
                 )}
 
                 <div className="modal-botoes">
-                  {editando && (
+                  {editando && filtros.status !== "desabilitado" && (
                     <button type="button" onClick={deleteEquipamento}>
                       <FaTrash />
                     </button>

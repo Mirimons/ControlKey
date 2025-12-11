@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FaTrash, FaCheck } from "react-icons/fa";
 import "./Reservation.css";
 import Navbar from "../../../components/navbar";
@@ -91,6 +91,7 @@ function Reservation() {
   const [modalAberto, setModalAberto] = useState(false);
   const [editando, setEditando] = useState(false);
   const [reservaSelecionada, setReservaSelecionada] = useState(null);
+  const [loading, setLoading] = useState(false); // Estado de carregamento
 
   const [nomeProfessor, setNomeProfessor] = useState("");
   const [laboratorio, setLaboratorio] = useState("");
@@ -100,17 +101,17 @@ function Reservation() {
   const [status, setStatus] = useState("agendado");
   const [finalidade, setFinalidade] = useState("");
 
+  
+  const [chaves, setChaves] = useState([]);
+  const [solicitantes, setSolicitantes] = useState([]);
+  const [reservas, setReservas] = useState([]);
+  const [errosValidacao, setErrosValidacao] = useState({});
+
   const [filtroData, setFiltroData] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
   const [filtroFinalidade, setFiltroFinalidade] = useState("");
   const [filtroAmbiente, setFiltroAmbiente] = useState("");
   const [filtroSolicitante, setFiltroSolicitante] = useState("");
-
-  const [chaves, setChaves] = useState([]);
-  const [solicitantes, setSolicitantes] = useState([]);
-  const [reservas, setReservas] = useState([]);
-  const [loading, setLoading] = useState(false); // Estado de carregamento
-  const [errosValidacao, setErrosValidacao] = useState({});
 
   const modalRef = useRef();
 
@@ -151,7 +152,12 @@ function Reservation() {
       setReservas((prev) => prev.filter((r) => r.id !== agendamento.id));
 
       // Se estiver no modal, fecha
+      if(reservas.length === 1) {
+        setFiltroStatus("");
+      }
+
       if (modalAberto) setModalAberto(false);
+      
     } catch (err) {
       handleApiError(err, "Erro ao reativar agendamento!");
     }

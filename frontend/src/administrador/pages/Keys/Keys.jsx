@@ -25,7 +25,6 @@ function Keys() {
 
   const [filtroTipo, setFiltroTipo] = useState("");
 
-
   const [errosValidacao, setErrosValidacao] = useState({});
 
   const modalRef = useRef();
@@ -34,7 +33,7 @@ function Keys() {
   const fecharModal = () => {
     setErrosValidacao({});
     setModalAberto(false);
-  }
+  };
 
   const deleteLabs = async () => {
     const result = await Swal.fire({
@@ -42,10 +41,10 @@ function Keys() {
       html: `Você pode reativar a chave <strong>"${chaveSelecionada.nome_lab}"</strong> caso seja necessário!`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#dc3545", // Vermelho
-      cancelButtonColor: "#6c757d", // Cinza
+      confirmButtonColor: "#dc3545",
+      cancelButtonColor: "#6c757d",
       confirmButtonText: "Sim, desativar!",
-      cancelButtonText: "Cancelar"
+      cancelButtonText: "Cancelar",
     });
 
     if (!result.isConfirmed) {
@@ -77,6 +76,52 @@ function Keys() {
       fetchChaves(); // Atualiza a tabela
     } catch (error) {
       console.error("Erro ao desativar chave:", error);
+
+      //Tratamento de erro para dependências:
+      if (error.response && error.response.data) {
+        const errorData = error.response.data;
+
+        const errorMessage =
+          errorData.message ||
+          errorData.error ||
+          errorData.msg ||
+          errorData.detail ||
+          (typeof errorData === "string"
+            ? errorData
+            : JSON.stringify(errorData));
+
+        console.log("Mensagem de erro extraída: ", errorMessage);
+
+        //Verifica se é um erro de dependências
+        if (
+          typeof errorMessage === "string" &&
+          (errorMessage.includes("controles ativos vinculados") ||
+            errorMessage.includes("agendamentos ativos vinculados") ||
+            errorMessage.includes("dependências") ||
+            errorMessage.includes("não é possível desativar") ||
+            errorMessage.includes("Control") ||
+            errorMessage.includes("Agendamento"))
+        ) {
+          Swal.fire({
+            title: "Não é possível desativar",
+            html: `
+            <div style="text-align: left;">
+              <p>O laboratório <strong>"${chaveSelecionada.nome_lab}"</strong> não pode ser desativado porque:</p>
+              <ul>
+                <li>Existem dependências no Relatório ou nas Reservas vinculados a ele</li>
+                <li>Caso desative esta chave, sua tabela de controle do Relatório, ou Reservas, ficará órfã de FK.</li>
+              </ul>
+              <p><small>Mensagem técnica: ${errorMessage}</small></p>
+            </div>
+          `,
+            icon: "error",
+            confirmButtonColor: "#3085d6",
+            confirmButtonText: "Entendi",
+          });
+          return;
+        }
+      }
+
       toast.error("Erro ao desativar chave!", {
         position: "top-right",
         autoClose: 2000,
@@ -174,14 +219,15 @@ function Keys() {
         position: "top-right",
         autoClose: 2000,
       });
-
-      fetchChaves(); // Atualiza a tabela
+      setFiltros((prev) => ({
+        ...prev,
+        status: "",
+      }));
     } catch (error) {
       console.error("Erro ao reativar laboratório:", error);
       handleApiError(error, "Erro ao reativar laboratório!");
     }
   };
-
 
   const abrirModalNovo = () => {
     setEditando(false);
@@ -293,7 +339,10 @@ function Keys() {
         })
         .catch((error) => {
           console.error("Erro ao editar chave:", error);
-          const validationErrors = handleApiError(error, "Erro ao editar chave!");
+          const validationErrors = handleApiError(
+            error,
+            "Erro ao editar chave!"
+          );
           if (validationErrors) {
             setErrosValidacao(validationErrors);
           }
@@ -323,7 +372,10 @@ function Keys() {
         })
         .catch((error) => {
           console.error("Erro ao cadastrar chave:", error);
-          const validationErrors = handleApiError(error, "Erro ao cadastrar chave!");
+          const validationErrors = handleApiError(
+            error,
+            "Erro ao cadastrar chave!"
+          );
           if (validationErrors) {
             setErrosValidacao(validationErrors);
           }
@@ -370,10 +422,9 @@ function Keys() {
         <header className="chaves-header">
           <h1>Chaves</h1>
           <button className="btn-add" type="button" onClick={abrirModalNovo}>
-          Adicionar Chave
+            Adicionar Chave
           </button>
         </header>
-
 
         <div className="chaves-filtros">
           <div>
@@ -401,7 +452,8 @@ function Keys() {
             <select
               name="status"
               value={filtros.status}
-              onChange={handleFiltroChange}>
+              onChange={handleFiltroChange}
+            >
               <option value="" disabled hidden>
                 Selecione o status
               </option>
@@ -421,12 +473,8 @@ function Keys() {
                 <th>Ambiente</th>
                 <th>Descrição</th>
                 <th>Status</th>
-                {filtros.status !== "desabilitado" ? (
-                  <th>Editar</th>
-                ) : null}
-                {filtros.status === "desabilitado" ? (
-                  <th>Ativar</th>
-                ) : null}
+                {filtros.status !== "desabilitado" ? <th>Editar</th> : null}
+                {filtros.status === "desabilitado" ? <th>Ativar</th> : null}
               </tr>
             </thead>
             <tbody>
@@ -483,7 +531,6 @@ function Keys() {
             <div className="modal-conteudo" ref={modalRef}>
               <h2>{editando ? "Editar Chave" : "Adicionar Chave"}</h2>
               <form onSubmit={handleSalvar}>
-
                 <label>Nome:</label>
                 <input
                   type="text"
@@ -491,7 +538,7 @@ function Keys() {
                   value={nome_lab}
                   onChange={(e) => setNome_lab(e.target.value)}
                   required
-                  className={errosValidacao.nome_lab ? 'input-error' : ''}
+                  className={errosValidacao.nome_lab ? "input-error" : ""}
                 />
                 {errosValidacao.nome_lab && (
                   <div className="erro-validacao">
@@ -505,7 +552,7 @@ function Keys() {
                   placeholder="Descrição"
                   value={desc_lab}
                   onChange={(e) => setDesc_lab(e.target.value)}
-                  className={errosValidacao.desc_lab ? 'input-error' : ''}
+                  className={errosValidacao.desc_lab ? "input-error" : ""}
                 />
                 {errosValidacao.desc_lab && (
                   <div className="erro-validacao">
@@ -518,15 +565,13 @@ function Keys() {
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                   required
-                  className={errosValidacao.status ? 'input-error' : ''}
+                  className={errosValidacao.status ? "input-error" : ""}
                 >
                   <option value="livre">Livre</option>
                   <option value="ocupado">Ocupado</option>
                 </select>
                 {errosValidacao.status && (
-                  <div className="erro-validacao">
-                    {errosValidacao.status}
-                  </div>
+                  <div className="erro-validacao">{errosValidacao.status}</div>
                 )}
 
                 <div className="modal-botoes">
